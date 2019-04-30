@@ -1,0 +1,721 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Cette API vous permet de notifier un utilisateur (envoi de mail codes OTP par mail ou message vocal).",
+    "version": "0.0.1",
+    "title": "notification-api-v1"
+  },
+  "host": "nie.api.dev.intranatixis.com",
+  "basePath": "/dev2/notification",
+  "tags": [
+    { "name": "Email", "description": "Send email" },
+    { "name": "OTP SMS", "description": "Otp Sms Controller" },
+    { "name": "OTPS", "description": "Otp Controller" }
+  ],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/v1/email": {
+      "post": {
+        "tags": ["Email"],
+        "summary": "Deprecated: use /v1/employee/{employeeId}/emails",
+        "description": "Permet d’envoyer un email en temps réel, il faut spécifier les infos du mail (destinataire, gabarits, parametres).",
+        "operationId": "sendEmailUsingPOST_1",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "email",
+            "description": "email",
+            "required": true,
+            "schema": { "$ref": "#/definitions/EmailDeprecated" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": { "$ref": "#/definitions/Tracking" }
+          },
+          "202": {
+            "description": "Une erreur est survenue lors de l'envoi du mail. Une nouvelle tentative d'envoi sera effectué automatiquement.",
+            "schema": { "$ref": "#/definitions/Tracking" }
+          },
+          "400": {
+            "description": "Il y a une(des) erreur(s) dans la requête.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "InvalidFormat": "{\n  \"errors\" : [ {\n    \"code\" : \"INVALID_FORMAT\",\n    \"message\" : \"Invalid format\",\n    \"attribute\" : \"zip\",\n    \"path\" : \"$.addresses[2].zip\"\n  } ]\n}",
+              "Required": "{\n  \"errors\" : [ {\n    \"code\" : \"REQUIRED\",\n    \"message\" : \"may not be null\",\n    \"attribute\" : \"zip\",\n    \"path\" : \"$.addresses[2].zip\"\n  } ]\n}"
+            }
+          },
+          "401": {
+            "description": "Utilisateur non authentifié.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Unauthorized": "{\n  \"errors\" : [ {\n    \"code\" : \"UNAUTHORIZED\",\n    \"message\" : \"Valid credentials required\"\n  } ]\n}"
+            }
+          },
+          "403": {
+            "description": "Utilisateur authentifié mais droits insuffisants.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Forbidden": "{\n  \"errors\" : [ {\n    \"code\" : \"FORBIDDEN\",\n    \"message\" : \"Access is forbidden\"\n  } ]\n}"
+            }
+          },
+          "500": {
+            "description": "Une erreur inattendue s'est produite.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Unexpected": "{\n  \"errors\" : [ {\n    \"code\" : \"UNEXPECTED\",\n    \"message\" : \"Unexpected error\"\n  } ]\n}"
+            }
+          }
+        },
+        "security": [{ "notification_auth": ["sendNotification"] }],
+        "deprecated": true
+      }
+    },
+    "/v1/employees/{employeeId}/emails": {
+      "post": {
+        "tags": ["Email"],
+        "summary": "envoyer un email à un salarié.",
+        "description": "Types de mails possibles :\n\n - Modification/création de l'adresse mail de secours : { \"type\": \"UPDATE_RESCUE_EMAIL\"}\n",
+        "operationId": "sendEmailUsingPOST",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "email",
+            "description": "email",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Email" }
+          },
+          {
+            "name": "employeeId",
+            "in": "path",
+            "description": "L'identifiant du salarié",
+            "required": true,
+            "type": "string",
+            "x-example": "5751-8569521"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": { "$ref": "#/definitions/Tracking" }
+          },
+          "202": {
+            "description": "Une erreur est survenue lors de l'envoi du mail. Une nouvelle tentative d'envoi sera effectué automatiquement.",
+            "schema": { "$ref": "#/definitions/Tracking" }
+          },
+          "400": {
+            "description": "Il y a une(des) erreur(s) dans la requête.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "InvalidFormat": "{\n  \"errors\" : [ {\n    \"code\" : \"INVALID_FORMAT\",\n    \"message\" : \"Invalid format\",\n    \"attribute\" : \"zip\",\n    \"path\" : \"$.addresses[2].zip\"\n  } ]\n}",
+              "Required": "{\n  \"errors\" : [ {\n    \"code\" : \"REQUIRED\",\n    \"message\" : \"may not be null\",\n    \"attribute\" : \"zip\",\n    \"path\" : \"$.addresses[2].zip\"\n  } ]\n}"
+            }
+          },
+          "401": {
+            "description": "Utilisateur non authentifié.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Unauthorized": "{\n  \"errors\" : [ {\n    \"code\" : \"UNAUTHORIZED\",\n    \"message\" : \"Valid credentials required\"\n  } ]\n}"
+            }
+          },
+          "403": {
+            "description": "Utilisateur authentifié mais droits insuffisants.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Forbidden": "{\n  \"errors\" : [ {\n    \"code\" : \"FORBIDDEN\",\n    \"message\" : \"Access is forbidden\"\n  } ]\n}"
+            }
+          },
+          "404": {
+            "description": "La ressource n'existe pas.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "EmployeeNotFound": "{\n  \"errors\" : [ {\n    \"code\" : \"NOT_FOUND\",\n    \"message\" : \"Unknown employee\",\n    \"attribute\" : \"employeeId\"\n  } ]\n}"
+            }
+          },
+          "500": {
+            "description": "Une erreur inattendue s'est produite.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Unexpected": "{\n  \"errors\" : [ {\n    \"code\" : \"UNEXPECTED\",\n    \"message\" : \"Unexpected error\"\n  } ]\n}"
+            }
+          }
+        },
+        "security": [{ "notification_auth": ["sendNotification"] }],
+        "deprecated": false
+      }
+    },
+    "/v1/otpSms": {
+      "post": {
+        "tags": ["OTP SMS"],
+        "summary": "Deprecated: use /v1/otps/",
+        "description": "Envoi d'un otp sms ou un message vocal à 6 chiffres pour la connexion et retourne l UUID",
+        "operationId": "sendOtpSmsUsingPOST_1",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "otpSmsDto",
+            "description": "otpSmsDto",
+            "required": true,
+            "schema": { "$ref": "#/definitions/OtpSms" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": { "$ref": "#/definitions/Tracking" }
+          },
+          "400": {
+            "description": "Il y a une(des) erreur(s) dans la requête.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "InvalidFormat": "{\n  \"errors\" : [ {\n    \"code\" : \"INVALID_FORMAT\",\n    \"message\" : \"Invalid format\",\n    \"attribute\" : \"zip\",\n    \"path\" : \"$.addresses[2].zip\"\n  } ]\n}",
+              "OtpsmsErrorDelay": "{\n  \"errors\" : [ {\n    \"code\" : \"OTPSMS_ERROR_DELAY\",\n    \"message\" : \"delay too short\"\n  } ]\n}",
+              "Required": "{\n  \"errors\" : [ {\n    \"code\" : \"REQUIRED\",\n    \"message\" : \"may not be null\",\n    \"attribute\" : \"zip\",\n    \"path\" : \"$.addresses[2].zip\"\n  } ]\n}"
+            }
+          },
+          "401": {
+            "description": "Utilisateur non authentifié.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Unauthorized": "{\n  \"errors\" : [ {\n    \"code\" : \"UNAUTHORIZED\",\n    \"message\" : \"Valid credentials required\"\n  } ]\n}"
+            }
+          },
+          "403": {
+            "description": "Utilisateur authentifié mais droits insuffisants.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Forbidden": "{\n  \"errors\" : [ {\n    \"code\" : \"FORBIDDEN\",\n    \"message\" : \"Access is forbidden\"\n  } ]\n}"
+            }
+          },
+          "500": {
+            "description": "Une erreur inattendue s'est produite.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Unexpected": "{\n  \"errors\" : [ {\n    \"code\" : \"UNEXPECTED\",\n    \"message\" : \"Unexpected error\"\n  } ]\n}"
+            }
+          }
+        },
+        "security": [{ "notification_auth": ["sendNotification"] }],
+        "deprecated": true
+      }
+    },
+    "/v1/otpSms/{otpId}/verify": {
+      "post": {
+        "tags": ["OTP SMS"],
+        "summary": "Deprecated: use /v1/otps/verification",
+        "description": "Vérifie le code otp saisi par un correspondant",
+        "operationId": "checkOtpCodeEEUsingPOST",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "checkOtpSmsDto",
+            "description": "checkOtpSmsDto",
+            "required": true,
+            "schema": { "$ref": "#/definitions/CheckOtp" }
+          },
+          {
+            "name": "otpId",
+            "in": "path",
+            "description": "Id de l'otp",
+            "required": true,
+            "type": "string",
+            "x-example": "1234567489778"
+          }
+        ],
+        "responses": {
+          "204": { "description": "No Content" },
+          "400": {
+            "description": "Il y a une(des) erreur(s) dans la requête.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "InvalidFormat": "{\n  \"errors\" : [ {\n    \"code\" : \"INVALID_FORMAT\",\n    \"message\" : \"Invalid format\",\n    \"attribute\" : \"zip\",\n    \"path\" : \"$.addresses[2].zip\"\n  } ]\n}",
+              "OtpsmsExpired": "{\n  \"errors\" : [ {\n    \"code\" : \"OTPSMS_EXPIRED\",\n    \"message\" : \"otp expired\"\n  } ]\n}",
+              "Required": "{\n  \"errors\" : [ {\n    \"code\" : \"REQUIRED\",\n    \"message\" : \"may not be null\",\n    \"attribute\" : \"zip\",\n    \"path\" : \"$.addresses[2].zip\"\n  } ]\n}",
+              "WrongOtp": "{\n  \"errors\" : [ {\n    \"code\" : \"WRONG_OTP\",\n    \"message\" : \"Invalid otp\"\n  } ]\n}"
+            }
+          },
+          "401": {
+            "description": "Utilisateur non authentifié.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Unauthorized": "{\n  \"errors\" : [ {\n    \"code\" : \"UNAUTHORIZED\",\n    \"message\" : \"Valid credentials required\"\n  } ]\n}"
+            }
+          },
+          "403": {
+            "description": "Utilisateur authentifié mais droits insuffisants.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Forbidden": "{\n  \"errors\" : [ {\n    \"code\" : \"FORBIDDEN\",\n    \"message\" : \"Access is forbidden\"\n  } ]\n}"
+            }
+          },
+          "404": {
+            "description": "La ressource n'existe pas.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "OtpNotFound": "{\n  \"errors\" : [ {\n    \"code\" : \"NOT_FOUND\",\n    \"message\" : \"Unknown otp\",\n    \"attribute\" : \"otpId\"\n  } ]\n}"
+            }
+          },
+          "500": {
+            "description": "Une erreur inattendue s'est produite.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Unexpected": "{\n  \"errors\" : [ {\n    \"code\" : \"UNEXPECTED\",\n    \"message\" : \"Unexpected error\"\n  } ]\n}"
+            }
+          }
+        },
+        "security": [{ "notification_auth": ["sendNotification"] }],
+        "deprecated": true
+      }
+    },
+    "/v1/otps": {
+      "post": {
+        "tags": ["OTPS"],
+        "summary": "Envoi d'un otp",
+        "description": "Envoi d'un otp à 6 chiffres pour la connexion et retourne l UUID",
+        "operationId": "sendOtpSmsUsingPOST",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "otp",
+            "description": "otp",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Otp" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": { "$ref": "#/definitions/Tracking" }
+          },
+          "401": {
+            "description": "Utilisateur non authentifié.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Unauthorized": "{\n  \"errors\" : [ {\n    \"code\" : \"UNAUTHORIZED\",\n    \"message\" : \"Valid credentials required\"\n  } ]\n}"
+            }
+          },
+          "403": {
+            "description": "Utilisateur authentifié mais droits insuffisants.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Forbidden": "{\n  \"errors\" : [ {\n    \"code\" : \"FORBIDDEN\",\n    \"message\" : \"Access is forbidden\"\n  } ]\n}"
+            }
+          },
+          "500": {
+            "description": "Une erreur inattendue s'est produite.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Unexpected": "{\n  \"errors\" : [ {\n    \"code\" : \"UNEXPECTED\",\n    \"message\" : \"Unexpected error\"\n  } ]\n}"
+            }
+          }
+        },
+        "security": [{ "notification_auth": ["sendNotification"] }],
+        "deprecated": false
+      }
+    },
+    "/v1/otps/{otpId}/verifications": {
+      "post": {
+        "tags": ["OTPS"],
+        "summary": "Vérifie du code d'un otp mail",
+        "description": "Vérifie un otp saisi",
+        "operationId": "checkOtpMailCodeUsingPOST",
+        "parameters": [
+          {
+            "name": "otpId",
+            "in": "path",
+            "description": "Id de l'otp",
+            "required": true,
+            "type": "string",
+            "x-example": "1234567489778"
+          },
+          {
+            "in": "body",
+            "name": "verificationOtp",
+            "description": "verificationOtp",
+            "required": true,
+            "schema": { "$ref": "#/definitions/VerificationOtp" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": { "$ref": "#/definitions/VerificationOtp" }
+          },
+          "401": {
+            "description": "Utilisateur non authentifié.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Unauthorized": "{\n  \"errors\" : [ {\n    \"code\" : \"UNAUTHORIZED\",\n    \"message\" : \"Valid credentials required\"\n  } ]\n}"
+            }
+          },
+          "403": {
+            "description": "Utilisateur authentifié mais droits insuffisants.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Forbidden": "{\n  \"errors\" : [ {\n    \"code\" : \"FORBIDDEN\",\n    \"message\" : \"Access is forbidden\"\n  } ]\n}"
+            }
+          },
+          "404": {
+            "description": "La ressource n'existe pas.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "OtpNotFound": "{\n  \"errors\" : [ {\n    \"code\" : \"NOT_FOUND\",\n    \"message\" : \"Unknown otp\",\n    \"attribute\" : \"otpId\"\n  } ]\n}"
+            }
+          },
+          "500": {
+            "description": "Une erreur inattendue s'est produite.",
+            "schema": { "$ref": "#/definitions/Errors" },
+            "examples": {
+              "Unexpected": "{\n  \"errors\" : [ {\n    \"code\" : \"UNEXPECTED\",\n    \"message\" : \"Unexpected error\"\n  } ]\n}"
+            }
+          }
+        },
+        "security": [{ "notification_auth": ["sendNotification"] }],
+        "deprecated": false
+      }
+    }
+  },
+  "definitions": {
+    "CheckOtp": {
+      "type": "object",
+      "required": ["codeOtp", "recipientType"],
+      "properties": {
+        "codeOtp": {
+          "type": "string",
+          "example": 123456,
+          "description": "Code otp",
+          "minLength": 4,
+          "maxLength": 8
+        },
+        "recipientType": {
+          "type": "string",
+          "example": "EP",
+          "description": "référentiel",
+          "enum": ["SAVER", "CORRESPONDENT"]
+        }
+      },
+      "title": "CheckOtp"
+    },
+    "Email": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "data": {
+          "type": "object",
+          "description": "Informations complémentaires à l'envoi de mail"
+        },
+        "type": {
+          "type": "string",
+          "example": "UPDATE_RESCUE_EMAIL",
+          "description": "Type de mail à envoyer",
+          "enum": [
+            "UPDATE_EMAIL",
+            "UPDATE_RESCUE_EMAIL",
+            "UPDATE_SECRET_QUESTION",
+            "UPDATE_PASSWORD",
+            "UPDATE_MOBILE_PHONE_NUMBER",
+            "UPDATE_BANKING_INFORMATION",
+            "UPDATE_POSTAL_DETAILS",
+            "DELETE_REDEMPTION",
+            "DELETE_RELEASE",
+            "DELETE_TRANSFER_BETWEEN_PRODUCTS",
+            "DELETE_TRANSFER",
+            "CREATE_REDEMPTION",
+            "CREATE_RELEASE",
+            "CREATE_COMPLEMENT_RELEASE",
+            "CREATE_REPLY_COMPLEMENTARY_PROFIT_SHARING",
+            "CREATE_REPLY_MANDATORY_PROFIT_SHARING",
+            "CREATE_REPLY_AVAILABILITY",
+            "CREATE_TRANSFER_BETWEEN_PRODUCTS",
+            "CREATE_TRANSFER",
+            "AMPLUS_WELCOME",
+            "AMPLUS_RECOVERY_CREATE_STATUS",
+            "AMPLUS_RECOVERY_SAVE_STATUS",
+            "AMPLUS_CONGRATULATIONS",
+            "AMPLUS_ACTION_FOLLOW_UP"
+          ]
+        }
+      },
+      "title": "Email",
+      "description": "Demande d'envoi d'un certain type de mail"
+    },
+    "EmailDeprecated": {
+      "type": "object",
+      "properties": {
+        "applicationType": {
+          "type": "string",
+          "example": "EP",
+          "description": "Type application appelante : EP, EE, AMPLUS, ACTIRIS, EASIRIS)",
+          "minLength": 0,
+          "maxLength": 10
+        },
+        "companyNumber": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Numéro entreprise"
+        },
+        "creationDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date de création du mail"
+        },
+        "emailAddress": {
+          "type": "string",
+          "description": "Adresse email du destinataire",
+          "minLength": 0,
+          "maxLength": 100
+        },
+        "externalId": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Identifiant unique externe"
+        },
+        "from": {
+          "type": "string",
+          "description": "L'émetteur du mail",
+          "minLength": 0,
+          "maxLength": 255
+        },
+        "jsonData": {
+          "type": "object",
+          "description": "Paramètres spécifiques au mail"
+        },
+        "language": {
+          "type": "string",
+          "example": "FR",
+          "description": "Code langue du mail",
+          "minLength": 0,
+          "maxLength": 3
+        },
+        "mailType": { "type": "integer", "format": "int32", "example": 5 },
+        "recipientNumber": {
+          "type": "string",
+          "description": "Numéro destinataire",
+          "minLength": 0,
+          "maxLength": 15
+        },
+        "recipientType": {
+          "type": "string",
+          "description": "Type de destinataire : EP, CRP",
+          "minLength": 0,
+          "maxLength": 10
+        },
+        "requestSubtype": { "type": "string", "minLength": 0, "maxLength": 10 },
+        "requestType": { "type": "string", "minLength": 0, "maxLength": 10 },
+        "templateCode": {
+          "type": "string",
+          "example": "OUV_BO",
+          "minLength": 0,
+          "maxLength": 10
+        },
+        "templateType": {
+          "type": "string",
+          "example": "NOTIFICATION",
+          "minLength": 0,
+          "maxLength": 30
+        }
+      },
+      "title": "EmailDeprecated",
+      "description": "Les infos du mail (destinataire, gabarits, parametres)"
+    },
+    "Error": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "additionalProperties": {
+          "type": "object",
+          "description": "propriétés additionnelles spécifiques"
+        },
+        "attribute": {
+          "type": "string",
+          "description": "nom de l'attribut source de l'erreur"
+        },
+        "code": { "type": "string", "description": "le code de l'erreur" },
+        "message": {
+          "type": "string",
+          "description": "description de l'erreur"
+        },
+        "path": {
+          "type": "string",
+          "description": "JSON path de l'attribut en erreur"
+        }
+      },
+      "title": "Error"
+    },
+    "Errors": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Error" }
+        }
+      },
+      "title": "Errors"
+    },
+    "Otp": {
+      "type": "object",
+      "required": [
+        "applicationCode",
+        "channel",
+        "companyNumber",
+        "recipientNumber"
+      ],
+      "properties": {
+        "applicationCode": {
+          "type": "string",
+          "example": "ACTIRIS",
+          "description": "Type application appelante : EP, EE, AMPLUS, ACTIRIS, EASIRIS)",
+          "minLength": 0,
+          "maxLength": 10
+        },
+        "channel": {
+          "type": "string",
+          "example": "SMS",
+          "description": "Type d'envoi du SMS",
+          "enum": ["SMS", "VOICE", "EMAIL"]
+        },
+        "companyNumber": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Numéro entreprise"
+        },
+        "context": {
+          "type": "string",
+          "example": "REINIT_MDP",
+          "description": "Contexte de l'otp",
+          "minLength": 0,
+          "maxLength": 10
+        },
+        "email": {
+          "type": "string",
+          "description": "Adresse email du destinataire",
+          "minLength": 0,
+          "maxLength": 100
+        },
+        "expiresIn": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Durée de validité en minutes, par défaut à 10 minutes",
+          "minimum": 1.0,
+          "exclusiveMinimum": false
+        },
+        "language": {
+          "type": "string",
+          "example": "FR",
+          "description": "Code langue de l'otp"
+        },
+        "phone": {
+          "type": "string",
+          "example": "(+33)612345678",
+          "description": "Numero de téléphone",
+          "minLength": 0,
+          "maxLength": 20
+        },
+        "recipientNumber": {
+          "type": "string",
+          "example": 273261,
+          "description": "Numéro du salarié ou du correspondant"
+        }
+      },
+      "title": "Otp"
+    },
+    "OtpSms": {
+      "type": "object",
+      "required": [
+        "language",
+        "phoneNumber",
+        "recipientNumber",
+        "section",
+        "sendType"
+      ],
+      "properties": {
+        "companyNumber": {
+          "type": "integer",
+          "format": "int32",
+          "example": 9999,
+          "description": "Numéro d'entreprise (pour les epargnants)",
+          "minimum": 0.0,
+          "maximum": 999999999,
+          "exclusiveMinimum": false,
+          "exclusiveMaximum": false
+        },
+        "language": {
+          "type": "string",
+          "example": "FR",
+          "description": "Code langue de l'otp"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "example": "(+33)649930234",
+          "description": "Numero de téléphone",
+          "minLength": 0,
+          "maxLength": 20
+        },
+        "recipientNumber": {
+          "type": "string",
+          "example": 273261,
+          "description": "Numéro du salarié ou du correspondant"
+        },
+        "recipientType": {
+          "type": "string",
+          "example": "EP",
+          "description": "référentiel",
+          "enum": ["SAVER", "CORRESPONDENT"]
+        },
+        "section": {
+          "type": "string",
+          "example": "REINIT_MDP",
+          "description": "Rubrique appelante",
+          "minLength": 0,
+          "maxLength": 10
+        },
+        "sendType": {
+          "type": "string",
+          "example": "SMS",
+          "description": "Type d'envoi du SMS",
+          "enum": ["SMS", "VOICE", "EMAIL"]
+        }
+      },
+      "title": "OtpSms"
+    },
+    "Tracking": {
+      "type": "object",
+      "required": ["id"],
+      "properties": { "id": { "type": "integer", "format": "int64" } },
+      "title": "Tracking"
+    },
+    "VerificationOtp": {
+      "type": "object",
+      "required": ["id", "otpId", "validated"],
+      "properties": {
+        "channel": {
+          "type": "string",
+          "example": "SMS",
+          "description": "Type d'envoi du SMS",
+          "enum": ["SMS", "VOICE", "EMAIL"]
+        },
+        "id": {
+          "type": "string",
+          "description": "Identifiant de la demande de vérification"
+        },
+        "otpId": {
+          "type": "string",
+          "description": "Identifiant de l'otp concerné"
+        },
+        "password": {
+          "type": "string",
+          "example": 123456,
+          "description": "Mot de passe"
+        },
+        "validated": {
+          "type": "boolean",
+          "description": "Indique si le code est le bon"
+        }
+      },
+      "title": "VerificationOtp"
+    }
+  },
+  "schemes": ["https"]
+}

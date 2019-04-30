@@ -1,0 +1,17 @@
+{
+    "nameTest": "hello_world",
+    "properties": {
+      "FirstName": {
+        "type": "string"
+      },
+      "LastName": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "lowerCamelCase": {
+        "type": "string"
+      }
+    }
+  }
