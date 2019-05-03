@@ -1,721 +1,1070 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "Cette API vous permet de notifier un utilisateur (envoi de mail codes OTP par mail ou message vocal).",
     "version": "0.0.1",
-    "title": "notification-api-v1"
+    "title": "prospectRemittance",
+    "description": "Remittance",
+    "contact": {}
   },
-  "host": "nie.api.dev.intranatixis.com",
-  "basePath": "/dev2/notification",
-  "tags": [
-    { "name": "Email", "description": "Send email" },
-    { "name": "OTP SMS", "description": "Otp Sms Controller" },
-    { "name": "OTPS", "description": "Otp Controller" }
+  "host": "fkcapigateway.dev.mycloud.intranatixis.com",
+  "basePath": "/prospectRemittance/V0",
+  "schemes": [
+    "http"
   ],
-  "consumes": ["application/json"],
-  "produces": ["application/json"],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
   "paths": {
-    "/v1/email": {
-      "post": {
-        "tags": ["Email"],
-        "summary": "Deprecated: use /v1/employee/{employeeId}/emails",
-        "description": "Permet d’envoyer un email en temps réel, il faut spécifier les infos du mail (destinataire, gabarits, parametres).",
-        "operationId": "sendEmailUsingPOST_1",
+    "/prospectRemittances": {
+      "get": {
+        "description": "Liste des remises en cours avec nombre de factues associ�es",
+        "summary": "getProspectRemittancesV0",
+        "tags": [
+          "Remise Prospect"
+        ],
+        "operationId": "ProspectRemittancesGet",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
+            "name": "prospectId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Identifiant du prospect"
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "n� de dossier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des remises",
+            "schema": {
+              "$ref": "#/definitions/ProspectRemittances"
+            },
+            "headers": {}
+          },
+          "401": {
+            "description": "Probl�me d'autorisation",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Erreur inattendue",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Creation d'une Remise Prospect",
+        "summary": "createProspectRemittanceV0",
+        "tags": [
+          "Remise Prospect"
+        ],
+        "operationId": "ProspectRemittancesPost",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
             "in": "body",
-            "name": "email",
-            "description": "email",
             "required": true,
-            "schema": { "$ref": "#/definitions/EmailDeprecated" }
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/prospectRemittanceCreate"
+            }
           }
         ],
         "responses": {
           "201": {
-            "description": "Created",
-            "schema": { "$ref": "#/definitions/Tracking" }
-          },
-          "202": {
-            "description": "Une erreur est survenue lors de l'envoi du mail. Une nouvelle tentative d'envoi sera effectué automatiquement.",
-            "schema": { "$ref": "#/definitions/Tracking" }
+            "description": "Remise cr��e",
+            "schema": {
+              "$ref": "#/definitions/ProspectRemittance"
+            },
+            "headers": {}
           },
           "400": {
-            "description": "Il y a une(des) erreur(s) dans la requête.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "InvalidFormat": "{\n  \"errors\" : [ {\n    \"code\" : \"INVALID_FORMAT\",\n    \"message\" : \"Invalid format\",\n    \"attribute\" : \"zip\",\n    \"path\" : \"$.addresses[2].zip\"\n  } ]\n}",
-              "Required": "{\n  \"errors\" : [ {\n    \"code\" : \"REQUIRED\",\n    \"message\" : \"may not be null\",\n    \"attribute\" : \"zip\",\n    \"path\" : \"$.addresses[2].zip\"\n  } ]\n}"
+            "description": "Erreur dans la requ�te",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "401": {
-            "description": "Utilisateur non authentifié.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Unauthorized": "{\n  \"errors\" : [ {\n    \"code\" : \"UNAUTHORIZED\",\n    \"message\" : \"Valid credentials required\"\n  } ]\n}"
+            "description": "Probl�me d'autorisation",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
-          "403": {
-            "description": "Utilisateur authentifié mais droits insuffisants.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Forbidden": "{\n  \"errors\" : [ {\n    \"code\" : \"FORBIDDEN\",\n    \"message\" : \"Access is forbidden\"\n  } ]\n}"
-            }
-          },
-          "500": {
-            "description": "Une erreur inattendue s'est produite.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Unexpected": "{\n  \"errors\" : [ {\n    \"code\" : \"UNEXPECTED\",\n    \"message\" : \"Unexpected error\"\n  } ]\n}"
+          "default": {
+            "description": "Erreur inattendue",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           }
-        },
-        "security": [{ "notification_auth": ["sendNotification"] }],
-        "deprecated": true
+        }
       }
     },
-    "/v1/employees/{employeeId}/emails": {
-      "post": {
-        "tags": ["Email"],
-        "summary": "envoyer un email à un salarié.",
-        "description": "Types de mails possibles :\n\n - Modification/création de l'adresse mail de secours : { \"type\": \"UPDATE_RESCUE_EMAIL\"}\n",
-        "operationId": "sendEmailUsingPOST",
+    "/prospectRemittances/{prospectRemittanceId}": {
+      "patch": {
+        "description": "(permet en autre la maj du statut de la remise prospect)\n",
+        "summary": "updateProspectRemittanceV0",
+        "tags": [
+          "Remise Prospect"
+        ],
+        "operationId": "ProspectRemittancesByProspectRemittanceIdPatch",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "in": "body",
-            "name": "email",
-            "description": "email",
-            "required": true,
-            "schema": { "$ref": "#/definitions/Email" }
-          },
-          {
-            "name": "employeeId",
+            "name": "prospectRemittanceId",
             "in": "path",
-            "description": "L'identifiant du salarié",
             "required": true,
             "type": "string",
-            "x-example": "5751-8569521"
+            "description": "Remittance Id"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ProspectRemittanceUpdate"
+            }
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created",
-            "schema": { "$ref": "#/definitions/Tracking" }
-          },
-          "202": {
-            "description": "Une erreur est survenue lors de l'envoi du mail. Une nouvelle tentative d'envoi sera effectué automatiquement.",
-            "schema": { "$ref": "#/definitions/Tracking" }
+          "200": {
+            "description": "Remise modifi�e",
+            "schema": {
+              "$ref": "#/definitions/ProspectRemittance"
+            },
+            "headers": {}
           },
           "400": {
-            "description": "Il y a une(des) erreur(s) dans la requête.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "InvalidFormat": "{\n  \"errors\" : [ {\n    \"code\" : \"INVALID_FORMAT\",\n    \"message\" : \"Invalid format\",\n    \"attribute\" : \"zip\",\n    \"path\" : \"$.addresses[2].zip\"\n  } ]\n}",
-              "Required": "{\n  \"errors\" : [ {\n    \"code\" : \"REQUIRED\",\n    \"message\" : \"may not be null\",\n    \"attribute\" : \"zip\",\n    \"path\" : \"$.addresses[2].zip\"\n  } ]\n}"
+            "description": "Erreur dans la requ�te",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "401": {
-            "description": "Utilisateur non authentifié.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Unauthorized": "{\n  \"errors\" : [ {\n    \"code\" : \"UNAUTHORIZED\",\n    \"message\" : \"Valid credentials required\"\n  } ]\n}"
-            }
-          },
-          "403": {
-            "description": "Utilisateur authentifié mais droits insuffisants.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Forbidden": "{\n  \"errors\" : [ {\n    \"code\" : \"FORBIDDEN\",\n    \"message\" : \"Access is forbidden\"\n  } ]\n}"
+            "description": "Probl�me d'autorisation",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "404": {
-            "description": "La ressource n'existe pas.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "EmployeeNotFound": "{\n  \"errors\" : [ {\n    \"code\" : \"NOT_FOUND\",\n    \"message\" : \"Unknown employee\",\n    \"attribute\" : \"employeeId\"\n  } ]\n}"
+            "description": "Remise non trouv�e",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
-          "500": {
-            "description": "Une erreur inattendue s'est produite.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Unexpected": "{\n  \"errors\" : [ {\n    \"code\" : \"UNEXPECTED\",\n    \"message\" : \"Unexpected error\"\n  } ]\n}"
+          "default": {
+            "description": "Erreur inattendue",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           }
-        },
-        "security": [{ "notification_auth": ["sendNotification"] }],
-        "deprecated": false
+        }
       }
     },
-    "/v1/otpSms": {
-      "post": {
-        "tags": ["OTP SMS"],
-        "summary": "Deprecated: use /v1/otps/",
-        "description": "Envoi d'un otp sms ou un message vocal à 6 chiffres pour la connexion et retourne l UUID",
-        "operationId": "sendOtpSmsUsingPOST_1",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "otpSmsDto",
-            "description": "otpSmsDto",
-            "required": true,
-            "schema": { "$ref": "#/definitions/OtpSms" }
-          }
+    "/prospectInvoices/{prospectInvoiceId}": {
+      "delete": {
+        "description": "Suppression facture sur remise prospect",
+        "summary": "deleteProspectInvoiceV0",
+        "tags": [
+          "Factures Prospect"
         ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": { "$ref": "#/definitions/Tracking" }
-          },
-          "400": {
-            "description": "Il y a une(des) erreur(s) dans la requête.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "InvalidFormat": "{\n  \"errors\" : [ {\n    \"code\" : \"INVALID_FORMAT\",\n    \"message\" : \"Invalid format\",\n    \"attribute\" : \"zip\",\n    \"path\" : \"$.addresses[2].zip\"\n  } ]\n}",
-              "OtpsmsErrorDelay": "{\n  \"errors\" : [ {\n    \"code\" : \"OTPSMS_ERROR_DELAY\",\n    \"message\" : \"delay too short\"\n  } ]\n}",
-              "Required": "{\n  \"errors\" : [ {\n    \"code\" : \"REQUIRED\",\n    \"message\" : \"may not be null\",\n    \"attribute\" : \"zip\",\n    \"path\" : \"$.addresses[2].zip\"\n  } ]\n}"
-            }
-          },
-          "401": {
-            "description": "Utilisateur non authentifié.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Unauthorized": "{\n  \"errors\" : [ {\n    \"code\" : \"UNAUTHORIZED\",\n    \"message\" : \"Valid credentials required\"\n  } ]\n}"
-            }
-          },
-          "403": {
-            "description": "Utilisateur authentifié mais droits insuffisants.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Forbidden": "{\n  \"errors\" : [ {\n    \"code\" : \"FORBIDDEN\",\n    \"message\" : \"Access is forbidden\"\n  } ]\n}"
-            }
-          },
-          "500": {
-            "description": "Une erreur inattendue s'est produite.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Unexpected": "{\n  \"errors\" : [ {\n    \"code\" : \"UNEXPECTED\",\n    \"message\" : \"Unexpected error\"\n  } ]\n}"
-            }
-          }
-        },
-        "security": [{ "notification_auth": ["sendNotification"] }],
-        "deprecated": true
-      }
-    },
-    "/v1/otpSms/{otpId}/verify": {
-      "post": {
-        "tags": ["OTP SMS"],
-        "summary": "Deprecated: use /v1/otps/verification",
-        "description": "Vérifie le code otp saisi par un correspondant",
-        "operationId": "checkOtpCodeEEUsingPOST",
+        "operationId": "ProspectInvoicesByProspectInvoiceIdDelete",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "in": "body",
-            "name": "checkOtpSmsDto",
-            "description": "checkOtpSmsDto",
-            "required": true,
-            "schema": { "$ref": "#/definitions/CheckOtp" }
-          },
-          {
-            "name": "otpId",
+            "name": "prospectInvoiceId",
             "in": "path",
-            "description": "Id de l'otp",
             "required": true,
             "type": "string",
-            "x-example": "1234567489778"
+            "description": "Prospect Invoice Id"
           }
         ],
         "responses": {
-          "204": { "description": "No Content" },
+          "204": {
+            "description": "La facture est supprim�e",
+            "headers": {}
+          },
           "400": {
-            "description": "Il y a une(des) erreur(s) dans la requête.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "InvalidFormat": "{\n  \"errors\" : [ {\n    \"code\" : \"INVALID_FORMAT\",\n    \"message\" : \"Invalid format\",\n    \"attribute\" : \"zip\",\n    \"path\" : \"$.addresses[2].zip\"\n  } ]\n}",
-              "OtpsmsExpired": "{\n  \"errors\" : [ {\n    \"code\" : \"OTPSMS_EXPIRED\",\n    \"message\" : \"otp expired\"\n  } ]\n}",
-              "Required": "{\n  \"errors\" : [ {\n    \"code\" : \"REQUIRED\",\n    \"message\" : \"may not be null\",\n    \"attribute\" : \"zip\",\n    \"path\" : \"$.addresses[2].zip\"\n  } ]\n}",
-              "WrongOtp": "{\n  \"errors\" : [ {\n    \"code\" : \"WRONG_OTP\",\n    \"message\" : \"Invalid otp\"\n  } ]\n}"
+            "description": "Suppression non autoris�e (seul le prospect peut supprimer une facture) \n",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "401": {
-            "description": "Utilisateur non authentifié.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Unauthorized": "{\n  \"errors\" : [ {\n    \"code\" : \"UNAUTHORIZED\",\n    \"message\" : \"Valid credentials required\"\n  } ]\n}"
-            }
-          },
-          "403": {
-            "description": "Utilisateur authentifié mais droits insuffisants.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Forbidden": "{\n  \"errors\" : [ {\n    \"code\" : \"FORBIDDEN\",\n    \"message\" : \"Access is forbidden\"\n  } ]\n}"
+            "description": "Probl�me d'autorisation",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "404": {
-            "description": "La ressource n'existe pas.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "OtpNotFound": "{\n  \"errors\" : [ {\n    \"code\" : \"NOT_FOUND\",\n    \"message\" : \"Unknown otp\",\n    \"attribute\" : \"otpId\"\n  } ]\n}"
+            "description": "Facture non trouv�e",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
-          "500": {
-            "description": "Une erreur inattendue s'est produite.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Unexpected": "{\n  \"errors\" : [ {\n    \"code\" : \"UNEXPECTED\",\n    \"message\" : \"Unexpected error\"\n  } ]\n}"
+          "default": {
+            "description": "Erreur inattendue",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           }
-        },
-        "security": [{ "notification_auth": ["sendNotification"] }],
-        "deprecated": true
-      }
-    },
-    "/v1/otps": {
-      "post": {
-        "tags": ["OTPS"],
-        "summary": "Envoi d'un otp",
-        "description": "Envoi d'un otp à 6 chiffres pour la connexion et retourne l UUID",
-        "operationId": "sendOtpSmsUsingPOST",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "otp",
-            "description": "otp",
-            "required": true,
-            "schema": { "$ref": "#/definitions/Otp" }
-          }
+        }
+      },
+      "put": {
+        "description": "Remplacement d'une facture prospect",
+        "summary": "replaceProspectInvoiceV0",
+        "tags": [
+          "Factures Prospect"
         ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": { "$ref": "#/definitions/Tracking" }
-          },
-          "401": {
-            "description": "Utilisateur non authentifié.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Unauthorized": "{\n  \"errors\" : [ {\n    \"code\" : \"UNAUTHORIZED\",\n    \"message\" : \"Valid credentials required\"\n  } ]\n}"
-            }
-          },
-          "403": {
-            "description": "Utilisateur authentifié mais droits insuffisants.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Forbidden": "{\n  \"errors\" : [ {\n    \"code\" : \"FORBIDDEN\",\n    \"message\" : \"Access is forbidden\"\n  } ]\n}"
-            }
-          },
-          "500": {
-            "description": "Une erreur inattendue s'est produite.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Unexpected": "{\n  \"errors\" : [ {\n    \"code\" : \"UNEXPECTED\",\n    \"message\" : \"Unexpected error\"\n  } ]\n}"
-            }
-          }
-        },
-        "security": [{ "notification_auth": ["sendNotification"] }],
-        "deprecated": false
-      }
-    },
-    "/v1/otps/{otpId}/verifications": {
-      "post": {
-        "tags": ["OTPS"],
-        "summary": "Vérifie du code d'un otp mail",
-        "description": "Vérifie un otp saisi",
-        "operationId": "checkOtpMailCodeUsingPOST",
+        "operationId": "ProspectInvoicesByProspectInvoiceIdPut",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "otpId",
+            "name": "prospectInvoiceId",
             "in": "path",
-            "description": "Id de l'otp",
             "required": true,
             "type": "string",
-            "x-example": "1234567489778"
+            "description": "Prospect Invoice Id"
           },
           {
+            "name": "body",
             "in": "body",
-            "name": "verificationOtp",
-            "description": "verificationOtp",
             "required": true,
-            "schema": { "$ref": "#/definitions/VerificationOtp" }
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ProspectInvoiceCreate"
+            }
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created",
-            "schema": { "$ref": "#/definitions/VerificationOtp" }
+          "200": {
+            "description": "Facture mise � jour",
+            "schema": {
+              "$ref": "#/definitions/ProspectInvoice"
+            },
+            "headers": {}
           },
-          "401": {
-            "description": "Utilisateur non authentifié.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Unauthorized": "{\n  \"errors\" : [ {\n    \"code\" : \"UNAUTHORIZED\",\n    \"message\" : \"Valid credentials required\"\n  } ]\n}"
+          "400": {
+            "description": "Donn�es transmises incorrectes ou incompl�tes",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
-          "403": {
-            "description": "Utilisateur authentifié mais droits insuffisants.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Forbidden": "{\n  \"errors\" : [ {\n    \"code\" : \"FORBIDDEN\",\n    \"message\" : \"Access is forbidden\"\n  } ]\n}"
+          "401": {
+            "description": "Probl�me d'autorisation",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "404": {
-            "description": "La ressource n'existe pas.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "OtpNotFound": "{\n  \"errors\" : [ {\n    \"code\" : \"NOT_FOUND\",\n    \"message\" : \"Unknown otp\",\n    \"attribute\" : \"otpId\"\n  } ]\n}"
+            "description": "Facture non trouv�e",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
-          "500": {
-            "description": "Une erreur inattendue s'est produite.",
-            "schema": { "$ref": "#/definitions/Errors" },
-            "examples": {
-              "Unexpected": "{\n  \"errors\" : [ {\n    \"code\" : \"UNEXPECTED\",\n    \"message\" : \"Unexpected error\"\n  } ]\n}"
+          "default": {
+            "description": "Erreur inattendue",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           }
-        },
-        "security": [{ "notification_auth": ["sendNotification"] }],
-        "deprecated": false
+        }
+      },
+      "patch": {
+        "description": "Modification d'une facture",
+        "summary": "updateProspectInvoiceV0",
+        "tags": [
+          "Factures Prospect"
+        ],
+        "operationId": "ProspectInvoicesByProspectInvoiceIdPatch",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "prospectInvoiceId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Prospect Invoice Id"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ProspectInvoiceUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Facture mise � jour",
+            "schema": {
+              "$ref": "#/definitions/ProspectInvoice"
+            },
+            "headers": {}
+          },
+          "400": {
+            "description": "Erreur dans la requ�te",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Probl�me d'autorisation",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Facture non trouv�e",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Erreur inattendue",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/prospectRemittances/{prospectRemittanceId}/prospectInvoices": {
+      "get": {
+        "description": "Liste des factures associ�es � une remise prospect",
+        "summary": "listProspectInvoicesV0",
+        "tags": [
+          "Factures Prospect"
+        ],
+        "operationId": "ProspectRemittancesProspectInvoicesByProspectRemittanceIdGet",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "prospectRemittanceId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Identifiant de la Remise"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des factures",
+            "schema": {
+              "$ref": "#/definitions/ProspectInvoices"
+            },
+            "headers": {}
+          },
+          "401": {
+            "description": "Probl�me d'autorisation",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Remise non trouv�e",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Erreur inattendue",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Ajout d'une facture",
+        "summary": "createProspectInvoiceV0",
+        "tags": [
+          "Factures Prospect"
+        ],
+        "operationId": "ProspectRemittancesProspectInvoicesByProspectRemittanceIdPost",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "prospectRemittanceId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Identifiant de la Remise"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ProspectInvoiceCreate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Prospect Invoice created",
+            "schema": {
+              "$ref": "#/definitions/ProspectInvoice"
+            },
+            "headers": {}
+          },
+          "400": {
+            "description": "Erreur dans la requ�te",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Probl�me d'autorisation",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Remise non trouv�e",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Erreur inattendue",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/documents/{documentId}": {
+      "get": {
+        "description": "Binaire du document",
+        "summary": "getDocumentV0",
+        "tags": [
+          "Documents de Factures (PDF/PNG/JPG)"
+        ],
+        "operationId": "DocumentsByDocumentIdGet",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Document Id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Binaire du document",
+            "schema": {
+              "type": "object"
+            },
+            "headers": {}
+          },
+          "401": {
+            "description": "Probl�me d'autorisation",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Document non trouv�",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Erreur inattendue",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "suppression d'un document de facture",
+        "summary": "deleteInvoiceDocumentV0",
+        "tags": [
+          "Documents de Factures (PDF/PNG/JPG)"
+        ],
+        "operationId": "DocumentsByDocumentIdDelete",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Document Id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Document supprim�",
+            "headers": {}
+          },
+          "400": {
+            "description": "Suppression non autoris�e (seul le prospect peut supprimer un document) \n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Probl�me d'autorisation",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Document non trouv�",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Erreur inattendue",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/prospectInvoices/{prospectInvoiceId}/documents": {
+      "post": {
+        "description": "Nom de fichier et type de fichier fournis dans le header du Multi-part.\nhttps://swagger.io/docs/specification/describing-request-body/file-upload/\n",
+        "summary": "createInvoiceDocumentV0",
+        "tags": [
+          "Documents de Factures (PDF/PNG/JPG)"
+        ],
+        "operationId": "ProspectInvoicesDocumentsByProspectInvoiceIdPost",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "prospectInvoiceId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Invoice Id"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "required": true,
+            "type": "file",
+            "format": "file",
+            "description": ""
+          },
+          {
+            "name": "type",
+            "in": "formData",
+            "required": false,
+            "enum": [
+              "invoice",
+              "order",
+              "other"
+            ],
+            "type": "string",
+            "description": "Facture / Bon de commande / Autre"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Document ajout� � la Facture",
+            "schema": {
+              "$ref": "#/definitions/Document"
+            },
+            "headers": {}
+          },
+          "400": {
+            "description": "Erreur dans la requ�te",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Probl�me d'autorisation",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Facture non trouv�e",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Erreur inattendue",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
       }
     }
   },
   "definitions": {
-    "CheckOtp": {
-      "type": "object",
-      "required": ["codeOtp", "recipientType"],
-      "properties": {
-        "codeOtp": {
-          "type": "string",
-          "example": 123456,
-          "description": "Code otp",
-          "minLength": 4,
-          "maxLength": 8
-        },
-        "recipientType": {
-          "type": "string",
-          "example": "EP",
-          "description": "référentiel",
-          "enum": ["SAVER", "CORRESPONDENT"]
-        }
-      },
-      "title": "CheckOtp"
-    },
-    "Email": {
-      "type": "object",
-      "required": ["type"],
-      "properties": {
-        "data": {
-          "type": "object",
-          "description": "Informations complémentaires à l'envoi de mail"
-        },
-        "type": {
-          "type": "string",
-          "example": "UPDATE_RESCUE_EMAIL",
-          "description": "Type de mail à envoyer",
-          "enum": [
-            "UPDATE_EMAIL",
-            "UPDATE_RESCUE_EMAIL",
-            "UPDATE_SECRET_QUESTION",
-            "UPDATE_PASSWORD",
-            "UPDATE_MOBILE_PHONE_NUMBER",
-            "UPDATE_BANKING_INFORMATION",
-            "UPDATE_POSTAL_DETAILS",
-            "DELETE_REDEMPTION",
-            "DELETE_RELEASE",
-            "DELETE_TRANSFER_BETWEEN_PRODUCTS",
-            "DELETE_TRANSFER",
-            "CREATE_REDEMPTION",
-            "CREATE_RELEASE",
-            "CREATE_COMPLEMENT_RELEASE",
-            "CREATE_REPLY_COMPLEMENTARY_PROFIT_SHARING",
-            "CREATE_REPLY_MANDATORY_PROFIT_SHARING",
-            "CREATE_REPLY_AVAILABILITY",
-            "CREATE_TRANSFER_BETWEEN_PRODUCTS",
-            "CREATE_TRANSFER",
-            "AMPLUS_WELCOME",
-            "AMPLUS_RECOVERY_CREATE_STATUS",
-            "AMPLUS_RECOVERY_SAVE_STATUS",
-            "AMPLUS_CONGRATULATIONS",
-            "AMPLUS_ACTION_FOLLOW_UP"
-          ]
-        }
-      },
-      "title": "Email",
-      "description": "Demande d'envoi d'un certain type de mail"
-    },
-    "EmailDeprecated": {
+    "InvoicesStatistics": {
+      "title": "InvoicesStatistics",
       "type": "object",
       "properties": {
-        "applicationType": {
-          "type": "string",
-          "example": "EP",
-          "description": "Type application appelante : EP, EE, AMPLUS, ACTIRIS, EASIRIS)",
-          "minLength": 0,
-          "maxLength": 10
-        },
-        "companyNumber": {
+        "totalInvoiceCount": {
+          "description": "nombre total de factures associ�es � la remise",
           "type": "integer",
-          "format": "int32",
-          "description": "Numéro entreprise"
+          "format": "int32"
+        },
+        "notTransmittedInvoiceCount": {
+          "description": "nombre de factures non encore transmises",
+          "type": "integer",
+          "format": "int32"
+        },
+        "transmittedInvoiceCount": {
+          "description": "nombre de factures transmises",
+          "type": "integer",
+          "format": "int32"
+        },
+        "analyzedInvoiceCount": {
+          "description": "nombre de factures analys�es",
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "required": [
+        "totalInvoiceCount",
+        "notTransmittedInvoiceCount",
+        "transmittedInvoiceCount",
+        "analyzedInvoiceCount"
+      ]
+    },
+    "Type1": {
+      "title": "Type1",
+      "description": "Facture / Bon de commande / Autre",
+      "example": "invoice",
+      "type": "string",
+      "enum": [
+        "invoice",
+        "order",
+        "other"
+      ]
+    },
+    "Type": {
+      "title": "Type",
+      "description": "Facture / Bon de commande/ Autre",
+      "example": "invoice",
+      "type": "string",
+      "enum": [
+        "invoice",
+        "order",
+        "other"
+      ]
+    },
+    "ProspectInvoice": {
+      "title": "ProspectInvoice",
+      "description": "Les donn�es de type \"check\" ne sont accessibles que pour les commerciaux (les donn�es doivent �tre absentes pour un prospect, et non renvoy�es nulles)",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "prospectRemittanceId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "reference": {
+          "description": "n� de facture prospect",
+          "example": "7654321",
+          "type": "string"
+        },
+        "issueDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "dueDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "amount": {
+          "$ref": "#/definitions/Amount"
+        },
+        "debtorName": {
+          "type": "string"
+        },
+        "debtorInsuranceCheck": {
+          "type": "boolean"
+        },
+        "dateCheck": {
+          "type": "boolean"
+        },
+        "debtorActivityCheck": {
+          "type": "boolean"
         },
         "creationDate": {
           "type": "string",
-          "format": "date-time",
-          "description": "Date de création du mail"
+          "format": "date-time"
         },
-        "emailAddress": {
-          "type": "string",
-          "description": "Adresse email du destinataire",
-          "minLength": 0,
-          "maxLength": 100
-        },
-        "externalId": {
-          "type": "integer",
-          "format": "int64",
-          "description": "Identifiant unique externe"
-        },
-        "from": {
-          "type": "string",
-          "description": "L'émetteur du mail",
-          "minLength": 0,
-          "maxLength": 255
-        },
-        "jsonData": {
-          "type": "object",
-          "description": "Paramètres spécifiques au mail"
-        },
-        "language": {
-          "type": "string",
-          "example": "FR",
-          "description": "Code langue du mail",
-          "minLength": 0,
-          "maxLength": 3
-        },
-        "mailType": { "type": "integer", "format": "int32", "example": 5 },
-        "recipientNumber": {
-          "type": "string",
-          "description": "Numéro destinataire",
-          "minLength": 0,
-          "maxLength": 15
-        },
-        "recipientType": {
-          "type": "string",
-          "description": "Type de destinataire : EP, CRP",
-          "minLength": 0,
-          "maxLength": 10
-        },
-        "requestSubtype": { "type": "string", "minLength": 0, "maxLength": 10 },
-        "requestType": { "type": "string", "minLength": 0, "maxLength": 10 },
-        "templateCode": {
-          "type": "string",
-          "example": "OUV_BO",
-          "minLength": 0,
-          "maxLength": 10
-        },
-        "templateType": {
-          "type": "string",
-          "example": "NOTIFICATION",
-          "minLength": 0,
-          "maxLength": 30
+        "documents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Document"
+          }
         }
       },
-      "title": "EmailDeprecated",
-      "description": "Les infos du mail (destinataire, gabarits, parametres)"
+      "required": [
+        "id",
+        "prospectRemittanceId",
+        "status",
+        "reference",
+        "issueDate",
+        "dueDate",
+        "amount",
+        "creationDate"
+      ]
     },
-    "Error": {
+    "Error1": {
+      "title": "Error1",
       "type": "object",
-      "required": ["code", "message"],
       "properties": {
-        "additionalProperties": {
-          "type": "object",
-          "description": "propriétés additionnelles spécifiques"
+        "code": {
+          "description": "Error Code",
+          "example": "INVALID_FORMAT",
+          "type": "string"
+        },
+        "message": {
+          "description": "Error Message",
+          "example": "Invalid format",
+          "type": "string"
         },
         "attribute": {
-          "type": "string",
-          "description": "nom de l'attribut source de l'erreur"
-        },
-        "code": { "type": "string", "description": "le code de l'erreur" },
-        "message": {
-          "type": "string",
-          "description": "description de l'erreur"
-        },
-        "path": {
-          "type": "string",
-          "description": "JSON path de l'attribut en erreur"
+          "description": "attribute name at the error origin",
+          "example": "userFrom",
+          "type": "string"
         }
       },
-      "title": "Error"
+      "required": [
+        "code",
+        "message"
+      ]
     },
-    "Errors": {
+    "Amount": {
+      "title": "Amount",
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "format": "double"
+        },
+        "currency": {
+          "description": "Devise (code iso 4217)",
+          "example": "EUR",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "currency"
+      ]
+    },
+    "ProspectInvoiceUpdate": {
+      "title": "ProspectInvoiceUpdate",
+      "description": "Seul le commercial peut modifier les donn�es type \"check\"",
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "reference": {
+          "description": "n� de facture prospect",
+          "example": "7654321",
+          "type": "string"
+        },
+        "issueDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "dueDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "amount": {
+          "$ref": "#/definitions/Amount"
+        },
+        "debtorName": {
+          "type": "string"
+        },
+        "debtorInsuranceCheck": {
+          "type": "boolean"
+        },
+        "dateCheck": {
+          "type": "boolean"
+        },
+        "debtorActivityCheck": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Status": {
+      "title": "Status",
+      "example": "analyzed",
+      "type": "string",
+      "enum": [
+        "analyzed",
+        "closed"
+      ]
+    },
+    "Document": {
+      "title": "Document",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/Type"
+        },
+        "contentType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "filename",
+        "contentType"
+      ]
+    },
+    "DocumentCreate": {
+      "title": "DocumentCreate",
+      "description": "Nom de fichier et type de fichier fournis dans le header du Multi-part\nhttps://swagger.io/docs/specification/describing-request-body/file-upload/",
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/Type1"
+        },
+        "file": {
+          "type": "string",
+          "format": "binary"
+        }
+      },
+      "required": [
+        "file"
+      ]
+    },
+    "ProspectInvoiceCreate": {
+      "title": "ProspectInvoiceCreate",
+      "type": "object",
+      "properties": {
+        "reference": {
+          "description": "n� de facture prospect",
+          "example": "7654321",
+          "type": "string"
+        },
+        "issueDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "dueDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "amount": {
+          "$ref": "#/definitions/Amount"
+        },
+        "debtorName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "reference",
+        "issueDate",
+        "dueDate",
+        "amount"
+      ]
+    },
+    "Error": {
+      "title": "Error",
       "type": "object",
       "properties": {
         "errors": {
           "type": "array",
-          "items": { "$ref": "#/definitions/Error" }
+          "items": {
+            "$ref": "#/definitions/Error1"
+          },
+          "minItems": 1
         }
       },
-      "title": "Errors"
-    },
-    "Otp": {
-      "type": "object",
       "required": [
-        "applicationCode",
-        "channel",
-        "companyNumber",
-        "recipientNumber"
-      ],
+        "errors"
+      ]
+    },
+    "ProspectInvoices": {
+      "title": "ProspectInvoices",
+      "type": "object",
       "properties": {
-        "applicationCode": {
-          "type": "string",
-          "example": "ACTIRIS",
-          "description": "Type application appelante : EP, EE, AMPLUS, ACTIRIS, EASIRIS)",
-          "minLength": 0,
-          "maxLength": 10
-        },
-        "channel": {
-          "type": "string",
-          "example": "SMS",
-          "description": "Type d'envoi du SMS",
-          "enum": ["SMS", "VOICE", "EMAIL"]
-        },
-        "companyNumber": {
-          "type": "integer",
-          "format": "int32",
-          "description": "Numéro entreprise"
-        },
-        "context": {
-          "type": "string",
-          "example": "REINIT_MDP",
-          "description": "Contexte de l'otp",
-          "minLength": 0,
-          "maxLength": 10
-        },
-        "email": {
-          "type": "string",
-          "description": "Adresse email du destinataire",
-          "minLength": 0,
-          "maxLength": 100
-        },
-        "expiresIn": {
-          "type": "integer",
-          "format": "int32",
-          "description": "Durée de validité en minutes, par défaut à 10 minutes",
-          "minimum": 1.0,
-          "exclusiveMinimum": false
-        },
-        "language": {
-          "type": "string",
-          "example": "FR",
-          "description": "Code langue de l'otp"
-        },
-        "phone": {
-          "type": "string",
-          "example": "(+33)612345678",
-          "description": "Numero de téléphone",
-          "minLength": 0,
-          "maxLength": 20
-        },
-        "recipientNumber": {
-          "type": "string",
-          "example": 273261,
-          "description": "Numéro du salarié ou du correspondant"
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProspectInvoice"
+          }
         }
       },
-      "title": "Otp"
-    },
-    "OtpSms": {
-      "type": "object",
       "required": [
-        "language",
-        "phoneNumber",
-        "recipientNumber",
-        "section",
-        "sendType"
-      ],
-      "properties": {
-        "companyNumber": {
-          "type": "integer",
-          "format": "int32",
-          "example": 9999,
-          "description": "Numéro d'entreprise (pour les epargnants)",
-          "minimum": 0.0,
-          "maximum": 999999999,
-          "exclusiveMinimum": false,
-          "exclusiveMaximum": false
-        },
-        "language": {
-          "type": "string",
-          "example": "FR",
-          "description": "Code langue de l'otp"
-        },
-        "phoneNumber": {
-          "type": "string",
-          "example": "(+33)649930234",
-          "description": "Numero de téléphone",
-          "minLength": 0,
-          "maxLength": 20
-        },
-        "recipientNumber": {
-          "type": "string",
-          "example": 273261,
-          "description": "Numéro du salarié ou du correspondant"
-        },
-        "recipientType": {
-          "type": "string",
-          "example": "EP",
-          "description": "référentiel",
-          "enum": ["SAVER", "CORRESPONDENT"]
-        },
-        "section": {
-          "type": "string",
-          "example": "REINIT_MDP",
-          "description": "Rubrique appelante",
-          "minLength": 0,
-          "maxLength": 10
-        },
-        "sendType": {
-          "type": "string",
-          "example": "SMS",
-          "description": "Type d'envoi du SMS",
-          "enum": ["SMS", "VOICE", "EMAIL"]
-        }
-      },
-      "title": "OtpSms"
+        "items"
+      ]
     },
-    "Tracking": {
+    "ProspectRemittance": {
+      "title": "ProspectRemittance",
       "type": "object",
-      "required": ["id"],
-      "properties": { "id": { "type": "integer", "format": "int64" } },
-      "title": "Tracking"
-    },
-    "VerificationOtp": {
-      "type": "object",
-      "required": ["id", "otpId", "validated"],
       "properties": {
-        "channel": {
-          "type": "string",
-          "example": "SMS",
-          "description": "Type d'envoi du SMS",
-          "enum": ["SMS", "VOICE", "EMAIL"]
-        },
         "id": {
-          "type": "string",
-          "description": "Identifiant de la demande de vérification"
+          "description": "Propect Remittance Id",
+          "type": "string"
         },
-        "otpId": {
-          "type": "string",
-          "description": "Identifiant de l'otp concerné"
+        "status": {
+          "example": "pending",
+          "type": "string"
         },
-        "password": {
-          "type": "string",
-          "example": 123456,
-          "description": "Mot de passe"
+        "commercialId": {
+          "type": "string"
         },
-        "validated": {
-          "type": "boolean",
-          "description": "Indique si le code est le bon"
+        "prospectId": {
+          "type": "string"
+        },
+        "caseId": {
+          "type": "string"
+        },
+        "creationDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "invoicesStatistics": {
+          "$ref": "#/definitions/InvoicesStatistics"
         }
       },
-      "title": "VerificationOtp"
+      "required": [
+        "id",
+        "status",
+        "commercialId",
+        "prospectId",
+        "caseId",
+        "creationDate"
+      ]
+    },
+    "prospectRemittanceCreate": {
+      "title": "prospectRemittanceCreate",
+      "type": "object",
+      "properties": {
+        "CommercialId": {
+          "type": "string"
+        },
+        "prospectId": {
+          "example": "123456789",
+          "type": "string"
+        },
+        "caseId": {
+          "example": "20190412",
+          "type": "string"
+        }
+      },
+      "required": [
+        "prospectId",
+        "caseId"
+      ]
+    },
+    "ProspectRemittances": {
+      "title": "ProspectRemittances",
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProspectRemittance"
+          }
+        }
+      },
+      "required": [
+        "items"
+      ]
+    },
+    "ProspectRemittanceUpdate": {
+      "title": "ProspectRemittanceUpdate",
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/Status"
+        }
+      }
     }
   },
-  "schemes": ["https"]
+  "tags": [
+    {
+      "name": "Remise Prospect",
+      "description": ""
+    },
+    {
+      "name": "Factures Prospect",
+      "description": ""
+    },
+    {
+      "name": "Documents de Factures (PDF/PNG/JPG)",
+      "description": ""
+    }
+  ]
 }

@@ -1,17 +1,40 @@
 {
     "nameTest": "hello_world",
+    "paths": {
+      "/some/dummy/path?query" : {
+          "get": "nothing"
+      }
+    },
     "properties": {
+      "_links": {
+        "properties" : {
+          "href": {
+            "properties": {
+              "self": {
+                "type": "string"
+              },
+              "DeepPropertyNoInLowerCamelCase": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
       "FirstName": {
-        "type": "string"
+        "type": "string",
+        "description": "description of FirstName"
       },
       "LastName": {
-        "type": "string"
+        "type": "string",
+        "description": "description of LastName"
       },
       "name": {
-        "type": "string"
+        "type": "string",
+        "description": "description of name"
       },
       "lowerCamelCase": {
-        "type": "string"
+        "type": "string",
+        "description": "description of lowerCamelCase"
       }
     }
   }

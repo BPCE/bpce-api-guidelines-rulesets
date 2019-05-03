@@ -28,7 +28,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ProspectRemittanceCreate"
+                "$ref": "#/components/schemas/prospectRemittanceCreate"
               }
             }
           }

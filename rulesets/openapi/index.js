@@ -1,19 +1,42 @@
-const openapiFunctions = {};
+const { RuleFunction, RuleType } = require('@stoplight/spectral');
+const { DiagnosticSeverity } = require('@stoplight/types');
+const { commonRules, commonFunctions, COMMON_OPTIONS } = require('../common');
+const merge = require('lodash').merge;
 
-const openapiRules = {
-    UpperCamelCaseDefinition: {
-      summary: 'Checks that all schema names are in UpperCamelCase',
+const functions = () => {
+  return {
+    //exampleFunction: require('./functions/example').exampleFunction
+  }
+};
+
+const rules = () => {
+  return {
+    'definition-name-is-valid': {
+      summary: 'A definition name must be in UpperCamelCase',
       given: '$.components.schemas',
+      type: RuleType.STYLE,
+      severity: DiagnosticSeverity.Error,
       then: {
-        function: 'checkPropertiesCase', // common function
+        // to work on the key and not the value
+        field: '@key',
+        function: RuleFunction.PATTERN,
         functionOptions: {
-          format: "UpperCamelCase"
+          match: COMMON_OPTIONS.PATTERN_SCHEMA_NAME
         }
       }
     }
-  };
+  }
+};
   
-  module.exports = {
-    openapiFunctions: openapiFunctions,
-    openapiRules: openapiRules
-  };
+const allRules = () => {
+  return merge(commonRules(), rules());;
+}
+
+const allFunctions = () => {
+  return merge(commonFunctions(), functions());
+}
+
+module.exports = {
+  openapiFunctions: allFunctions,
+  openapiRules: allRules
+};

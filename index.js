@@ -1,6 +1,9 @@
 const argv = require('minimist')(process.argv.slice(2));
 const { Spectral } = require('@stoplight/spectral');
-const { customCommonRules, customCommonFunctions, customSwaggerRules, customSwaggerFunctions, customOpenapiRules, customOpenapiFunctions} = require ('./rulesets');
+// Natixis rules
+const { swaggerRules, swaggerFunctions } = require('./rulesets/swagger');
+const { openapiRules, openapiFunctions } = require('./rulesets/openapi');
+// spectral rules
 const { oas2Functions, oas2Rules } = require('@stoplight/spectral/rulesets/oas2');
 const { oas3Functions, oas3Rules } = require('@stoplight/spectral/rulesets/oas3');
 
@@ -12,10 +15,6 @@ const toLint = require(argv._[argv._.length-1]);
 //console.log(argv);
 const customOnly = argv.customOnly == 'true';
 
-if (customOnly) {
-  console.log("Spectral OAS2 and OAS3 rules are disabled");
-}
-
 const spectral = new Spectral();
 
 if (toLint.swagger) {
@@ -26,11 +25,10 @@ if (toLint.swagger) {
     spectral.addRules(oas2Rules());
   }
   //Natixis swagger rules & functions
-  spectral.addFunctions(customSwaggerFunctions);
-  spectral.addRules(customSwaggerRules);
+  spectral.addFunctions(swaggerFunctions());
+  spectral.addRules(swaggerRules());
 }
 else if(toLint.openapi) {
-
   console.log("OpenAPI file detected");
   if(!customOnly) {
     //Default OpenAPI rules & functions
@@ -38,17 +36,18 @@ else if(toLint.openapi) {
     spectral.addRules(oas3Rules());
   }
   //Natixis OpenAPI rules & functions 
-  spectral.addFunctions(customOpenapiFunctions);
-  spectral.addRules(customOpenapiRules);
+  spectral.addFunctions(openapiFunctions());
+  spectral.addRules(openapiRules());
 }
 else {
-  console.log("Not a Swagger nor OpenAPI file, only custom functions and rules applied");
-  // Natixis functions and rules
-  spectral.addFunctions(customCommonFunctions);
-  spectral.addRules(customCommonRules);
+  console.log("Not a Swagger nor OpenAPI file");
+  process.exit(1);
 }
 
-
 spectral.run(toLint).then(results => {
+  if (customOnly) {
+    console.log("Spectral rules are disabled");
+  }  
   console.log(JSON.stringify(results, null, 4));
+  process.exit(0);
 });
