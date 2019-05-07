@@ -1,5 +1,6 @@
 const checkPropertiesCase = (targetValue, options) => {
     const { format } = options;
+    const specialProperties = ["_links"];
     var result = [];
     var regex;
     switch(format) {
@@ -19,7 +20,7 @@ const checkPropertiesCase = (targetValue, options) => {
         ]
     }
     Object.keys(targetValue).forEach(function (key) {
-      if(!regex.test(key)){
+      if(!specialProperties.includes(key) && !regex.test(key)){
         result.push({
           message: `${key} name is not in ${format}`
         })
