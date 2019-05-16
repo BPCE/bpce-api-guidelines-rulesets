@@ -15,7 +15,7 @@ produces:
 paths:
   /prospectRemittances:
     get:
-      description: Liste des remises en cours avec nombre de factues associ�es
+      description: Liste des remises en cours avec nombre de factues associées
       summary: getProspectRemittancesV0
       tags:
         - Remise Prospect
@@ -33,15 +33,14 @@ paths:
           in: query
           required: false
           type: string
-          description: n� de dossier
+          description: n° de dossier
       responses:
         '200':
           description: Liste des remises
           schema:
             $ref: '#/definitions/ProspectRemittances'
-          headers: {}
         '401':
-          description: Probl�me d'autorisation
+          description: Problème d'autorisation
           schema:
             $ref: '#/definitions/Error'
         '500':
@@ -742,11 +741,10 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ProspectRemittance'
-    required:
-      - items
   ProspectRemittanceUpdate:
     title: ProspectRemittanceUpdate
     type: object
+    required: []
     properties:
       status:
         $ref: '#/definitions/Status'

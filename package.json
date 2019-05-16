@@ -10,11 +10,11 @@
   "author": "Arnaud Lauret",
   "license": "ISC",
   "dependencies": {
-    "@stoplight/spectral": "^2.0.6",
+    "@stoplight/spectral": "^2.3.1",
     "@stoplight/yaml": "^2.2.1",
     "lodash": "^4.17.11",
     "minimist": "^1.2.0",
-    "node-fetch": "^2.5.0"
+    "node-fetch": "^2.6.0"
   },
   "devDependencies": {}
 }

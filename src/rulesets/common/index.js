@@ -12,7 +12,7 @@ const SCHEMAS = {
 
 const functions = () => {
   return {
-    echo: require('./functions/echo').echo
+    echo: require('./functions/echo').echo,
     versionNotInPathFunction: require('./functions/checkPath').versionNotInPathFunction,
     pathStructureFunction: require('./functions/checkPath').pathStructureFunction
     //exampleFunction: require('./functions/example').exampleFunction
@@ -34,31 +34,6 @@ const rules = () => {
         functionOptions: {
           match: '^(_links|[a-z]+([A-Z0-9][a-z0-9]*)*)$'
         }
-<<<<<<< HEAD
-      },
-      tags: ['schema']
-    },
-    'http-status-is-authorized':{
-      summary: 'HTTP status must be in authorized list',
-      given: '$..responses',
-      type: RuleType.STYLE,
-      severity: DiagnosticSeverity.Error,
-      then: {
-        // to work on the key and not the value
-        field: '@key',
-        function: RuleFunction.PATTERN,
-        functionOptions: {
-          match: '^(200|201|202|204|207|400|401|403|404|406|500|503)$'
-        }
-      }
-    },
-    'test-ref': {
-      summary: 'Test $ref resolution',
-      given: '$..responses.201.schema',
-      then: {
-        function: 'echo'
-||||||| merged common ancestors
-=======
       },
       tags: ['dataRepresentationRule']
     },
@@ -74,7 +49,6 @@ const rules = () => {
           notMatch: /array/i
         },
       tags: ['dataRepresentationRule']
->>>>>>> 55e600aedfaa5d96617d8636aed4836b78fb121f
       }
   },
   'versioning-in-path': {

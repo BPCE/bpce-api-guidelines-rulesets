@@ -25,17 +25,38 @@ const rules = () => {
         }
       }
     },
-    'suspicious-schema-empty-required': {
+    'suspicious-schema-no-required-list': {
       summary: 'No required properties',
-      given: '$..definitions',
+      given: '$..definitions.*',
       type: RuleType.STYLE,
       severity: DiagnosticSeverity.Warning,
-      then : {
-        field: 'required',
-        function: 'echo',
-        functionOptions: {
-          min: 1
+      then :
+        {
+          field: 'required',
+          function: RuleFunction.TRUTHY
         }
+    },
+    'suspicious-schema-empty-required-list': {
+      summary: 'No required properties',
+      given: '$..definitions.*.required',
+      type: RuleType.STYLE,
+      severity: DiagnosticSeverity.Warning,
+      then :
+        {
+          function: RuleFunction.LENGTH,
+          functionOptions: {
+            min: 2 // bug dans la fonction length, il faut indiquer la longueur souhaitée + 1 (considère que l'élément est un object au lieu d'un array)
+          }
+        }
+    },
+    'error-schema-is-valid': {
+      summary: 'An error must conforms to standard Errors schema',
+      given: '$..responses.400.schema',
+      type: RuleType.VALIDATION,
+      severity: DiagnosticSeverity.Error,
+      then: {
+        function: RuleFunction.SCHEMA,
+        functionOptions: require('../common/schemas/error.json')
       }
     }
   }
