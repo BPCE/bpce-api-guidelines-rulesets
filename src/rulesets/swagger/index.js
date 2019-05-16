@@ -3,7 +3,6 @@ const { DiagnosticSeverity } = require('@stoplight/types');
 const { commonRules, commonFunctions, COMMON_OPTIONS } = require('../common');
 const merge = require('lodash').merge;
 
-
 const functions = () => {
   return {
     //exampleFunction: require('./functions/example').exampleFunction
@@ -23,6 +22,19 @@ const rules = () => {
         function: RuleFunction.PATTERN,
         functionOptions: {
           match: COMMON_OPTIONS.PATTERN_SCHEMA_NAME
+        }
+      }
+    },
+    'suspicious-schema-empty-required': {
+      summary: 'No required properties',
+      given: '$..definitions',
+      type: RuleType.STYLE,
+      severity: DiagnosticSeverity.Warning,
+      then : {
+        field: 'required',
+        function: 'echo',
+        functionOptions: {
+          min: 1
         }
       }
     }

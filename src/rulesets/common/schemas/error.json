@@ -1,0 +1,42 @@
+{
+  "required": [
+    "errors"
+  ],
+  "properties": {
+    "errors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": null,
+        "code": {
+          "type": "string",
+          "description": "le code de l'erreur",
+          "example": "INVALID_FORMAT"
+        },
+        "message": {
+          "type": "string",
+          "description": "description de l'erreur",
+          "example": "Invalid format"
+        },
+        "attribute": {
+          "type": "string",
+          "description": "nom de l'attribut source de l'erreur",
+          "example": "zip"
+        },
+        "path": {
+          "type": "string",
+          "description": "JSON path de l'attribut en erreur",
+          "example": "$.addresses[2].zip"
+        },
+        "additionalInformation": {
+          "description": "propriétés additionnelles spécifiques, à compléter ou supprimer selon les besoins",
+          "type": "object"
+        }
+      }
+    }
+  }
+}
