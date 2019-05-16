@@ -12,14 +12,14 @@ npm install
 
 Lint a file using our rules and functions (common + swagger + openapi) and spectral ones (oas2 + oas3)
 ```
-node index.js <file to lint>
-node index.js ./samples/openapi.json
+node src/index.js <file to lint>
+node src/index.js ./samples/openapi.json
 ```
 
 Lint a file only using our rules and functions (common + swagger + openapi)
 ```
-node index.js --customOnly=true <file to lint>
-node index.js --customOnly=true ./samples/openapi.json
+node src/index.js --customOnly=true <file to lint>
+node src/index.js --customOnly=true ./samples/openapi.json
 ```
 
 # Source code organization
