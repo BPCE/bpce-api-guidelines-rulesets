@@ -193,3 +193,15 @@ rules:
         function: length
         functionOptions:
           min: 1
+  
+  property-name-is-valid:
+    summary: Property name must be in lowerCamelCase or be _links
+    given: $..properties
+    severity: 0
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+          match: "^(_links|[a-z]+([A-Z0-9][a-z0-9]*)*)$"
+    tags:
+      - data
