@@ -1,0 +1,19 @@
+rules:
+  suspicious-empty-required-in-schema :
+    summary: A schema without any required properties is suspicious
+    given: $.definitions[*].required
+    severity: 2
+    then:
+      function: length
+      functionOptions:
+        min: 1
+  too-long-property-name :
+    summary: Use as short as possible property names
+    given: $.definitions[*].properties
+    severity: 2
+    then:
+      field: "@key"
+      function: length
+      functionOptions:
+        min: 3
+        max: 10

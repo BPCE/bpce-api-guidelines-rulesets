@@ -1,0 +1,31 @@
+swagger: "2.0"
+info:
+  title: "API"
+  version: "1.0.0"
+paths:
+  /some-resources:
+    get:
+      summary: Lists some resources
+      description: Returns an array, schema is defined inline
+      responses:
+        '200':
+          description: Some resources
+          schema:
+            type: array
+            items:
+              type: string
+  /resources:
+    get:
+      summary: Lists resources
+      description: Returns an array, schema is defined by a $ref
+      responses:
+        '200':
+          description: The resources
+          schema:
+            $ref: '#/definitions/Resources'
+
+definitions:
+  Resources:
+    type: array
+    items:
+      type: string

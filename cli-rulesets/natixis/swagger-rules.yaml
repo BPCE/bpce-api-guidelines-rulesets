@@ -1,0 +1,23 @@
+rules:
+  authorized-http-methods:
+    summary: Only post, get, put, patch and delete HTTP methods are allowed
+    severity: 0
+    given: $.paths.*
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: ^(parameters|x-.*|post|get|put|patch|delete)$
+      tags:
+        - http method
+  expected-http-error-status-all:
+    summary: Any operation must at least return a 401 and a 500 error HTTP status codes
+    severity: 0
+    given: $.paths.*.*.responses
+    then:
+      - field: "401"
+        function: truthy
+      - field: "500"
+        function: truthy
+    tags:
+      - http status
