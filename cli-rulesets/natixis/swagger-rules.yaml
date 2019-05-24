@@ -119,3 +119,23 @@ rules:
       function: pattern
       functionOptions:
         match: "^(200|204|400|401|403|404|500)$"
+
+  # Not working when there is a reference. Work around: lint unreferenced files.
+  response-only-object:
+    summary: An operation can only return an object
+    severity: 0
+    tags:
+      - response data
+    given: $.paths.*.*.responses.*.schema
+    then:
+      function: schema
+      functionOptions:
+        # Pay attention! It's a JSON Schema of the expected Schema (Inception!)
+        schema:
+          $schema: "http://json-schema.org/draft-04/schema#"
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - object

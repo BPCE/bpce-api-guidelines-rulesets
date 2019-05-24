@@ -3,7 +3,7 @@ info:
   title: "API"
   version: "1.0.0"
 paths:
-  /resources/: # Error (trailing slash)
+  /resources: # Error (trailing slash)
     get:
       summary: Lists resources
       responses: 
@@ -13,8 +13,12 @@ paths:
             type: string
         '401':
           description: Unauthorized
+          schema:
+            $ref: "#/definitions/ErrorObject"
         '500':
           description: Unexpected error
+          schema:
+            $ref: "#/definitions/ErrorString"
   /other-resources:
     get:
       summary: Lists resources
@@ -25,5 +29,17 @@ paths:
             type: string
         '401':
           description: Unauthorized
+          schema: 
+            properties:
+              message:
+                type: string
         '500':
           description: Unexpected error
+
+definitions:
+  ErrorString:
+    type: string
+  ErrorObject:
+    properties:
+      message:
+        type: string
