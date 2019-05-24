@@ -1,4 +1,18 @@
 rules:
+
+  path-no-trailing-slash:
+    summary: No trailing slash on path (cause problems on API gateway)
+    severity: 0
+    tags:
+      - path
+    given: $.paths
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        # Always put quotes around regex (it may work without them but not on all regex)
+        notMatch: "\\/$"
+
   authorized-http-methods:
     summary: Only post, get, put, patch and delete HTTP methods are allowed
     severity: 0
@@ -9,7 +23,7 @@ rules:
       field: "@key"
       function: pattern
       functionOptions:
-        match: ^(parameters|x-.*|post|get|put|patch|delete)$
+        match: "^(parameters|x-.*|post|get|put|patch|delete)$"
     
   expected-http-status-all-methods-errors:
     summary: Operation must have at least a 401 and a 500 error responses
@@ -43,7 +57,7 @@ rules:
     then:
       function: pattern
       functionOptions:
-        match: ^(200|201|202|400|401|403|404|500)$
+        match: "^(200|201|202|400|401|403|404|500)$"
   
   authorized-http-status-post:
     summary: Post operation can only return 200, 201, 202, 400, 401, 403, 404, and 500 HTTP status codes
@@ -55,7 +69,7 @@ rules:
       field: "@key"
       function: pattern
       functionOptions:
-        match: ^(200|201|202|400|401|403|404|500)$
+        match: "^(200|201|202|400|401|403|404|500)$"
 
   # Using separate rule for each method to stay user friendly (get, put and patch could be handled with the same rule)
   authorized-http-status-get:
@@ -68,7 +82,7 @@ rules:
       field: "@key"
       function: pattern
       functionOptions:
-        match: ^(200|400|401|403|404|500)$
+        match: "^(200|400|401|403|404|500)$"
 
   authorized-http-status-put:
     summary: Put operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
@@ -80,7 +94,7 @@ rules:
       field: "@key"
       function: pattern
       functionOptions:
-        match: ^(200|400|401|403|404|500)$
+        match: "^(200|400|401|403|404|500)$"
 
   authorized-http-status-patch:
     summary: Patch operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
@@ -92,7 +106,7 @@ rules:
       field: "@key"
       function: pattern
       functionOptions:
-        match: ^(200|400|401|403|404|500)$
+        match: "^(200|400|401|403|404|500)$"
 
   authorized-http-status-delete:
     summary: Delete operation can only return 200, 204, 400, 401, 403, 404, and 500 HTTP status codes
@@ -104,4 +118,4 @@ rules:
       field: "@key"
       function: pattern
       functionOptions:
-        match: ^(200|204|400|401|403|404|500)$
+        match: "^(200|204|400|401|403|404|500)$"
