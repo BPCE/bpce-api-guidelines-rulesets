@@ -139,3 +139,15 @@ rules:
               type: string
               enum:
                 - object
+  
+  query-parameters-only-for-get-delete:
+    summary: Query parameters can only be used on get or delete operation
+    severity: 0
+    tags:
+      - parameter
+    given: $.paths.*[?( name() === 'post' || name() === 'put' || name() === 'patch')].parameters[*]
+    then:
+      field: in
+      function: pattern
+      functionOptions:
+        notMatch: "^query$" 
