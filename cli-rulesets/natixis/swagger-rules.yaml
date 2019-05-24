@@ -151,3 +151,45 @@ rules:
       function: pattern
       functionOptions:
         notMatch: "^query$" 
+
+  suspicious-empty-required-properties-list-definition:
+    summary: "A schema (definition) without any required properties is suspicious (but it can be normal)"
+    severity: 1
+    tags:
+      - data
+    given: $.definitions.*
+    then:
+      - field: required
+        function: truthy
+      - field: required
+        function: length
+        functionOptions:
+          min: 1
+
+  suspicious-empty-required-properties-list-inline-parameter:
+    summary: "A schema (inline parameter) without any required properties is suspicious (but it can be normal)"
+    severity: 1
+    tags:
+      - data
+    given: $.paths.*.*.parameters[*].schema
+    then:
+      - field: required
+        function: truthy
+      - field: required
+        function: length
+        functionOptions:
+          min: 1
+
+  suspicious-empty-required-properties-list-inline-response:
+    summary: "A schema (inline response) without any required properties is suspicious (but it can be normal)"
+    severity: 1
+    tags:
+      - data
+    given: $.paths.*.*.responses[*].schema
+    then:
+      - field: required
+        function: truthy
+      - field: required
+        function: length
+        functionOptions:
+          min: 1
