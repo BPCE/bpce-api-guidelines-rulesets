@@ -1,0 +1,31 @@
+swagger: "2.0"
+info:
+  title: "API"
+  version: "1.0.0"
+paths:
+  /resources:
+    patch:
+      summary: Does something
+      responses: 
+        '201': # Error (201 instead of 200)
+          description: The resources
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+        '429': # Error (429 unauthorized)
+          description: Too much calls
+        '500':
+          description: Unexpected error
+  /other-resources:
+    patch:
+      summary: Does something
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+        '500':
+          description: Unexpected error

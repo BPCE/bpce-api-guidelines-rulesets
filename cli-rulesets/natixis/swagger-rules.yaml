@@ -12,7 +12,7 @@ rules:
         match: ^(parameters|x-.*|post|get|put|patch|delete)$
     
   expected-http-status-all-methods-errors:
-    summary: Operation must at least return a 401 and a 500 error HTTP status codes
+    summary: Operation must have at least a 401 and a 500 error responses
     severity: 0
     tags:
       - http status
@@ -25,7 +25,7 @@ rules:
 
   expected-http-status-all-methods-successes:
     # source: https://github.com/stoplightio/spectral/blob/master/src/rulesets/oas/ruleset.json
-    summary: Operation must have at least one `2xx` response.
+    summary: Operation must have at least one 2xx response.
     severity: 0
     tags:
       - http status
@@ -33,3 +33,75 @@ rules:
     then:
       field: responses
       function: oasOp2xxResponse
+
+  authorized-http-status-post:
+    summary: Post operation can only return XXX HTTP status codes
+    severity: 0
+    tags:
+      - http status
+    given: $.paths.*.post.responses
+    then:
+      function: pattern
+      functionOptions:
+        match: ^(200|201|202|400|401|403|404|500)$
+  
+  authorized-http-status-post:
+    summary: Post operation can only return 200, 201, 202, 400, 401, 403, 404, and 500 HTTP status codes
+    severity: 0
+    tags:
+      - http status
+    given: $.paths.*.post.responses
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: ^(200|201|202|400|401|403|404|500)$
+
+  # Using separate rule for each method to stay user friendly (get, put and patch could be handled with the same rule)
+  authorized-http-status-get:
+    summary: Get operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
+    severity: 0
+    tags:
+      - http status
+    given: $.paths.*.get.responses
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: ^(200|400|401|403|404|500)$
+
+  authorized-http-status-put:
+    summary: Put operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
+    severity: 0
+    tags:
+      - http status
+    given: $.paths.*.put.responses
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: ^(200|400|401|403|404|500)$
+
+  authorized-http-status-patch:
+    summary: Patch operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
+    severity: 0
+    tags:
+      - http status
+    given: $.paths.*.patch.responses
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: ^(200|400|401|403|404|500)$
+
+  authorized-http-status-delete:
+    summary: Delete operation can only return 200, 204, 400, 401, 403, 404, and 500 HTTP status codes
+    severity: 0
+    tags:
+      - http status
+    given: $.paths.*.delete.responses
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: ^(200|204|400|401|403|404|500)$
