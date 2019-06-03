@@ -40,7 +40,7 @@ const rules = () => {
     
     'arrays-as-responses-not-allowed' : {
       summary: 'Arrays must not be used at the root of a response object',
-      given: '$..responses..type',
+      given: '$..responses[*].schema.type',
       type: RuleType.VALIDATION,
       severity: DiagnosticSeverity.Error,
       then: {
