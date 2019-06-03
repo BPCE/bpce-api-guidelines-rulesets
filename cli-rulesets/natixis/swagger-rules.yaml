@@ -205,3 +205,23 @@ rules:
           match: "^(_links|[a-z]+([A-Z0-9][a-z0-9]*)*)$"
     tags:
       - data
+
+  schema-name-is-valid:
+    summary: Definitionname must be in UpperCamelCase and not contain technical suffix or prefix
+    given: $.definitions
+    severity: 0
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: "^[A-Z][a-z0-9]+([A-Z][a-z0-9]*)*$"
+        # Can't provide a /something/i regex, created an issue
+        # https://github.com/stoplightio/spectral/issues/242
+        # notMatch: /^.*dto$/i
+        # Ugly workaround
+        notMatch: ^.*(dto|Dto|dTo|dtO|DTo|dTO|DTO)$
+
+  # no schema on 204
+  # no known bad prefix or suffix on midfix in property dte for example
+  # valid definition name
+  # valid parameter name
