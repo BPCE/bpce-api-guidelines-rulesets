@@ -3,7 +3,7 @@ info:
   title: "API"
   version: "1.0.0"
 paths:
-  /resources: # Error (trailing slash)
+  /strings:
     get:
       summary: Lists resources
       responses: 
@@ -19,14 +19,29 @@ paths:
           description: Unexpected error
           schema:
             $ref: "#/definitions/ErrorString"
-  /other-resources:
+    delete:
+      summary: deletes some resources
+      responses: 
+        '204':
+          description: Deleted
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/ErrorObject"
+        '500':
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/ErrorString"
+  /arrays:
     get:
       summary: Lists resources
       responses:
         '200':
           description: The resources
           schema:
-            type: string
+            type: array
+            items:
+              type: string
         '401':
           description: Unauthorized
           schema: 
@@ -35,7 +50,24 @@ paths:
                 type: string
         '500':
           description: Unexpected error
-
+  /objects:
+    get:
+      summary: Lists resources
+      responses:
+        '200':
+          description: The resources
+          schema:
+            properties:
+              aProperty:
+                type: string
+        '401':
+          description: Unauthorized
+          schema: 
+            properties:
+              message:
+                type: string
+        '500':
+          description: Unexpected error
 definitions:
   ErrorString:
     type: string
