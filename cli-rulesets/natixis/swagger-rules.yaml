@@ -220,8 +220,52 @@ rules:
         # notMatch: /^.*dto$/i
         # Ugly workaround
         notMatch: ^.*(dto|Dto|dTo|dtO|DTo|dTO|DTO)$
+ 
+  # Not working when there is a reference. Work around: lint unreferenced files.
+  response-error-schema-is-valid:
+    summary: An error must conform to standard schema
+    severity: 0
+    tags:
+      - response data
+    given: $.paths.*.*.responses.*
+    when:
+      field: "@key"
+      pattern: 4..|5..
+    then:
+      field: schema
+      function: schema
+      functionOptions:
+        schema:
+          # Pay attention! It's a JSON Schema of the expected Schema (Inception!)
+          $schema: "http://json-schema.org/draft-04/schema#"
+          type: object
+          required:
+            - properties
+          properties:
+            # Root object properties list
+            properties:
+              type: object
+              additionalProperties: false
+              required:
+                - errors
+              properties:
+                errors:
+                  type: object
+                  required:
+                    - type
+                    - items
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                      - array
+                    items:
+                      type: object
 
+  # Rules ideas:
+  # ------------
   # no schema on 204
   # no known bad prefix or suffix on midfix in property dte for example
-  # valid definition name
   # valid parameter name
+  # Response for get collection is always an object with items (+ possibly pagination + additionalInformation)
+  # Response for erreors match Natixis format
