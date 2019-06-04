@@ -221,7 +221,7 @@ rules:
         # Ugly workaround
         notMatch: ^.*(dto|Dto|dTo|dtO|DTo|dTO|DTO)$
  
-  # Not working when there is a reference. Work around: lint unreferenced files.
+  # Not working when there is a reference. Work around: lint dereferenced files.
   response-error-schema-is-valid:
     summary: An error must conform to standard schema
     severity: 0
@@ -240,8 +240,14 @@ rules:
           $schema: "http://json-schema.org/draft-04/schema#"
           type: object
           required:
+            - required
             - properties
           properties:
+            # Required properties
+            required:
+              type: array
+              items:
+                type: string
             # Root object properties list
             properties:
               type: object
@@ -261,6 +267,59 @@ rules:
                       - array
                     items:
                       type: object
+                      required:
+                        - properties
+                        - required
+                      properties:
+                        required:
+                          type: array
+                          items:
+                            type: string
+                          minItems: 2
+                        properties:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                            code:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  enum:
+                                    - string
+                            message:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  enum:
+                                    - string
+                            attribute:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  enum:
+                                    - string
+                            path:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  enum:
+                                    - string
+                            additionalInformation:
+                              type: object
+                              # This check (additionalInformation content being described) should be in a separate rule as a warning because peopletend to use generic error object
+                              required:
+                                - properties
+                              properties:
+                                type:
+                                  type: string
+                                  enum:
+                                    - object
+                                properties:
+                                  type: object
 
   # Rules ideas:
   # ------------
@@ -268,4 +327,3 @@ rules:
   # no known bad prefix or suffix on midfix in property dte for example
   # valid parameter name
   # Response for get collection is always an object with items (+ possibly pagination + additionalInformation)
-  # Response for erreors match Natixis format
