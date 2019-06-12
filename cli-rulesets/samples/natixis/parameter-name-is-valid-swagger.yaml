@@ -1,0 +1,31 @@
+swagger: "2.0"
+info:
+  title: "API"
+  version: "1.0.0"
+paths:
+  /resources:
+    parameters:
+      - name: SomeParameter # Error (not lowerCamelCase)
+        in: query
+        type: string
+      - name: anotherParameter
+        in: query
+        type: string
+    delete:
+      responses:
+        '204':
+          description: Resources deleted
+  /resources/{ResourceId}:
+    parameters:
+      - name: ResourceId # Error (not lowerCamelCase)
+        in: path
+        type: string
+        required: true
+      - name: 'Some-Header' # Not checked because not in query or path
+        in: header
+        type: string
+        required: false
+    delete:
+      responses:
+        '204':
+          description: Resource deleted

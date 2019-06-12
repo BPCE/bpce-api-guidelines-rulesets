@@ -221,6 +221,15 @@ rules:
         # Ugly workaround
         notMatch: ^.*(dto|Dto|dTo|dtO|DTo|dTO|DTO)$
  
+  query-path-parameter-name-is-valid:
+    summary: Path and query parameter name must be in lowerCamelCase
+    given: $.paths.*.parameters[?( @.in === 'query' | @.in === 'path' )].name
+    severity: 0
+    then:
+      function: pattern
+      functionOptions:
+          match: "^([a-z]+([A-Z0-9][a-z0-9])*)*$"
+
   # Not working when there is a reference. Work around: lint dereferenced files.
   response-error-schema-is-valid:
     summary: An error must conform to standard schema
