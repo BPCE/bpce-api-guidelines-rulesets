@@ -223,7 +223,8 @@ rules:
  
   query-path-parameter-name-is-valid:
     summary: Path and query parameter name must be in lowerCamelCase
-    given: $.paths.*.parameters[?( @.in === 'query' | @.in === 'path' )].name
+    # works on reusable parameters ($.parameters), resource level parameters ($.paths.parameters) and operaiton level parameters ($.paths.*.parameters)
+    given: $..parameters[?( @.in === 'query' | @.in === 'path' )].name
     severity: 0
     then:
       function: pattern
