@@ -60,3 +60,15 @@ spectral lint samples/natixis/expected-http-error-status-all-swagger.yaml -r nat
 ```
 spectral lint samples/natixis/authorized-http-methods-swagger.yaml -r natixis/swagger-rules.yaml -f json -o result.json; cat result.json | jq "map({path: .path | join(\".\"), line: .range.start.line, code: .code, message: .message})";rm result.json
 ```
+
+There is a sh script example in cli-rulesets to do so (first parameter is the swagger/openapi file, second the rules file):
+
+```
+./spectral.sh samples/natixis/parameter-name-is-valid-swagger.yaml natixis/swagger-rules.yaml
+```
+
+## Useful tools
+
+- https://goessner.net/articles/JsonPath/ to learn Json path syntax
+- https://jsonpath.com/ to build "given" paths in rules
+- https://regex101.com/ to test regex used in rules
