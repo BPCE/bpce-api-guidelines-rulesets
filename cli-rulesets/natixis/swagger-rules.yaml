@@ -343,8 +343,109 @@ rules:
                                 properties:
                                   type: object
 
+  collection-schema-is-valid-get:
+    summary: A get collection response must conform to standard list schema
+    severity: 0
+    given: $.paths.*
+    when:
+      field: "@key"
+      # regex match examples: 
+      # get /users/{userId}/resources/{id}/statuses
+      # get /resources/me/statuses
+      # get /resources/{some}-{id}/statuses/{id}/tags
+      # get /v1/resources
+      pattern:  "^(\/v[0-9]+)?(\/[a-zA-Z0-9]+\/([a-zA-Z0-9]+|{[a-zA-Z0-9]+}(-{[a-zA-Z0-9]+})*))*(\/[a-zA-Z0-9]+)"
+    then:
+      field: get.responses.200.schema
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          required:
+            - properties
+          properties:
+            properties:
+              type: object
+              additionalProperties: false
+              required:
+                - items
+              properties:
+                items:
+                  type: object
+                  required:
+                    - type
+                    - items
+                  properties:
+                    type:
+                      type: string
+                      enum: 
+                        - array
+                    items:
+                      required:
+                        - properties
+                      properties:
+                        properties:
+                          type: object
+                additionalInformation:
+                  type: object
+                  required:
+                    - properties
+                  properties:
+                    properties:
+                      type: object
+                page:
+                  type: object
+                  properties:
+                    properties:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        pageSize:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - number
+                        pageNumber:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - number
+                        totalElements:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - number
+                        totalPages:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - number
+                        before:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - string
+                        after:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - string
+
+
   # Rules ideas:
   # ------------
   # no schema on 204
   # no known bad prefix or suffix on midfix in property dte for example
-  # Response for get collection is always an object with items (+ possibly pagination + additionalInformation)
+  # adapt collection-schema-is-valid-get for post .../search
