@@ -152,6 +152,18 @@ rules:
       functionOptions:
         notMatch: "^query$" 
 
+  body-parameters-only-for-post-put-patch:
+    summary: Body parameters can only be used on post, put or patch operation
+    severity: 0
+    tags:
+      - parameter
+    given: $.paths.*[?( name() === 'get' || name() === 'delete')].parameters[*]
+    then:
+      field: in
+      function: pattern
+      functionOptions:
+        notMatch: "^body$" 
+
   suspicious-empty-required-properties-list-definition:
     summary: "A schema (definition) without any required properties is suspicious (but it can be normal)"
     severity: 1
@@ -335,5 +347,4 @@ rules:
   # ------------
   # no schema on 204
   # no known bad prefix or suffix on midfix in property dte for example
-  # valid parameter name
   # Response for get collection is always an object with items (+ possibly pagination + additionalInformation)
