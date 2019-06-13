@@ -13,6 +13,15 @@ rules:
         # Always put quotes around regex (it may work without them but not on all regex)
         notMatch: "\\/$"
 
+  path-not-include-query: 
+      summary: Path should not include a query string
+      given: $.paths
+      then:
+        field: "@key"
+        function: pattern
+        functionOptions:
+          notMatch: "\\?"
+
   authorized-http-methods:
     summary: Only post, get, put, patch and delete HTTP methods are allowed
     severity: 0
