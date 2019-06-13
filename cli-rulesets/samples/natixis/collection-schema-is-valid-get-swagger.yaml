@@ -3,6 +3,18 @@ info:
   title: "API"
   version: "1.0.0"
 paths:
+  /withoutGetResources:
+    post:
+      summary: Creates something
+      responses:
+        '201':
+          description: created
+          schema:
+            required:
+              - id
+            properties:
+              id:
+                type: string      
   /resources:
     post:
       summary: creates some /resources
