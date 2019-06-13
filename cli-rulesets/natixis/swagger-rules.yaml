@@ -47,17 +47,6 @@ rules:
     then:
       field: responses
       function: oasOp2xxResponse
-
-  authorized-http-status-post:
-    summary: Post operation can only return XXX HTTP status codes
-    severity: 0
-    tags:
-      - http status
-    given: $.paths.*.post.responses
-    then:
-      function: pattern
-      functionOptions:
-        match: "^(200|201|202|400|401|403|404|500)$"
   
   authorized-http-status-post:
     summary: Post operation can only return 200, 201, 202, 400, 401, 403, 404, and 500 HTTP status codes
