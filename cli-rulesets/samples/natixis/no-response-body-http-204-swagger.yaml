@@ -1,0 +1,35 @@
+swagger: "2.0"
+info:
+  title: "API"
+  version: "1.0.0"
+paths:
+  /resources:
+    delete:
+      summary: deletes some resources
+      responses:
+        '204':
+          description: resources deleted
+    post:
+      summary: do something
+      responses:
+        '204':
+          description: done without further notice
+  /errorResources:
+    delete:
+      summary: deletes some resources
+      responses:
+        '204':
+          description: resources deleted
+          schema:
+            properties:
+              id:
+                type: string
+    post:
+      summary: do something
+      responses:
+        '204':
+          description: done without further notice
+          schema:
+            properties:
+              id:
+                type: string

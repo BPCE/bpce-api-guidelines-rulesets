@@ -47,7 +47,17 @@ rules:
     then:
       field: responses
       function: oasOp2xxResponse
-  
+
+  no-response-body-http-204:
+    summary: No response body allowed on 204 status
+    severity: 0
+    given: $.paths.*.*.responses.204
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        notMatch: "^schema$"
+
   authorized-http-status-post:
     summary: Post operation can only return 200, 201, 202, 400, 401, 403, 404, and 500 HTTP status codes
     severity: 0
@@ -537,4 +547,3 @@ rules:
   # ------------
   # no schema on 204
   # no known bad prefix or suffix on midfix in property dte for example
-  # adapt collection-schema-is-valid-get for post .../search
