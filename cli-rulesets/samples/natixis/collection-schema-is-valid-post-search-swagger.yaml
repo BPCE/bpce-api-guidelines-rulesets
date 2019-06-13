@@ -27,8 +27,8 @@ paths:
                   properties:
                     someAttribute:
                       type: string
-  /v1/paginatedResources:
-    get:
+  /v1/paginatedResources/search:
+    post:
       responses:
         '200':
           description: search results
@@ -54,8 +54,8 @@ paths:
                   properties:
                     someAttribute:
                       type: string
-  /additionalInformationResources:
-    get:
+  /additionalInformationResources/search:
+    post:
       responses:
         '200':
           description: search results
@@ -71,8 +71,8 @@ paths:
                   properties:
                     someAttribute:
                       type: string
-  /errorPaginatedResources: # Error page does not match schema
-    get:
+  /errorPaginatedResources/search: # Error page does not match schema
+    post:
       responses:
         '200':
           description: search results
@@ -89,8 +89,8 @@ paths:
                     someAttribute:
                       type: string
 
-  /v2/resources/{someId}/errorStringArrayResources: # Error response is not an array (also trigger "response-only-object") -> OK
-    get:
+  /v2/resources/{someId}/errorStringArrayResources/search: # Error response is not an array (also trigger "response-only-object") -> OK
+    post:
       parameters:
         - name: someId
           type: string
@@ -103,8 +103,8 @@ paths:
             type: array
             items:
               type: string
-  /v1/errorItemsStringArrayResources: # Error: items is an array of string instead of objects -> OK
-    get:
+  /v1/errorItemsStringArrayResources/search: # Error: items is an array of string instead of objects -> OK
+    post:
       responses:
         '200':
           description: search results
@@ -114,8 +114,8 @@ paths:
                 type: array
                 items:
                   type: string
-  /resources/{someId}/errorNoItemsResources: # Error: the list is named resources instead of items -> OK
-    get:
+  /resources/{someId}/errorNoItemsResources/search: # Error: the list is named resources instead of items -> OK
+    post:
       parameters:
         - name: someId
           type: string
@@ -132,8 +132,8 @@ paths:
                   properties:
                     someAttribute:
                       type: string
-  /resources/{someId}-{anotherId}/errorRootDataResources: # Error: data at root level (outside of additionalInformation) -> OK
-    get:
+  /resources/{someId}-{anotherId}/errorRootDataResources/search: # Error: data at root level (outside of additionalInformation) -> OK
+    post:
       parameters:
         - name: someId
           type: string
@@ -157,8 +157,8 @@ paths:
                   properties:
                     someAttribute:
                       type: string
-  /resources/{someId}/otherResources/{anotherId}/errorEmpryAdditionalInformationResources: # Error : empty additionalInformation -> OK
-    get:
+  /resources/{someId}/otherResources/{anotherId}/errorEmpryAdditionalInformationResources/search: # Error : empty additionalInformation -> OK
+    post:
       parameters:
         - name: someId
           type: string

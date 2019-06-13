@@ -354,9 +354,109 @@ rules:
       # get /resources/me/statuses
       # get /resources/{some}-{id}/statuses/{id}/tags
       # get /v1/resources
-      pattern:  "^(\/v[0-9]+)?(\/[a-zA-Z0-9]+\/([a-zA-Z0-9]+|{[a-zA-Z0-9]+}(-{[a-zA-Z0-9]+})*))*(\/[a-zA-Z0-9]+)"
+      pattern:  "^(?!.*search$)(\/v[0-9]+)?(\/[a-zA-Z0-9]+\/([a-zA-Z0-9]+|{[a-zA-Z0-9]+}(-{[a-zA-Z0-9]+})*))*(\/[a-zA-Z0-9]+)$"
     then:
       field: get.responses.200.schema
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          required:
+            - properties
+          properties:
+            properties:
+              type: object
+              additionalProperties: false
+              required:
+                - items
+              properties:
+                items:
+                  type: object
+                  required:
+                    - type
+                    - items
+                  properties:
+                    type:
+                      type: string
+                      enum: 
+                        - array
+                    items:
+                      required:
+                        - properties
+                      properties:
+                        properties:
+                          type: object
+                additionalInformation:
+                  type: object
+                  required:
+                    - properties
+                  properties:
+                    properties:
+                      type: object
+                page:
+                  type: object
+                  properties:
+                    properties:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        pageSize:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - number
+                        pageNumber:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - number
+                        totalElements:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - number
+                        totalPages:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - number
+                        before:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - string
+                        after:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - string
+  # collection-schema-is-valid-get copy (added search on regex and changed then.field value)
+  collection-schema-is-valid-post-search:
+    summary: A post search collection response must conform to standard list schema
+    severity: 0
+    given: $.paths.*
+    when:
+      field: "@key"
+      # regex match examples: 
+      # /users/{userId}/resources/{id}/statuses/search
+      # /resources/me/statuses/search
+      # /resources/{some}-{id}/statuses/{id}/tags/search
+      # /v1/resources/search
+      pattern:  "\/search$"
+    then:
+      field: post.responses.200.schema
       function: schema
       functionOptions:
         schema:
