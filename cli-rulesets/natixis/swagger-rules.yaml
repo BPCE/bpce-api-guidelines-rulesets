@@ -225,7 +225,7 @@ rules:
           match: "^(_links|[a-z]+([A-Z0-9][a-z0-9]*)*)$"
     tags:
       - data
-
+ 
   schema-name-is-valid:
     summary: Definitionname must be in UpperCamelCase and not contain technical suffix or prefix
     given: $.definitions
@@ -235,12 +235,9 @@ rules:
       function: pattern
       functionOptions:
         match: "^[A-Z][a-z0-9]+([A-Z][a-z0-9]*)*$"
-        # Can't provide a /something/i regex, created an issue
-        # https://github.com/stoplightio/spectral/issues/242
-        # notMatch: /^.*dto$/i
-        # Ugly workaround
-        notMatch: ^.*(dto|Dto|dTo|dtO|DTo|dTO|DTO)$
- 
+        # Regex modifiers in ruleset files works only after spectral 3.0.5 (https://github.com/stoplightio/spectral/issues/242) 
+        notMatch: /^.*dto$/i
+
   query-path-parameter-name-is-valid:
     summary: Path and query parameter name must be in lowerCamelCase
     # works on reusable parameters ($.parameters), resource level parameters ($.paths.parameters) and operaiton level parameters ($.paths.*.parameters)
