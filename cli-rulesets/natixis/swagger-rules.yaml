@@ -3,7 +3,60 @@ extends: [[spectral:oas2, off]]
 rules:
   # Spectral OAS 2 rules actually used
   operation-2xx-response: true
+
   # Natixis rules
+
+  basepath-defined:
+    recommended: true
+    description: Base path must be defined
+    severity: error
+    tags:
+      - basepath
+    given: $
+    then:
+      field: basePath
+      function: truthy
+
+  basepath-valid-structure:
+    recommended: true
+    description: Base path structure must be /apiName/version (for example /someName/v2)
+    severity: error
+    tags:
+      - basepath
+    given: $
+    then:
+      field: basePath
+      function: pattern
+      functionOptions:
+        match: "^\/[a-zA-Z0-9_-]+\/(v|V)[0-9]+$"
+  
+  basepath-lowerCamelCased:
+    recommended: true
+    description: Base path in lowerCamelCase (for example /someName/v2)
+    severity: error
+    tags:
+      - basepath
+    given: $
+    then:
+      field: basePath
+      function: pattern
+      functionOptions:
+        # added / use case to avoid having it trigger this rule
+        match: "(^\/$)|(^(\/{?[a-z]+([A-Z0-9][a-z0-9]*)*}?)+$)"
+
+  basepath-no-trailing-slash:
+    recommended: true
+    description: No trailing slash on basepath
+    severity: error
+    tags:
+      - basepath
+    given: $
+    then:
+      field: basePath
+      function: pattern
+      functionOptions:
+        notMatch: "\\/$"
+
 
   path-no-trailing-slash:
     recommended: true
