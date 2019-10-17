@@ -1,8 +1,15 @@
+# ruleset for spectral version 4.x.x (tested with 4.2.0)
+extends: [[spectral:oas2, off]]
 rules:
+  # Spectral OAS 2 rules actually used
+  operation-2xx-response: true
+  # Natixis rules
 
   path-no-trailing-slash:
-    summary: No trailing slash on path (cause problems on API gateway)
-    severity: 0
+    recommended: true
+    description: No trailing slash on path (cause problems on API gateway)
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
     tags:
       - path
     given: $.paths
@@ -14,7 +21,9 @@ rules:
         notMatch: "\\/$"
 
   path-not-include-query: 
-      summary: Path should not include a query string
+      recommended: true
+      description: Path should not include a query string
+      message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
       given: $.paths
       then:
         field: "@key"
@@ -22,9 +31,76 @@ rules:
         functionOptions:
           notMatch: "\\?"
 
+  path-lower-camel-case:
+    recommended: true
+    description: Path must be in lowerCamelCase
+    severity: error
+    tags:
+      - path
+    given: $.paths
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: "^(\/{?[a-z]+([A-Z0-9][a-z0-9]*)*}?)+$"
+
+  path-contains-no-basepath:
+    recommended: true
+    description: Path must not contain base path (api name and version)
+    severity: error
+    tags:
+      - path
+    given: $.paths
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        notMatch: "^\/[a-zA-Z0-9_-]+\/(v|V)[0-9]+.*$"
+
+  path-contains-no-versioning:
+    recommended: true
+    description: Resource path must not contain version (must be in base path)
+    severity: error
+    tags:
+      - path
+    given: $.paths
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        notMatch: "(v|V)[0-9]+"  
+
+  path-valid-structure:
+    recommended: true
+    description: Resource path must conform to /resources/{id} pattern
+    severity: error
+    tags:
+      - path
+    given: $.paths
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: "^(\/[a-zA-Z0-9-_]+\/[v|V][0-9]+)?((\/[a-zA-Z0-9-_]+\/{[a-zA-Z0-9-_]+})*)(\/[a-zA-Z0-9-_]+$|\/[a-zA-Z0-9-_]+\/{[a-zA-Z0-9-_]+})$"
+
+  path-collections-plural-names:
+    recommended: true
+    description: Collection must be plural names
+    severity: error
+    tags:
+      - path
+    given: $.paths
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: "^(\/[a-zA-Z0-9-_]+\/[v|V][0-9]+)?((\/[a-zA-Z0-9-_]+(s|i?es|ves)\/{[a-zA-Z0-9-_]+})*)(\/[a-zA-Z0-9-_]+(s|i?es|ves)$|\/[a-zA-Z0-9-_]+(s|i?es|ves)\/{[a-zA-Z0-9-_]+})$"
+
   authorized-http-methods:
-    summary: Only post, get, put, patch and delete HTTP methods are allowed
-    severity: 0
+    recommended: true
+    description: Only post, get, put, patch and delete HTTP methods are allowed
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
     tags:
       - http method
     given: $.paths.*
@@ -35,8 +111,10 @@ rules:
         match: "^(parameters|x-.*|post|get|put|patch|delete)$"
     
   expected-http-status-all-methods-errors:
-    summary: Operation must have at least a 401 and a 500 error responses
-    severity: 0
+    recommended: true
+    description: Operation must have at least a 401 and a 500 error responses
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
     tags:
       - http status
     given: $.paths.*.*.responses
@@ -47,19 +125,23 @@ rules:
         function: truthy
 
   expected-http-status-all-methods-successes:
+    recommended: false
     # source: https://github.com/stoplightio/spectral/blob/master/src/rulesets/oas/ruleset.json
-    summary: Operation must have at least one 2xx response.
-    severity: 0
+    description: Operation must have at least one 2xx response.
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
     tags:
       - http status
-    given: $..paths.*[?( name() === 'get' || name() === 'put' || name() === 'post' || name() === 'delete' || name() === 'options' || name() === 'head' || name() === 'patch' || name() === 'trace' )]
+    given: $..paths.*[?( @property === 'get' || @property === 'put' || @property === 'post' || @property === 'delete' || @property === 'options' || @property === 'head' || @property === 'patch' || @property === 'trace' )]
     then:
       field: responses
-      function: oasOp2xxResponse
+      function: truthy
 
   no-response-body-http-204:
-    summary: No response body allowed on 204 status
-    severity: 0
+    recommended: true
+    description: No response body allowed on 204 status
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
     given: $.paths.*.*.responses.204
     then:
       field: "@key"
@@ -68,8 +150,10 @@ rules:
         notMatch: "^schema$"
 
   authorized-http-status-post:
-    summary: Post operation can only return 200, 201, 202, 400, 401, 403, 404, and 500 HTTP status codes
-    severity: 0
+    recommended: true
+    description: Post operation can only return 200, 201, 202, 400, 401, 403, 404, and 500 HTTP status codes
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
     tags:
       - http status
     given: $.paths.*.post.responses
@@ -81,8 +165,10 @@ rules:
 
   # Using separate rule for each method to stay user friendly (get, put and patch could be handled with the same rule)
   authorized-http-status-get:
-    summary: Get operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
-    severity: 0
+    recommended: true
+    description: Get operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
     tags:
       - http status
     given: $.paths.*.get.responses
@@ -93,8 +179,10 @@ rules:
         match: "^(200|400|401|403|404|500)$"
 
   authorized-http-status-put:
-    summary: Put operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
-    severity: 0
+    recommended: true
+    description: Put operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
     tags:
       - http status
     given: $.paths.*.put.responses
@@ -105,8 +193,10 @@ rules:
         match: "^(200|400|401|403|404|500)$"
 
   authorized-http-status-patch:
-    summary: Patch operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
-    severity: 0
+    recommended: true
+    description: Patch operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
     tags:
       - http status
     given: $.paths.*.patch.responses
@@ -117,8 +207,10 @@ rules:
         match: "^(200|400|401|403|404|500)$"
 
   authorized-http-status-delete:
-    summary: Delete operation can only return 200, 204, 400, 401, 403, 404, and 500 HTTP status codes
-    severity: 0
+    recommended: true
+    description: Delete operation can only return 200, 204, 400, 401, 403, 404, and 500 HTTP status codes
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
     tags:
       - http status
     given: $.paths.*.delete.responses
@@ -130,8 +222,10 @@ rules:
 
   # Not working when there is a reference. Work around: lint unreferenced files.
   response-only-object:
-    summary: An operation can only return an object
-    severity: 0
+    recommended: true
+    description: An operation can only return an object
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
     tags:
       - response data
     given: $.paths.*.*.responses.*.schema
@@ -149,11 +243,13 @@ rules:
                 - object
   
   query-parameters-only-for-get-delete:
-    summary: Query parameters can only be used on get or delete operation
-    severity: 0
+    recommended: true
+    description: Query parameters can only be used on get or delete operation
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
     tags:
       - parameter
-    given: $.paths.*[?( name() === 'post' || name() === 'put' || name() === 'patch')].parameters[*]
+    given: $.paths.*[?( @property === 'post' || @property === 'put' || @property === 'patch')].parameters[*]
     then:
       field: in
       function: pattern
@@ -161,11 +257,13 @@ rules:
         notMatch: "^query$" 
 
   body-parameters-only-for-post-put-patch:
-    summary: Body parameters can only be used on post, put or patch operation
-    severity: 0
+    recommended: true
+    description: Body parameters can only be used on post, put or patch operation
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
     tags:
       - parameter
-    given: $.paths.*[?( name() === 'get' || name() === 'delete')].parameters[*]
+    given: $.paths.*[?( @property === 'get' || @property === 'delete')].parameters[*]
     then:
       field: in
       function: pattern
@@ -173,8 +271,10 @@ rules:
         notMatch: "^body$" 
 
   suspicious-empty-required-properties-list-definition:
-    summary: "A schema (definition) without any required properties is suspicious (but it can be normal)"
-    severity: 1
+    recommended: true
+    description: "A schema (definition) without any required properties is suspicious (but it can be normal)"
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: info
     tags:
       - data
     given: $.definitions.*
@@ -187,8 +287,10 @@ rules:
           min: 1
 
   suspicious-empty-required-properties-list-inline-parameter:
-    summary: "A schema (inline parameter) without any required properties is suspicious (but it can be normal)"
-    severity: 1
+    recommended: true
+    description: "A schema (inline parameter) without any required properties is suspicious (but it can be normal)"
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: info
     tags:
       - data
     given: $.paths.*.*.parameters[*].schema
@@ -201,8 +303,10 @@ rules:
           min: 1
 
   suspicious-empty-required-properties-list-inline-response:
-    summary: "A schema (inline response) without any required properties is suspicious (but it can be normal)"
-    severity: 1
+    recommended: true
+    description: "A schema (inline response) without any required properties is suspicious (but it can be normal)"
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: info
     tags:
       - data
     given: $.paths.*.*.responses[*].schema
@@ -215,9 +319,11 @@ rules:
           min: 1
   
   property-name-is-valid:
-    summary: Property name must be in lowerCamelCase or be _links
+    recommended: true
+    description: Property name must be in lowerCamelCase or be _links
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
     given: $..properties
-    severity: 0
+    severity: error
     then:
       field: "@key"
       function: pattern
@@ -227,9 +333,11 @@ rules:
       - data
  
   schema-name-is-valid:
-    summary: Definitionname must be in UpperCamelCase and not contain technical suffix or prefix
+    recommended: true
+    description: Definitionname must be in UpperCamelCase and not contain technical suffix or prefix
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
     given: $.definitions
-    severity: 0
+    severity: error
     then:
       field: "@key"
       function: pattern
@@ -239,10 +347,12 @@ rules:
         notMatch: /^.*dto$/i
 
   query-path-parameter-name-is-valid:
-    summary: Path and query parameter name must be in lowerCamelCase
+    recommended: true
+    description: Path and query parameter name must be in lowerCamelCase
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
     # works on reusable parameters ($.parameters), resource level parameters ($.paths.parameters) and operaiton level parameters ($.paths.*.parameters)
     given: $..parameters[?( @.in === 'query' | @.in === 'path' )].name
-    severity: 0
+    severity: error
     then:
       function: pattern
       functionOptions:
@@ -250,8 +360,10 @@ rules:
 
   # Not working when there is a reference. Work around: lint dereferenced files.
   response-error-schema-is-valid:
-    summary: An error must conform to standard schema
-    severity: 0
+    recommended: true
+    description: An error must conform to standard schema
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
     tags:
       - response data
     given: $.paths.*.*.responses.*
@@ -279,8 +391,8 @@ rules:
             properties:
               type: object
               additionalProperties: false
-              required:
-                - errors
+              #required:
+              #  - errors
               properties:
                 errors:
                   type: object
@@ -338,19 +450,21 @@ rules:
                             additionalInformation:
                               type: object
                               # This check (additionalInformation content being described) should be in a separate rule as a warning because peopletend to use generic error object
-                              required:
-                                - properties
-                              properties:
-                                type:
-                                  type: string
-                                  enum:
-                                    - object
-                                properties:
-                                  type: object
+                              #required:
+                              #  - properties
+                              #properties:
+                              #  type:
+                              #    type: string
+                              #    enum:
+                              #      - object
+                              #  properties:
+                              #    type: object
 
   collection-schema-is-valid-get:
-    summary: A get collection response must conform to standard list schema
-    severity: 0
+    recommended: true
+    description: A get collection response must conform to standard list schema
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
     given: $.paths.*
     when:
       field: "@key"
@@ -467,8 +581,10 @@ rules:
                                                 - string
   # collection-schema-is-valid-get copy (added search on regex and changed then.field value)
   collection-schema-is-valid-post-search:
-    summary: A post search collection response must conform to standard list schema
-    severity: 0
+    recommended: true
+    description: A post search collection response must conform to standard list schema
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
     given: $.paths.*
     when:
       field: "@key"
