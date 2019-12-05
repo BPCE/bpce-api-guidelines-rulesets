@@ -1,0 +1,13 @@
+rules:
+  allowed-http-method:
+    recommended: true
+    description: Only post, get, put, patch and delete HTTP methods are allowed
+    severity: error
+    tags:
+      - http method
+    given: $.paths.*
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: "^(parameters|x-.*|post|get|put|patch|delete)$"

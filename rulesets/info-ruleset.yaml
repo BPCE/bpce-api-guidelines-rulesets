@@ -1,0 +1,29 @@
+rules:
+  api-name-provided:
+    description: An API name (info.title) must be provided
+    recommended: true
+    severity: error
+    given: $.info
+    then:
+      field: title
+      function: truthy
+
+  api-name-does-not-contain-api:
+    description: An API name (info.title) should not contain the word api
+    recommended: true
+    severity: warn
+    given: $.info.title
+    then:
+      function: pattern
+      functionOptions:
+        # Regex modifiers in ruleset files works only after spectral 3.0.5 (https://github.com/stoplightio/spectral/issues/242) 
+        notMatch: "/^.*api.*$/i"
+
+  api-description-provided:
+    description: An API description (info.description) must be provided
+    recommended: true
+    severity: error
+    given: $.info
+    then:
+      field: description
+      function: truthy

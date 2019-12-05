@@ -5,7 +5,6 @@ rules:
   operation-2xx-response: true
 
   # Natixis rules
-
   basepath-defined:
     recommended: true
     description: Base path must be defined
@@ -56,7 +55,6 @@ rules:
       function: pattern
       functionOptions:
         notMatch: "\\/$"
-
 
   path-no-trailing-slash:
     recommended: true
@@ -273,7 +271,6 @@ rules:
       functionOptions:
         match: "^(200|204|400|401|403|404|500)$"
 
-  # Not working when there is a reference. Work around: lint unreferenced files.
   response-only-object:
     recommended: true
     description: An operation can only return an object
@@ -736,6 +733,65 @@ rules:
                                 - string
 
 
+  # Security
+  security-definitions-defined:
+    recommended: true
+    description: Security definitions must be defined
+    severity: error
+    tags:
+      - security
+    given: $
+    then:
+      field: securityDefinitions
+      function: truthy
+      
+  security-definitions-authorized:
+    recommended: true
+    description: Only apiKey and oauth security definitions are allowed
+    severity: error
+    tags:
+      - security
+    given: $.securityDefinitions.*
+    then:
+      field: type
+      function: enumeration
+      functionOptions:
+        values:
+          - apiKey
+          - oauth2
+
+  security-definitions-oauth-scopes-defined:
+    recommended: true
+    description: Scopes must be defined for all Oauth2 security definitions
+    severity: error
+    tags:
+      - security
+    given: $.securityDefinitions[?(@.type==='oauth2')]
+    then:
+      field: scopes
+      function: truthy
+
+  security-no-api-level:
+    recommended: true
+    description: API level security is forbidden (must be configured at operation level)
+    severity: error
+    tags:
+      - security
+    given: $
+    then:
+      field: security
+      function: falsy
+  
+  security-operation-defined:
+    recommended: true
+    description: Security must be defined on each operation
+    severity: error
+    tags:
+      - security
+    given: $.paths.*.*
+    then:
+      field: security
+      function: truthy
   # Rules ideas:
   # ------------
   # no schema on 204

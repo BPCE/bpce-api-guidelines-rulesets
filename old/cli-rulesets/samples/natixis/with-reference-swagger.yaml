@@ -1,0 +1,24 @@
+swagger: "2.0"
+info:
+  title: "API"
+  version: "1.0.0"
+paths:
+  /resources:
+    get:
+      responses:
+        '200':
+          description: Some resources
+          schema:
+            $ref: '#/definitions/ResourcesDto'
+
+definitions:
+  ResourcesDto:
+    properties:
+      resources:
+        type: array
+        items:
+          $ref: '#/definitions/ResourceDto'
+  ResourceDto:
+    properties:
+      SomeAttribute:
+        type: string

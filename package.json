@@ -1,20 +1,28 @@
 {
-  "name": "linter",
+  "name": "api-linter",
   "version": "1.0.0",
-  "description": "An experimental linter based on Spectral by Stoplight",
-  "main": "src/index.js",
+  "description": "Check OpenAPI3/Swagger2 files compliance with Natixis API Design guidelines",
+  "main": "index.js",
   "scripts": {
-    "lint": "node src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "standard test/*.js && mocha"
   },
   "author": "Arnaud Lauret",
   "license": "ISC",
-  "dependencies": {
-    "@stoplight/spectral": "^2.3.1",
-    "@stoplight/yaml": "^2.2.1",
-    "lodash": "^4.17.11",
-    "minimist": "^1.2.0",
-    "node-fetch": "^2.6.0"
+  "devDependencies": {
+    "@stoplight/spectral": "^4.2.0",
+    "mocha": "^6.2.2",
+    "standard": "^14.3.1"
   },
-  "devDependencies": {}
+  "standard": {
+    "globals": [
+      "describe",
+      "context",
+      "before",
+      "beforeEach",
+      "after",
+      "afterEach",
+      "it",
+      "expect"
+    ]
+  }
 }

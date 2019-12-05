@@ -1,0 +1,13 @@
+swagger: "2.0"
+
+info:
+  title: Wonderful API
+  description: A super cool API that does cray stuff
+  version: "1.0.0"
+
+paths:
+  /resources:
+    get:
+      summary: Gets some resources
+    head:
+      summary: Not allowed!      

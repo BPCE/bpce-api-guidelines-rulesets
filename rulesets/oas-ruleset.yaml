@@ -1,0 +1,7 @@
+extends:
+  - [spectral:oas2, off]
+  - [spectral:oas3, off]
+rules:
+  # Spectral OAS 2 rules actually used
+  oas2-schema: true
+  oas3-schema: true
