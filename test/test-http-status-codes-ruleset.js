@@ -1,89 +1,25 @@
 const assert = require('assert')
 const path = require('@stoplight/path')
-const { Spectral, isOpenApiv2, isOpenApiv3 } = require('@stoplight/spectral')
-// const { SpectralTestWrapper } = require('./common/ruleset-test-tools.js')
+const { SpectralTestWrapper } = require('./common/SpectralTestWrapper.js')
+const testHelpers = require('./common/ruleset-test-helpers')
 
-const ruleset = 'http-status-codes'
 let spectral
-let allLoadedRules
-
-const SEVERITY = {
-  off: -1,
-  error: 0,
-  warn: 1,
-  info: 2,
-  hint: 3
-}
-
-function getSubRuleSet (names, rules) {
-  const subRuleSet = {}
-  for (sourceName in rules) {
-    if (names.includes(sourceName)) {
-      subRuleSet[sourceName] = rules[sourceName]
-    }
-  }
-  return subRuleSet
-}
-
-function checkError (error, code, path, severity) {
-  assert.strictEqual(error.code, code, 'invalid error code')
-  assert.deepStrictEqual(error.path, path, 'invalid path')
-  assert.strictEqual(error.severity, severity, 'invalid severity')
-}
-
-function checkSameTypeErrors (errors, code, paths, severity) {
-  assert.notDeepStrictEqual(errors, [], 'no error returned')
-  assert.strictEqual(errors.length, paths.length, 'more errors than expected')
-  for (let i = 0; i < paths.length; i++) {
-    checkError(errors[i], code, paths[i], severity)
-  }
-}
-
-function checkNoErrors (errors) {
-  assert.deepStrictEqual(errors, [], 'unexpected error')
-}
-
-function checkAllRulesTested (testedRules, loadedRules) {
-  console.log(loadedRules)
-  loadedRules.forEach(function (rule, ruleName) {
-    it('should have tested rule ' + ruleName, function () {
-      console.log(rule)
-      assert.strictEqual(testedRules.includes(rule), true, 'rule has not been tested')
-    })
-  })
-}
-
-function initRuleTest (ruleName, spectral, loadedRules) {
-  testedRules.push(ruleName)
-  spectral.rules = getSubRuleSet([ruleName], loadedRules)
-}
-
-function resetAfterRuleTest (spectral, loadedRules) {
-  // Reset full ruleset for next describe('rule name')
-  spectral.rules = loadedRules
-}
+const ruleset = 'http-status-codes'
 
 before(async function () {
-  spectral = new Spectral()
-  spectral.registerFormat('oas2', isOpenApiv2)
-  spectral.registerFormat('oas3', isOpenApiv3)
-  await spectral.loadRuleset(
-    path.join(__dirname, '../rulesets/' + ruleset + '-ruleset.yaml')
-  )
-  allLoadedRules = spectral.rules
+  spectral = new SpectralTestWrapper()
+  await spectral.loadRuleset(path.join(__dirname, '../rulesets/' + ruleset + '-ruleset.yaml'))
 })
-
-const testedRules = []
 
 describe(ruleset, function () {
   // Test Works for both Swagger 2.0 and OpenAPI 3 formats
   describe('operation-2xx-response', function () {
     before(function () {
-      initRuleTest('operation-2xx-response', spectral, allLoadedRules)
+      spectral.initRuleTest('operation-2xx-response')
     })
 
     after(function () {
-      resetAfterRuleTest(spectral.rules, allLoadedRules)
+      spectral.reset()
     })
 
     it('should return an error if no 2xx reponse for an operation', async function () {
@@ -112,7 +48,7 @@ describe(ruleset, function () {
         }
       }
       const results = await spectral.run(document)
-      checkSameTypeErrors(
+      testHelpers.checkSameTypeErrors(
         results,
         'operation-2xx-response',
         [
@@ -122,7 +58,7 @@ describe(ruleset, function () {
           ['paths', '/anotherPath', 'patch', 'responses'],
           ['paths', '/anotherPath', 'delete', 'responses']
         ],
-        SEVERITY.error
+        testHelpers.SEVERITY.error
       )
     })
 
@@ -161,18 +97,17 @@ describe(ruleset, function () {
         }
       }
       const results = await spectral.run(document)
-      checkNoErrors(results)
+      testHelpers.checkNoErrors(results)
     })
   })
 
   describe('mandatory-http-status-codes-401', function () {
     before(function () {
-      initRuleTest('mandatory-http-status-codes-401', spectral, allLoadedRules)
-      console.log(spectral.rules)
+      spectral.initRuleTest('mandatory-http-status-codes-401')
     })
 
     after(function () {
-      resetAfterRuleTest(spectral.rules, allLoadedRules)
+      spectral.reset()
     })
 
     it('should return an error if 401 response is missing', async function () {
@@ -200,7 +135,7 @@ describe(ruleset, function () {
         }
       }
       const results = await spectral.run(document)
-      checkSameTypeErrors(
+      testHelpers.checkSameTypeErrors(
         results,
         'mandatory-http-status-codes-401',
         [
@@ -210,7 +145,7 @@ describe(ruleset, function () {
           ['paths', '/anotherPath', 'patch', 'responses'],
           ['paths', '/anotherPath', 'delete', 'responses']
         ],
-        SEVERITY.error
+        testHelpers.SEVERITY.error
       )
     })
 
@@ -249,17 +184,17 @@ describe(ruleset, function () {
         }
       }
       const results = await spectral.run(document)
-      checkNoErrors(results)
+      testHelpers.checkNoErrors(results)
     })
   })
 
   describe('mandatory-http-status-codes-500', function () {
     before(function () {
-      initRuleTest('mandatory-http-status-codes-500', spectral, allLoadedRules)
+      spectral.initRuleTest('mandatory-http-status-codes-500')
     })
 
     after(function () {
-      resetAfterRuleTest(spectral.rules, allLoadedRules)
+      spectral.reset()
     })
 
     it('should return an error if 500 response is missing', async function () {
@@ -287,7 +222,7 @@ describe(ruleset, function () {
         }
       }
       const results = await spectral.run(document)
-      checkSameTypeErrors(
+      testHelpers.checkSameTypeErrors(
         results,
         'mandatory-http-status-codes-500',
         [
@@ -297,7 +232,7 @@ describe(ruleset, function () {
           ['paths', '/anotherPath', 'patch', 'responses'],
           ['paths', '/anotherPath', 'delete', 'responses']
         ],
-        SEVERITY.error
+        testHelpers.SEVERITY.error
       )
     })
 
@@ -336,17 +271,17 @@ describe(ruleset, function () {
         }
       }
       const results = await spectral.run(document)
-      checkNoErrors(results)
+      testHelpers.checkNoErrors(results)
     })
   })
 
   describe('allowed-http-status-codes-get', function () {
     before(function () {
-      initRuleTest('allowed-http-status-codes-get', spectral, allLoadedRules)
+      spectral.initRuleTest('allowed-http-status-codes-get')
     })
 
     after(function () {
-      resetAfterRuleTest(spectral.rules, allLoadedRules)
+      spectral.reset()
     })
 
     it('should return an error if unallowed response is defined', async function () {
@@ -373,7 +308,7 @@ describe(ruleset, function () {
         }
       }
       const results = await spectral.run(document)
-      checkSameTypeErrors(
+      testHelpers.checkSameTypeErrors(
         results,
         'allowed-http-status-codes-get',
         [
@@ -381,7 +316,7 @@ describe(ruleset, function () {
           ['paths', '/somePath', 'get', 'responses', '418'],
           ['paths', '/anotherPath', 'get', 'responses', '508']
         ],
-        SEVERITY.error
+        testHelpers.SEVERITY.error
       )
     })
 
@@ -405,17 +340,17 @@ describe(ruleset, function () {
         }
       }
       const results = await spectral.run(document)
-      checkNoErrors(results)
+      testHelpers.checkNoErrors(results)
     })
   })
 
   describe('allowed-http-status-codes-put', function () {
     before(function () {
-      initRuleTest('allowed-http-status-codes-put', spectral, allLoadedRules)
+      spectral.initRuleTest('allowed-http-status-codes-put')
     })
 
     after(function () {
-      resetAfterRuleTest(spectral.rules, allLoadedRules)
+      spectral.reset()
     })
 
     it('should return an error if unallowed response is defined', async function () {
@@ -442,7 +377,7 @@ describe(ruleset, function () {
         }
       }
       const results = await spectral.run(document)
-      checkSameTypeErrors(
+      testHelpers.checkSameTypeErrors(
         results,
         'allowed-http-status-codes-put',
         [
@@ -450,7 +385,7 @@ describe(ruleset, function () {
           ['paths', '/somePath', 'put', 'responses', '418'],
           ['paths', '/anotherPath', 'put', 'responses', '508']
         ],
-        SEVERITY.error
+        testHelpers.SEVERITY.error
       )
     })
 
@@ -474,17 +409,17 @@ describe(ruleset, function () {
         }
       }
       const results = await spectral.run(document)
-      checkNoErrors(results)
+      testHelpers.checkNoErrors(results)
     })
   })
 
   describe('allowed-http-status-codes-patch', function () {
     before(function () {
-      initRuleTest('allowed-http-status-codes-patch', spectral, allLoadedRules)
+      spectral.initRuleTest('allowed-http-status-codes-patch')
     })
 
     after(function () {
-      resetAfterRuleTest(spectral.rules, allLoadedRules)
+      spectral.reset()
     })
 
     it('should return an error if unallowed response is defined', async function () {
@@ -507,7 +442,7 @@ describe(ruleset, function () {
         }
       }
       const results = await spectral.run(document)
-      checkSameTypeErrors(
+      testHelpers.checkSameTypeErrors(
         results,
         'allowed-http-status-codes-patch',
         [
@@ -515,7 +450,7 @@ describe(ruleset, function () {
           ['paths', '/somePath', 'patch', 'responses', '418'],
           ['paths', '/anotherPath', 'patch', 'responses', '508']
         ],
-        SEVERITY.error
+        testHelpers.SEVERITY.error
       )
     })
 
@@ -539,20 +474,77 @@ describe(ruleset, function () {
         }
       }
       const results = await spectral.run(document)
-      checkNoErrors(results)
+      testHelpers.checkNoErrors(results)
+    })
+  })
+
+  describe('allowed-http-status-codes-delete', function () {
+    before(function () {
+      spectral.initRuleTest('allowed-http-status-codes-delete')
+    })
+
+    after(function () {
+      spectral.reset()
+    })
+
+    it('should return an error if unallowed response is defined', async function () {
+      const document = {
+        paths: {
+          '/somePath': {
+            delete: {
+              responses: {
+                204: {}, 418: {}, 500: {}
+              }
+            }
+          },
+          '/anotherPath': {
+            delete: {
+              responses: {
+                200: {}, 401: {}, 508: {}
+              }
+            }
+          }
+        }
+      }
+      const results = await spectral.run(document)
+      testHelpers.checkSameTypeErrors(
+        results,
+        'allowed-http-status-codes-delete',
+        [
+          ['paths', '/somePath', 'delete', 'responses', '418'],
+          ['paths', '/anotherPath', 'delete', 'responses', '508']
+        ],
+        testHelpers.SEVERITY.error
+      )
+    })
+
+    it('should not return an error if only allowed responses are defined', async function () {
+      const document = {
+        paths: {
+          '/somePath': {
+            delete: {
+              responses: {
+                200: {}, 204: {}, 400: {}, 401: {}, 403: {}, 404: {}, 500: {}
+              }
+            }
+          },
+          '/anotherPath': {
+            delete: {
+              responses: {
+                200: {}, 204: {}, 400: {}, 401: {}, 403: {}, 404: {}, 500: {}
+              }
+            }
+          }
+        }
+      }
+      const results = await spectral.run(document)
+      testHelpers.checkNoErrors(results)
     })
   })
 
   describe('exhaustive tests', function () {
-    it('should have tested all rule', function () {
-      const untestedRules = []
-      for (const ruleName in allLoadedRules) {
-        // disabled rules have -1 severity
-        if (allLoadedRules[ruleName].severity >= 0 && !testedRules.includes(ruleName)) {
-          untestedRules.push(ruleName)
-        }
-      }
-      assert.strictEqual(untestedRules, [], 'some rules have not been tested')
+    it('should have tested all rules', function () {
+      assert.deepStrictEqual(spectral.listUntestedRules(), [], 'some rules have not been tested')
     })
   })
 })

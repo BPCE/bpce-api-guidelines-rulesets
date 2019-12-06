@@ -100,6 +100,13 @@ rules:
     given: $.paths.*.delete.responses
     then:
       field: "@key"
-      function: pattern
+      function: enumeration
       functionOptions:
-        match: "^(200|204|400|401|403|404|500)$"
+        values:
+          - '200'
+          - '204'
+          - '400'
+          - '401'
+          - '403'
+          - '404'
+          - '500'
