@@ -542,6 +542,71 @@ describe(ruleset, function () {
     })
   })
 
+  describe('allowed-http-status-codes-post', function () {
+    before(function () {
+      spectral.initRuleTest('allowed-http-status-codes-post')
+    })
+
+    after(function () {
+      spectral.reset()
+    })
+
+    it('should return an error if unallowed response is defined', async function () {
+      const document = {
+        paths: {
+          '/somePath': {
+            post: {
+              responses: {
+                204: {}, 418: {}
+              }
+            }
+          },
+          '/anotherPath': {
+            post: {
+              responses: {
+                200: {}, 508: {}
+              }
+            }
+          }
+        }
+      }
+      const results = await spectral.run(document)
+      testHelpers.checkSameTypeErrors(
+        results,
+        'allowed-http-status-codes-post',
+        [
+          ['paths', '/somePath', 'post', 'responses', '204'],
+          ['paths', '/somePath', 'post', 'responses', '418'],
+          ['paths', '/anotherPath', 'post', 'responses', '508']
+        ],
+        testHelpers.SEVERITY.error
+      )
+    })
+
+    it('should not return an error if only allowed responses are defined', async function () {
+      const document = {
+        paths: {
+          '/somePath': {
+            post: {
+              responses: {
+                200: {}, 201: {}, 202: {}, 400: {}, 401: {}, 403: {}, 404: {}, 500: {}
+              }
+            }
+          },
+          '/anotherPath': {
+            post: {
+              responses: {
+                200: {}, 201: {}, 202: {}, 400: {}, 401: {}, 403: {}, 404: {}, 500: {}
+              }
+            }
+          }
+        }
+      }
+      const results = await spectral.run(document)
+      testHelpers.checkNoErrors(results)
+    })
+  })
+
   describe('exhaustive tests', function () {
     it('should have tested all rules', function () {
       assert.deepStrictEqual(spectral.listUntestedRules(), [], 'some rules have not been tested')

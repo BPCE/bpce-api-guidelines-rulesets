@@ -110,3 +110,28 @@ rules:
           - '403'
           - '404'
           - '500'
+
+  allowed-http-status-codes-post:
+    recommended: true
+    description: Post operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
+    tags:
+      - http status
+    # Test de filtre pour les post .../search: filtre en dure OK mais regex KO, fonction spécifique pour gérer finement les post à prévoir?
+    #given: $.paths[?(@property === "/somePath/search")].post.responses
+    #given: $.paths.[[?(@property =~ /\/search$/)]].post.responses
+    given: $;paths.*.post.responses
+    then:
+      field: "@key"
+      function: enumeration
+      functionOptions:
+        values:
+          - '200'
+          - '201'
+          - '202'
+          - '400'
+          - '401'
+          - '403'
+          - '404'
+          - '500'

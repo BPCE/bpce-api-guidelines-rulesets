@@ -20,6 +20,9 @@ SpectralTestWrapper.prototype.run = function (document) {
 SpectralTestWrapper.prototype.initRuleTest = function (name) {
   this.testedRuleset.push(name)
   const subRuleset = {}
+  if (this.originalRuleset[name] === undefined) {
+    throw new Error('Unknow rule ' + name)
+  }
   subRuleset[name] = this.originalRuleset[name]
   this.spectral.rules = subRuleset
 }
