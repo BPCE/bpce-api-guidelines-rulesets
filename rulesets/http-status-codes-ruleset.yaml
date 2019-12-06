@@ -1,0 +1,105 @@
+extends:
+  - [spectral:oas, off]
+rules:
+  # Actually used oas functions (note that operation-2xx-response severity is changed from warn to error)
+  operation-2xx-response: error
+  
+  # Separate rules for 401 and 500 because can't have field name in variable message
+  mandatory-http-status-codes-401:
+    recommended: true
+    description: Operation must return a 401 error response
+    severity: error
+    tags:
+      - http status code
+    given: $.paths.*.*.responses
+    then:
+      - field: "401"
+        function: truthy
+
+  mandatory-http-status-codes-500:
+    recommended: true
+    description: Operation must return a 500 error response
+    severity: error
+    tags:
+      - http status code
+    given: $.paths.*.*.responses
+    then:
+      - field: "500"
+        function: truthy
+  
+  # Using separate rule for each method to stay user friendly (get, put and patch could be handled with the same rule)
+  allowed-http-status-codes-get:
+    recommended: true
+    description: Get operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
+    message: "{{error}}. {{description}}"
+    severity: error
+    tags:
+      - http status code
+    given: $.paths.*.get.responses
+    then:
+      field: "@key"
+      function: pattern
+      function: enumeration
+      functionOptions:
+        values:
+          - '200'
+          - '400'
+          - '401'
+          - '403'
+          - '404'
+          - '500'
+
+  allowed-http-status-codes-put:
+    recommended: true
+    description: Put operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
+    message: "{{error}}. {{description}}"
+    message: "{{error}}"
+    severity: error
+    tags:
+      - http status code
+    given: $.paths.*.put.responses
+    then:
+      field: "@key"
+      function: enumeration
+      functionOptions:
+        values:
+          - '200'
+          - '400'
+          - '401'
+          - '403'
+          - '404'
+          - '500'
+
+  allowed-http-status-codes-patch:
+    recommended: true
+    description: Patch operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
+    message: "{{error}}. {{description}}"
+    severity: error
+    tags:
+      - http status
+    given: $.paths.*.patch.responses
+    then:
+      field: "@key"
+      function: enumeration
+      functionOptions:
+        values:
+          - '200'
+          - '400'
+          - '401'
+          - '403'
+          - '404'
+          - '500'
+
+  allowed-http-status-codes-delete:
+    recommended: true
+    description: Delete operation can only return 200, 204, 400, 401, 403, 404, and 500 HTTP status codes
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
+    tags:
+      - http status
+    given: $.paths.*.delete.responses
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: "^(200|204|400|401|403|404|500)$"
