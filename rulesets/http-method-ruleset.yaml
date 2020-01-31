@@ -1,5 +1,5 @@
 rules:
-  allowed-http-method:
+  http-method-allowed:
     recommended: true
     description: Only post, get, put, patch and delete HTTP methods are allowed
     severity: error
