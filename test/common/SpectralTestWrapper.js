@@ -72,9 +72,9 @@ SpectralTestWrapper.prototype.runAndCheckNoError = async function (document) {
   this.checkNoError(results)
 }
 
-SpectralTestWrapper.prototype.runAndCheckExpectedError = async function (document, code, path, severity) {
+SpectralTestWrapper.prototype.runAndCheckExpectedError = async function (document, codeOrCodes, pathOrPaths, severityOrSeverities) {
   const results = await this.run(document)
-  this.checkExpectedError(results, code, path, severity)
+  this.checkExpectedError(results, codeOrCodes, pathOrPaths, severityOrSeverities)
 }
 
 SpectralTestWrapper.prototype.checkError = function (error, code, path, severity) {
@@ -83,10 +83,30 @@ SpectralTestWrapper.prototype.checkError = function (error, code, path, severity
   assert.strictEqual(error.severity, severity, 'invalid severity')
 }
 
-SpectralTestWrapper.prototype.checkExpectedError = function (errors, code, path, severity) {
+SpectralTestWrapper.prototype.checkExpectedError = function (errors, codeOrCodes, pathOrPaths, severityOrSeverities) {
   assert.notDeepStrictEqual(errors, [], 'no error returned')
   assert.strictEqual(errors.length, 1, 'more errors than expected')
   for (let i = 0; i < errors.length; i++) {
+    let code, path, severity
+
+    if (codeOrCodes[0] === 'array') {
+      code = codeOrCodes[i]
+    } else {
+      code = codeOrCodes
+    }
+
+    if (pathOrPaths[0] === 'array') {
+      path = pathOrPaths[i]
+    } else {
+      path = pathOrPaths
+    }
+
+    if (severityOrSeverities[0] === 'array') {
+      severity = severityOrSeverities[i]
+    } else {
+      severity = severityOrSeverities
+    }
+
     this.checkError(errors[i], code, path, severity)
   }
 }
