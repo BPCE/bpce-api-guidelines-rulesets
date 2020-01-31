@@ -1,6 +1,6 @@
 const assert = require('assert')
 const path = require('@stoplight/path')
-const { SpectralTestWrapper } = require('./common/SpectralTestWrapper.js')
+const { SpectralTestWrapper } = require('../common/SpectralTestWrapper.js')
 const testHelpers = require('./common/ruleset-test-helpers')
 
 let spectral
