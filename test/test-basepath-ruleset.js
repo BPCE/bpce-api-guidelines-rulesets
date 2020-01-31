@@ -113,6 +113,25 @@ describe('basepath', function () {
     })
   })
 
+  describe('basepath-no-api', function () {
+    it('should return no error if basepath does not contain api', async function () {
+      const document = {
+        basePath: '/some/path'
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return an error if basepath contains api', async function () {
+      const document = {
+        basePath: '/api/path'
+      }
+      const errorPath = ['basePath']
+      const errorSeverity = SEVERITY.error
+      const errorCode = currentRule(this)
+      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+    })
+  })
+
   describe('basepath-not-in-path', function () {
     it('should return no error if path does not contain basepath', async function () {
       const document = {

@@ -54,6 +54,20 @@ rules:
       functionOptions:
         notMatch: "\\/$"
 
+  basepath-no-api:
+    recommended: true
+    description: Basepath should not contain api
+    message: '{{description}} ({{path}})'
+    severity: error
+    tags:
+      - basepath
+    given: $
+    then:
+      field: basePath
+      function: pattern
+      functionOptions:
+        notMatch: "/^.*api.*$/i"
+
   basepath-not-in-path:
     recommended: true
     description: Path must not contain base path (api name and version)
