@@ -1,0 +1,76 @@
+rules:
+  suspicious-empty-required-properties-list-definition:
+    recommended: true
+    description: "A schema (definition) without any required properties is suspicious (but it can be normal)"
+    message: 'No required properties ({{property}}) ({{path}})'
+    severity: info
+    tags:
+      - data
+    given: $.definitions.*
+    then:
+      - field: required
+        function: truthy
+      - field: required
+        function: length
+        functionOptions:
+          min: 1
+
+  property-name-is-valid-lowercamelcase:
+    recommended: true
+    description: Property name must be in lowerCamelCase or be _links
+    message: "{{description}} ({{property}}) ({{path}})"
+    given: $..properties
+    severity: error
+    then:
+      - field: "@key"
+        function: pattern
+        functionOptions:
+          match: "^(_links|[a-z]+([A-Z0-9][a-z0-9]*)*)$"
+    tags:
+      - property-names
+
+  property-name-is-valid-no-numbers:
+    recommended: true
+    description: Property name should not contain numbers
+    message: "{{description}} ({{property}}) ({{path}})"
+    given: $..properties
+    severity: warn
+    then:
+      - field: "@key"
+        function: pattern
+        functionOptions:
+          notMatch: "/[0-9]+/i"
+    tags:
+      - property-names
+
+  property-name-is-valid-no-technical-prefix-suffix:
+    recommended: true
+    description: Property name must not use technical prefix or suffix
+    message: "{{description}} ({{property}}) ({{path}})"
+    given: $..properties
+    severity: error
+    then:
+      - field: "@key"
+        function: pattern
+        functionOptions:
+          notMatch: "/^.*dtos?$/i"
+      - field: "@key"
+        function: pattern
+        functionOptions:
+          notMatch: "/^dtos?.*$/i"
+    tags:
+      - property-names
+
+  schema-name-is-valid:
+    recommended: true
+    description: Definitionname must be in UpperCamelCase and not contain technical suffix or prefix
+    message: "{{description}} ({{property}}) ({{path}})"
+    given: $.definitions
+    severity: error
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: "^[A-Z][a-z0-9]+([A-Z][a-z0-9]*)*$"
+        # Regex modifiers in ruleset files works only after spectral 3.0.5 (https://github.com/stoplightio/spectral/issues/242) 
+        notMatch: /^.*dto$/i

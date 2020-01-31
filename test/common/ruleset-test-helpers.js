@@ -14,18 +14,24 @@ function checkError (error, code, path, severity) {
   assert.strictEqual(error.severity, severity, 'invalid severity')
 }
 
-function checkSameTypeErrors (errors, code, paths, severity) {
+function checkExpectedError (errors, code, path, severity) {
   assert.notDeepStrictEqual(errors, [], 'no error returned')
-  assert.strictEqual(errors.length, paths.length, 'more errors than expected')
-  for (let i = 0; i < paths.length; i++) {
-    checkError(errors[i], code, paths[i], severity)
+  assert.strictEqual(errors.length, 1, 'more errors than expected')
+  for (let i = 0; i < errors.length; i++) {
+    checkError(errors[i], code, path, severity)
   }
 }
 
-function checkNoErrors (errors) {
+function checkNoError (errors) {
   assert.deepStrictEqual(errors, [], 'unexpected error')
 }
 
+function checkAllRulesHaveBeenTest (spectralTestWrapper) {
+  assert.deepStrictEqual(spectralTestWrapper.listUntestedRules(), [], 'untested rules')
+}
+
 module.exports.SEVERITY = SEVERITY
-module.exports.checkSameTypeErrors = checkSameTypeErrors
-module.exports.checkNoErrors = checkNoErrors
+module.exports.checkError = checkError
+module.exports.checkExpectedError = checkExpectedError
+module.exports.checkNoError = checkNoError
+module.exports.checkAllRulesHaveBeenTest = checkAllRulesHaveBeenTest

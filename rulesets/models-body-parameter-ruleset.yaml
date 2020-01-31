@@ -1,0 +1,23 @@
+rules:
+
+  # Pas encore finalisée, ne marche pas
+  body-parameter-only-object:
+    recommended: true
+    description: A (JSON) body parameter can only be an object
+    message: '{{description}} ({{path}}'
+    severity: error
+    tags:
+      - request data
+    given: $.paths.*.*.parameters.*.schema
+    then:
+      function: schema
+      functionOptions:
+        # Pay attention! It's a JSON Schema of the expected Schema (Inception!)
+        schema:
+          $schema: "http://json-schema.org/draft-04/schema#"
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - object

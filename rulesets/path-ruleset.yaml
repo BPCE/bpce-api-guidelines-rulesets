@@ -1,0 +1,69 @@
+rules:
+
+  path-no-trailing-slash:
+    recommended: true
+    description: No trailing slash on path (cause problems on API gateway)
+    message: '{{description}} ({{path}})'
+    severity: error
+    tags:
+      - path
+    given: $.paths
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        # Always put quotes around regex (it may work without them but not on all regex)
+        notMatch: "\\/$"
+
+  path-not-include-query: 
+      recommended: true
+      description: Path should not include a query string
+      message: '{{description}} ({{path}})'
+      given: $.paths
+      then:
+        field: "@key"
+        function: pattern
+        functionOptions:
+          notMatch: "\\?"
+
+  path-lower-camel-case:
+    recommended: true
+    description: Path must be in lowerCamelCase
+    message: '{{description}} ({{path}})'
+    severity: error
+    tags:
+      - path
+    given: $.paths
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: "^(\/{?[a-z]+([A-Z0-9][a-z0-9]*)*}?)+$"
+
+  path-valid-structure:
+    recommended: true
+    description: Resource path must conform to /resources/{id} pattern
+    message: '{{description}} ({{path}})'
+    severity: error
+    tags:
+      - path
+    given: $.paths
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: "^(\/[a-zA-Z0-9-_]+\/[v|V][0-9]+)?((\/[a-zA-Z0-9-_]+\/{[a-zA-Z0-9-_]+})*)(\/[a-zA-Z0-9-_]+$|\/[a-zA-Z0-9-_]+\/{[a-zA-Z0-9-_]+})$"
+
+  path-collections-plural-names:
+    recommended: true
+    description: Collection name must be a plural noun
+    message: '{{description}} ({{path}})'
+    severity: error
+    tags:
+      - path
+    given: $.paths
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: "^(\/[a-zA-Z0-9-_]+\/[v|V][0-9]+)?((\/[a-zA-Z0-9-_]+(s|i?es|ves)\/{[a-zA-Z0-9-_]+})*)(\/[a-zA-Z0-9-_]+(s|i?es|ves)$|\/[a-zA-Z0-9-_]+(s|i?es|ves)\/{[a-zA-Z0-9-_]+})$"

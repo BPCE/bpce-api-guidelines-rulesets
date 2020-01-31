@@ -5,6 +5,11 @@ extends:
   - oas-ruleset.yaml
   - info-ruleset.yaml
   - http-methods-ruleset.yaml
+  - http-status-codes-ruleset.yaml
+  - basepath-ruleset.yaml
+  - path-ruleset.yaml
+  - models-ruleset.yaml
+  - models-response-rulesets.yaml
 rules:
   oas2-schema: true
   oas3-schema: true

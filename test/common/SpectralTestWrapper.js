@@ -1,4 +1,11 @@
+const path = require('@stoplight/path')
 const { Spectral, isOpenApiv2, isOpenApiv3 } = require('@stoplight/spectral')
+
+async function loadRuleset (name) {
+  const spectral = new SpectralTestWrapper()
+  await spectral.loadRuleset(path.join(__dirname, '../../rulesets/' + name + '-ruleset.yaml'))
+  return spectral
+}
 
 function SpectralTestWrapper (path) {
   this.path = path
@@ -17,7 +24,9 @@ SpectralTestWrapper.prototype.run = function (document) {
   return this.spectral.run(document)
 }
 
+// Isolation testing, the rule is added to the tested rules
 SpectralTestWrapper.prototype.initRuleTest = function (name) {
+  this.reset()
   this.testedRuleset.push(name)
   const subRuleset = {}
   if (this.originalRuleset[name] === undefined) {
@@ -43,3 +52,4 @@ SpectralTestWrapper.prototype.listUntestedRules = function () {
 }
 
 module.exports.SpectralTestWrapper = SpectralTestWrapper
+module.exports.loadRuleset = loadRuleset

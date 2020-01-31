@@ -1,0 +1,346 @@
+rules:
+
+  response-only-object:
+    recommended: true
+    description: An operation can only return an object
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    severity: error
+    tags:
+      - response data
+    given: $.paths.*.*.responses.*.schema
+    then:
+      function: schema
+      functionOptions:
+        # Pay attention! It's a JSON Schema of the expected Schema (Inception!)
+        schema:
+          $schema: "http://json-schema.org/draft-04/schema#"
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - object
+
+
+  response-error-schema-is-valid:
+    recommended: true
+    description: An error must conform to standard schema
+    message: '{{description}} ({{path}})'
+    severity: error
+    tags:
+      - response data
+    given: $.paths.*.*.responses.*
+    when:
+      field: "@key"
+      pattern: 4..|5..
+    then:
+      field: schema
+      function: schema
+      functionOptions:
+        schema:
+          # Pay attention! It's a JSON Schema of the expected Schema (Inception!)
+          $schema: "http://json-schema.org/draft-04/schema#"
+          type: object
+          required:
+            - required
+            - properties
+          properties:
+            # Required properties
+            required:
+              type: array
+              items:
+                type: string
+            # Root object properties list
+            properties:
+              type: object
+              additionalProperties: false
+              #required:
+              #  - errors
+              properties:
+                errors:
+                  type: object
+                  required:
+                    - type
+                    - items
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                      - array
+                    items:
+                      type: object
+                      required:
+                        - properties
+                        - required
+                      properties:
+                        required:
+                          type: array
+                          items:
+                            type: string
+                          minItems: 2
+                        properties:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                            code:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  enum:
+                                    - string
+                            message:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  enum:
+                                    - string
+                            attribute:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  enum:
+                                    - string
+                            path:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  enum:
+                                    - string
+                            additionalInformation:
+                              type: object
+                              # This check (additionalInformation content being described) should be in a separate rule as a warning because peopletend to use generic error object
+                              #required:
+                              #  - properties
+                              #properties:
+                              #  type:
+                              #    type: string
+                              #    enum:
+                              #      - object
+                              #  properties:
+                              #    type: object
+
+  collection-schema-is-valid-get:
+    recommended: true
+    description: A get collection response must conform to standard list schema
+    message: '{{description}} ({{path}})'
+    severity: error
+    given: $.paths.*
+    when:
+      field: "@key"
+      # regex match examples: 
+      # get /users/{userId}/resources/{id}/statuses
+      # get /resources/me/statuses
+      # get /resources/{some}-{id}/statuses/{id}/tags
+      # get /v1/resources
+      pattern:  "^(?!.*search$)(\/v[0-9]+)?(\/[a-zA-Z0-9]+\/([a-zA-Z0-9]+|{[a-zA-Z0-9]+}(-{[a-zA-Z0-9]+})*))*(\/[a-zA-Z0-9]+)$"
+    then:
+      # field: get.responses.200.schema -> error if this path does not exist so modifying schema so checking schema from path level
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          additionalProperties: true
+          properties:
+            get:
+              type: object
+              additionalProperties: true
+              properties:
+                responses:
+                  type: object
+                  required:
+                    - '200'  
+                  properties:
+                    '200':
+                      type: object
+                      required:
+                        - schema
+                      properties:
+                        schema:
+                          type: object
+                          required:
+                            - properties
+                          properties:
+                            properties:
+                              type: object
+                              additionalProperties: false
+                              required:
+                                - items
+                              properties:
+                                items:
+                                  type: object
+                                  required:
+                                    - type
+                                    - items
+                                  properties:
+                                    type:
+                                      type: string
+                                      enum: 
+                                        - array
+                                    items:
+                                      required:
+                                        - properties
+                                      properties:
+                                        properties:
+                                          type: object
+                                additionalInformation:
+                                  type: object
+                                  required:
+                                    - properties
+                                  properties:
+                                    properties:
+                                      type: object
+                                page:
+                                  type: object
+                                  properties:
+                                    properties:
+                                      type: object
+                                      additionalProperties: false
+                                      properties:
+                                        pageSize:
+                                          type: object
+                                          properties:
+                                            type:
+                                              type: string
+                                              enum: 
+                                                - number
+                                        pageNumber:
+                                          type: object
+                                          properties:
+                                            type:
+                                              type: string
+                                              enum: 
+                                                - number
+                                        totalElements:
+                                          type: object
+                                          properties:
+                                            type:
+                                              type: string
+                                              enum: 
+                                                - number
+                                        totalPages:
+                                          type: object
+                                          properties:
+                                            type:
+                                              type: string
+                                              enum: 
+                                                - number
+                                        before:
+                                          type: object
+                                          properties:
+                                            type:
+                                              type: string
+                                              enum: 
+                                                - string
+                                        after:
+                                          type: object
+                                          properties:
+                                            type:
+                                              type: string
+                                              enum: 
+                                                - string
+  # collection-schema-is-valid-get copy (added search on regex and changed then.field value)
+  collection-schema-is-valid-post-search:
+    recommended: true
+    description: A post search collection response must conform to standard list schema
+    message: '{{description}} ({{path}})'
+    severity: error
+    given: $.paths.*
+    when:
+      field: "@key"
+      # regex match examples: 
+      # /users/{userId}/resources/{id}/statuses/search
+      # /resources/me/statuses/search
+      # /resources/{some}-{id}/statuses/{id}/tags/search
+      # /v1/resources/search
+      pattern:  "\/search$"
+    then:
+      field: post.responses.200.schema
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          required:
+            - properties
+          properties:
+            properties:
+              type: object
+              additionalProperties: false
+              required:
+                - items
+              properties:
+                items:
+                  type: object
+                  required:
+                    - type
+                    - items
+                  properties:
+                    type:
+                      type: string
+                      enum: 
+                        - array
+                    items:
+                      required:
+                        - properties
+                      properties:
+                        properties:
+                          type: object
+                additionalInformation:
+                  type: object
+                  required:
+                    - properties
+                  properties:
+                    properties:
+                      type: object
+                page:
+                  type: object
+                  properties:
+                    properties:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        pageSize:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - number
+                        pageNumber:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - number
+                        totalElements:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - number
+                        totalPages:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - number
+                        before:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - string
+                        after:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - string
