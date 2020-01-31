@@ -1,6 +1,21 @@
 rules:
-  api-name-provided:
-    description: An API name (info.title) must be provided
+  info-defined:
+    description: The info section must be defined
+    message: '{{description}} ({{path}})'
+    tags:
+      - info
+    recommended: true
+    severity: error
+    given: $
+    then:
+      field: info
+      function: truthy
+
+  info-name-defined:
+    description: An API name (info.title) must be defined
+    message: '{{description}} ({{path}})'
+    tags:
+      - info
     recommended: true
     severity: error
     given: $.info
@@ -8,22 +23,49 @@ rules:
       field: title
       function: truthy
 
-  api-name-does-not-contain-api:
+  info-name-not-contain-api:
     description: An API name (info.title) should not contain the word api
+    message: '{{description}} ({{path}})'
+    tags:
+      - info
     recommended: true
-    severity: warn
+    severity: error
     given: $.info.title
     then:
       function: pattern
       functionOptions:
-        # Regex modifiers in ruleset files works only after spectral 3.0.5 (https://github.com/stoplightio/spectral/issues/242) 
         notMatch: "/^.*api.*$/i"
 
-  api-description-provided:
-    description: An API description (info.description) must be provided
+  info-description-provided:
+    description: A description of the API (info.description) must be provided
+    message: '{{description}} ({{path}})'
+    tags:
+      - info
     recommended: true
     severity: error
     given: $.info
     then:
       field: description
       function: truthy
+
+  info-description-valid-content:
+    description: The API's description should not start by sentences such as "this API ...", "this service ..." or talk about "web service" or "API"
+    message: '{{description}} ({{path}})'
+    tags:
+      - info
+    recommended: true
+    severity: info
+    given: $.info.description
+    then:
+      - function: pattern
+        functionOptions:
+          notMatch: "/^(this|cette) api.*/i"
+      - function: pattern
+        functionOptions:
+          notMatch: "/^((this|ce) )+ service.*$/i"
+      - function: pattern
+        functionOptions:
+          notMatch: "/^.*web service.*$/i"
+      - function: pattern
+        functionOptions:
+          notMatch: "/^.*api.*$/i"
