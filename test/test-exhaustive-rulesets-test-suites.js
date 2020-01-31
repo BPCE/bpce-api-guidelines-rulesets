@@ -4,7 +4,7 @@ const path = require('path')
 const fs = require('fs')
 
 // Check that a test file exists for all rule sets
-describe('checking test exists for each ruleset', function () {
+describe('exhaustive rulesets test suites', function () {
   it('should exist a test file for each ruleset', function () {
     const rulesetsFolder = path.join(__dirname, '..', 'rulesets')
     const rulesets = fs.readdirSync(rulesetsFolder)
@@ -15,6 +15,6 @@ describe('checking test exists for each ruleset', function () {
         untestedRulesets.push(rulesets[ruleset])
       }
     }
-    assert.deepStrictEqual(untestedRulesets, [], 'some rulesets have not been tested')
+    assert.deepStrictEqual(untestedRulesets, [], 'untested rulesets')
   })
 })
