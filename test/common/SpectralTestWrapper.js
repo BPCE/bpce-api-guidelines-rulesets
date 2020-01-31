@@ -11,8 +11,8 @@ const SEVERITY = {
 }
 
 // Rulesets file paths are expected to be GIT_REPO/rulesets/{name}-ruleset.yaml
-async function loadRuleset (name) {
-  const spectral = new SpectralTestWrapper()
+async function loadRuleset (name, oasFormat) {
+  const spectral = new SpectralTestWrapper(oasFormat)
   await spectral.loadRuleset(path.join(__dirname, '../../rulesets/' + name + '-ruleset.yaml'))
   return spectral
 }
@@ -21,11 +21,27 @@ function currentRule (currentTest) {
   return currentTest.test.parent.title
 }
 
-function SpectralTestWrapper (path) {
-  this.path = path
+// oasFormat: null, auto, forceOas2, forceOas3
+function SpectralTestWrapper (oasFormat) {
   this.spectral = new Spectral()
-  // this.spectral.registerFormat('oas2', isOpenApiv2)
-  // this.spectral.registerFormat('oas3', isOpenApiv3)
+
+  switch (oasFormat) {
+    case 'auto':
+      this.spectral.registerFormat('oas2', isOpenApiv2)
+      this.spectral.registerFormat('oas3', isOpenApiv3)
+      break
+    case 'forceOas2':
+      this.spectral.registerFormat('oas2', function (document) { return true })
+      this.spectral.registerFormat('oas3', function (document) { return false })
+      break
+    case 'forceOas3':
+      this.spectral.registerFormat('oas2', function (document) { return false })
+      this.spectral.registerFormat('oas3', function (document) { return true })
+      break
+    default:
+      // no format registered
+  }
+
   this.originalRuleset = this.spectral.rules
   this.testedRules = []
 }
@@ -85,23 +101,33 @@ SpectralTestWrapper.prototype.checkError = function (error, code, path, severity
 
 SpectralTestWrapper.prototype.checkExpectedError = function (errors, codeOrCodes, pathOrPaths, severityOrSeverities) {
   assert.notDeepStrictEqual(errors, [], 'no error returned')
-  assert.strictEqual(errors.length, 1, 'more errors than expected')
+
+  let expectedErrorCount
+  if (Array.isArray(codeOrCodes[0])) {
+    expectedErrorCount = codeOrCodes.length
+  } else if (Array.isArray(pathOrPaths[0])) {
+    expectedErrorCount = pathOrPaths.length
+  } else {
+    expectedErrorCount = 1
+  }
+  assert.strictEqual(errors.length, expectedErrorCount, 'more errors than expected')
+
   for (let i = 0; i < errors.length; i++) {
     let code, path, severity
 
-    if (codeOrCodes[0] === 'array') {
+    if (Array.isArray(codeOrCodes[0])) {
       code = codeOrCodes[i]
     } else {
       code = codeOrCodes
     }
 
-    if (pathOrPaths[0] === 'array') {
+    if (Array.isArray(pathOrPaths[0])) {
       path = pathOrPaths[i]
     } else {
       path = pathOrPaths
     }
 
-    if (severityOrSeverities[0] === 'array') {
+    if (Array.isArray(severityOrSeverities[0])) {
       severity = severityOrSeverities[i]
     } else {
       severity = severityOrSeverities
