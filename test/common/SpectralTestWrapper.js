@@ -101,39 +101,40 @@ SpectralTestWrapper.prototype.checkError = function (error, code, path, severity
 
 SpectralTestWrapper.prototype.checkExpectedError = function (errors, codeOrCodes, pathOrPaths, severityOrSeverities) {
   assert.notDeepStrictEqual(errors, [], 'no error returned')
-
-  let expectedErrorCount
-  if (Array.isArray(codeOrCodes[0])) {
-    expectedErrorCount = codeOrCodes.length
-  } else if (Array.isArray(pathOrPaths[0])) {
-    expectedErrorCount = pathOrPaths.length
-  } else {
-    expectedErrorCount = 1
-  }
-  assert.strictEqual(errors.length, expectedErrorCount, 'more errors than expected')
-
-  for (let i = 0; i < errors.length; i++) {
-    let code, path, severity
-
+  if (errors.length > 0) {
+    let expectedErrorCount
     if (Array.isArray(codeOrCodes[0])) {
-      code = codeOrCodes[i]
+      expectedErrorCount = codeOrCodes.length
+    } else if (Array.isArray(pathOrPaths[0])) {
+      expectedErrorCount = pathOrPaths.length
     } else {
-      code = codeOrCodes
+      expectedErrorCount = 1
     }
+    assert.strictEqual(errors.length, expectedErrorCount, 'more errors than expected')
 
-    if (Array.isArray(pathOrPaths[0])) {
-      path = pathOrPaths[i]
-    } else {
-      path = pathOrPaths
+    for (let i = 0; i < errors.length; i++) {
+      let code, path, severity
+
+      if (Array.isArray(codeOrCodes[0])) {
+        code = codeOrCodes[i]
+      } else {
+        code = codeOrCodes
+      }
+
+      if (Array.isArray(pathOrPaths[0])) {
+        path = pathOrPaths[i]
+      } else {
+        path = pathOrPaths
+      }
+
+      if (Array.isArray(severityOrSeverities[0])) {
+        severity = severityOrSeverities[i]
+      } else {
+        severity = severityOrSeverities
+      }
+
+      this.checkError(errors[i], code, path, severity)
     }
-
-    if (Array.isArray(severityOrSeverities[0])) {
-      severity = severityOrSeverities[i]
-    } else {
-      severity = severityOrSeverities
-    }
-
-    this.checkError(errors[i], code, path, severity)
   }
 }
 

@@ -22,7 +22,7 @@ describe('{ruleset name}', function () {
 
   // Add test suite for each rule in rule set
   describe('{rule name}', function () {
-    it('should not return an error if {test}', async function () {
+    it('should return no error if {test}', async function () {
       const document = {
         some: 'thing'
       }
