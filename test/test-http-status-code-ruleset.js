@@ -329,6 +329,189 @@ describe('http-status-code', function () {
     })
   })
 
+  describe('http-status-code-400-operation-level-query-param', function () {
+    it('should return no error if 400 is returned on operation with query parameter', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            post: {
+              parameters: [
+                { in: 'query' },
+                { in: 'body' },
+                { in: 'header' }
+              ],
+              responses: {
+                400: {}
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if no 400 is returned on operation without query, body or header parameter but with path one', async function () {
+      const document = {
+        paths: {
+          '/some/{param}/path': {
+            post: {
+              parameters: [
+                { in: 'path' }
+              ],
+              responses: {}
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return an error if 400 is not returned on operation with query, body or header parameter', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            post: {
+              parameters: [
+                { in: 'query' },
+                { in: 'body' },
+                { in: 'header' }
+              ],
+              responses: {}
+            }
+          }
+        }
+      }
+      // const errorPath = ['paths', '/some/path', 'post', 'responses', '400']
+      // Bug the wrong path is returned but the error shows the good value:  `/some/path.responses[400]` property is not truthy',
+      const errorPath = ['paths', '/some/path']
+      const errorSeverity = SEVERITY.error
+      const errorCode = currentRule(this)
+      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+    })
+  })
+
+  describe('http-status-code-400-operation-level-body-param', function () {
+    it('should return no error if 400 is returned on operation with body parameter', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            post: {
+              parameters: [
+                { in: 'query' },
+                { in: 'body' },
+                { in: 'header' }
+              ],
+              responses: {
+                400: {}
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if no 400 is returned on operation without query, body or header parameter but with path one', async function () {
+      const document = {
+        paths: {
+          '/some/{param}/path': {
+            post: {
+              parameters: [
+                { in: 'path' }
+              ],
+              responses: {}
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return an error if 400 is not returned on operation with body parameter', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            post: {
+              parameters: [
+                { in: 'query' },
+                { in: 'body' },
+                { in: 'header' }
+              ],
+              responses: {}
+            }
+          }
+        }
+      }
+      // const errorPath = ['paths', '/some/path', 'post', 'responses', '400']
+      // Bug the wrong path is returned but the error shows the good value:  `/some/path.responses[400]` property is not truthy',
+      const errorPath = ['paths', '/some/path']
+      const errorSeverity = SEVERITY.error
+      const errorCode = currentRule(this)
+      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+    })
+  })
+
+  describe('http-status-code-400-operation-level-header-param', function () {
+    it('should return no error if 400 is returned on operation with header parameter', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            post: {
+              parameters: [
+                { in: 'query' },
+                { in: 'body' },
+                { in: 'header' }
+              ],
+              responses: {
+                400: {}
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if no 400 is returned on operation without query, body or header parameter but with path one', async function () {
+      const document = {
+        paths: {
+          '/some/{param}/path': {
+            post: {
+              parameters: [
+                { in: 'path' }
+              ],
+              responses: {}
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return an error if 400 is not returned on operation with header parameter', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            post: {
+              parameters: [
+                { in: 'query' },
+                { in: 'body' },
+                { in: 'header' }
+              ],
+              responses: {}
+            }
+          }
+        }
+      }
+      // const errorPath = ['paths', '/some/path', 'post', 'responses', '400']
+      // Bug the wrong path is returned but the error shows the good value:  `/some/path.responses[400]` property is not truthy',
+      const errorPath = ['paths', '/some/path']
+      const errorSeverity = SEVERITY.error
+      const errorCode = currentRule(this)
+      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+    })
+  })
+
   describe('http-status-code-get', function () {
     it('should return no error is get returns allowed HTTP status codes', async function () {
       const document = {

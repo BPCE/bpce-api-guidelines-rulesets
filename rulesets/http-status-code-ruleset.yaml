@@ -63,6 +63,45 @@ rules:
       - field: "404"
         function: falsy
 
+  http-status-code-400-operation-level-query-param:
+    recommended: true
+    description: Operation must return a 400 HTTP status code in case of query, body or header parameters
+    message: "{{description}}. {{error}}"
+    severity: error
+    tags:
+      - http status code
+    given: "$.paths[*][*][*][?(@.in == 'query')]^^^.responses"
+    #given: "$.paths[*][*][*][?(@.in =~ /(query|body|header)/)]^^^.responses" NOT WORKING :-( ->  3 separated rules
+    then:
+      - field: "400"
+        function: truthy
+
+  http-status-code-400-operation-level-body-param:
+    recommended: true
+    description: Operation must return a 400 HTTP status code in case of query, body or header parameters
+    message: "{{description}}. {{error}}"
+    severity: error
+    tags:
+      - http status code
+    given: "$.paths[*][*][*][?(@.in == 'body')]^^^.responses"
+    #given: "$.paths[*][*][*][?(@.in =~ /(query|body|header)/)]^^^.responses" NOT WORKING :-( ->  3 separated rules
+    then:
+      - field: "400"
+        function: truthy
+
+  http-status-code-400-operation-level-header-param:
+    recommended: true
+    description: Operation must return a 400 HTTP status code in case of query, body or header parameters
+    message: "{{description}}. {{error}}"
+    severity: error
+    tags:
+      - http status code
+    given: "$.paths[*][*][*][?(@.in == 'header')]^^^.responses"
+    #given: "$.paths[*][*][*][?(@.in =~ /(query|body|header)/)]^^^.responses" NOT WORKING :-( ->  3 separated rules
+    then:
+      - field: "400"
+        function: truthy
+
   # Using separate rule for each method to stay user friendly (get, put and patch could be handled with the same rule)
   http-status-code-get:
     recommended: true
