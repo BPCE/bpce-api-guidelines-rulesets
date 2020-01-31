@@ -38,7 +38,7 @@ rules:
       function: pattern
       functionOptions:
         # added / use case to avoid having it trigger this rule
-        match: "(^\/$)|(^(\/{?[a-z]+([A-Z0-9][a-z0-9]*)*}?)+$)"
+        match: "(^\/$)|(^(\/{?[a-z]+([A-Z0-9][a-z0-9]+)*}?)+$)"
 
   basepath-no-trailing-slash:
     recommended: true

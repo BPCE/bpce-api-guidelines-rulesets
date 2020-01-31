@@ -1,21 +1,20 @@
-const { loadRuleset } = require('./common/SpectralTestWrapper.js')
-const testHelpers = require('./common/ruleset-test-helpers')
+const { loadRuleset, currentRule, SEVERITY } = require('./common/SpectralTestWrapper.js')
 
 describe('basepath', function () {
-  let spectral
+  let spectralTestWrapper
 
   before(async function () {
-    spectral = await loadRuleset(this.test.parent.title)
+    spectralTestWrapper = await loadRuleset(this.test.parent.title)
   })
 
   beforeEach(function () {
-    spectral.initRuleTest(this.currentTest.parent.title)
+    spectralTestWrapper.disableAllRulesExcept(this.currentTest.parent.title)
   })
 
   after(function () {
-    describe('all ' + this.test.parent.title + ' rules tested', function () {
+    describe(this.test.parent.title + ' ruleset fully tested', function () {
       it('all rules should have been tested', function () {
-        testHelpers.checkAllRulesHaveBeenTest(spectral)
+        spectralTestWrapper.checkAllRulesHaveBeenTest(spectralTestWrapper)
       })
     })
   })
@@ -25,14 +24,15 @@ describe('basepath', function () {
       const document = {
         basePath: '/someBasePath'
       }
-      const results = await spectral.run(document)
-      testHelpers.checkNoError(results)
+      await spectralTestWrapper.runAndCheckNoError(document)
     })
 
     it('should return an error if basepath is not defined', async function () {
       const document = {}
-      const results = await spectral.run(document)
-      testHelpers.checkExpectedError(results, 'basepath-defined', [], testHelpers.SEVERITY.error)
+      const errorPath = []
+      const errorSeverity = SEVERITY.error
+      const errorCode = currentRule(this)
+      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
     })
   })
 
@@ -41,16 +41,121 @@ describe('basepath', function () {
       const document = {
         basePath: '/someName/v2'
       }
-      const results = await spectral.run(document)
-      testHelpers.checkNoError(results)
+      await spectralTestWrapper.runAndCheckNoError(document)
     })
 
-    it('should return an error if basepath nas not a valid structure', async function () {
+    it('should return an error if basepath has not a valid structure', async function () {
       const document = {
         basePath: '/someBasePath'
       }
-      const results = await spectral.run(document)
-      testHelpers.checkExpectedError(results, 'basepath-valid-structure', ['basePath'], testHelpers.SEVERITY.error)
+      const errorPath = ['basePath']
+      const errorSeverity = SEVERITY.error
+      const errorCode = currentRule(this)
+      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+    })
+  })
+
+  describe('basepath-lowerCamelCased', function () {
+    it('should not return an error if basepath is lowerCamelCased', async function () {
+      const document = {
+        basePath: '/lowerCamelCased'
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return an error if basepath is NotLowerCamelCased', async function () {
+      const document = {
+        basePath: '/NotLowerCamelCased'
+      }
+      const errorPath = ['basePath']
+      const errorSeverity = SEVERITY.error
+      const errorCode = currentRule(this)
+      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+    })
+
+    it('should return an error if basepath is notLOWERCamelCased', async function () {
+      const document = {
+        basePath: '/notLOWERCamelCased'
+      }
+      const errorPath = ['basePath']
+      const errorSeverity = SEVERITY.error
+      const errorCode = currentRule(this)
+      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+    })
+  })
+
+  describe('basepath-no-trailing-slash', async function () {
+    it('should return no error if basepath has no trailing slash', async function () {
+      const document = {
+        basePath: '/no-trailing-slash'
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return an error if basepath has a trailing slash', async function () {
+      const document = {
+        basePath: '/forbidden-trailing-slash/'
+      }
+      const errorPath = ['basePath']
+      const errorSeverity = SEVERITY.error
+      const errorCode = currentRule(this)
+      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+    })
+
+    it('should return an error if basepath is just slash', async function () {
+      const document = {
+        basePath: '/'
+      }
+      const errorPath = ['basePath']
+      const errorSeverity = SEVERITY.error
+      const errorCode = currentRule(this)
+      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+    })
+  })
+
+  describe('basepath-not-in-path', function () {
+    it('should return no error if path does not contain basepath', async function () {
+      const document = {
+        paths: {
+          '/some/path': {}
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return an error if path contains basepath', async function () {
+      const document = {
+        paths: {
+          '/someName/v1/some/path': {}
+        }
+      }
+      const errorPath = ['paths', '/someName/v1/some/path']
+      const errorSeverity = SEVERITY.error
+      const errorCode = currentRule(this)
+      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+    })
+  })
+
+  describe('basepath-version-not-in-path', function () {
+    it('should return no error if path does not contain version', async function () {
+      const document = {
+        paths: {
+          '/some/path': {}
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return an error if path contains version', async function () {
+      const document = {
+        paths: {
+          '/v1/some/path': {}
+        }
+      }
+      const errorPath = ['paths', '/v1/some/path']
+      const errorSeverity = SEVERITY.error
+      const errorCode = currentRule(this)
+      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
     })
   })
 })
