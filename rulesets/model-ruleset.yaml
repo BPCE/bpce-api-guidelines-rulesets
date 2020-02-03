@@ -1,0 +1,112 @@
+rules:
+
+  schema-name-uppercamelcase:
+    recommended: true
+    description: Definitionname must be in UpperCamelCase
+    message: '{{description}} ({{path}})'
+    given: $.definitions
+    severity: error
+    tags:
+      - model
+    then:
+      field: "@key"
+      # function: casing # casing not working :-(
+      #functionOption:
+      #  type: pascal
+      function: pattern
+      functionOptions:
+        match: "^[A-Z][a-z0-9]+([A-Z][a-z0-9]*)*$"
+
+  schema-name-no-number:
+    recommended: true
+    description: Definitionname should not contain number
+    message: '{{description}} ({{path}})'
+    given: $.definitions
+    severity: warn
+    tags:
+      - model
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        notMatch: "/[0-9]+/i"
+
+  schema-name-no-technical-prefix-suffix:
+    recommended: true
+    description: Definitionname must not contain technical suffix or prefix
+    message: '{{description}} ({{path}})'
+    given: $.definitions
+    severity: error
+    tags:
+      - model
+    then:
+      - field: "@key"
+        function: pattern
+        functionOptions:
+          notMatch: "/^.*dtos?$/i"
+      - field: "@key"
+        function: pattern
+        functionOptions:
+          notMatch: "/^dtos?.*$/i"
+
+  property-name-lowercamelcase:
+    recommended: true
+    description: Property name must be in lowerCamelCase or be _links
+    message: '{{description}} ({{path}})'
+    given: $..properties
+    severity: error
+    tags:
+      - property
+    then:
+      - field: "@key"
+        function: pattern
+        functionOptions:
+          match: "^(_links|[a-z0-9]+([A-Z][a-z0-9]*)*)$"
+
+  property-name-no-number:
+    recommended: true
+    description: Property name should not contain numbers
+    message: '{{description}} ({{path}})'
+    given: $..properties
+    severity: warn
+    then:
+      - field: "@key"
+        function: pattern
+        functionOptions:
+          notMatch: "/[0-9]+/i"
+    tags:
+      - property
+
+  property-name-no-technical-prefix-suffix:
+    recommended: true
+    description: Property name must not use technical prefix or suffix
+    message: '{{description}} ({{path}})'
+    given: $..properties
+    severity: error
+    then:
+      - field: "@key"
+        function: pattern
+        functionOptions:
+          notMatch: "/^.*dtos?$/i"
+      - field: "@key"
+        function: pattern
+        functionOptions:
+          notMatch: "/^dtos?.*$/i"
+    tags:
+      - property
+
+  model-empty-required:
+    recommended: true
+    description: "A schema (definition) without any required properties is suspicious (but it can be normal)"
+    message: '{{description}} ({{path}})'
+    severity: info
+    tags:
+      - model
+    given: $.definitions.*
+    then:
+      - field: required
+        function: truthy
+      - field: required
+        function: length
+        functionOptions:
+          min: 1
