@@ -1,6 +1,6 @@
 const { loadRuleset, SEVERITY, ruleset, rule, isNotRulesetFullyTestedTestSuite, rulesetFullyTestedSuiteName } = require('./common/SpectralTestWrapper.js')
 
-// @TODO Set ruleset name. Ruleset files are in the rulesets folder. Example for a info-ruleset.yaml file it's "info".
+// TODO Set ruleset name. Ruleset files are in the rulesets folder. Example for a info-ruleset.yaml file it's "info".
 describe('{ruleset name}', function () {
   let spectralTestWrapper
 
@@ -16,28 +16,28 @@ describe('{ruleset name}', function () {
     }
   })
 
-  // @TODO Add test suite for each rule in rule set
-  // @TODO Set the rule name as defined in the Spectral ruleset
+  // TODO Add test suite for each rule in rule set
+  // TODO Set the rule name as defined in the Spectral ruleset
   describe('{rule name}', function () {
-    // @TODO Do a test for each possible success
+    // TODO Do a test for each possible success
     it('should return no error if {test}', async function () {
-      // @TODO Minimal document to test the use case, no need for a complete one
+      // TODO Minimal document to test the use case, no need for a complete one
       const document = {
         some: 'thing'
       }
       await spectralTestWrapper.runAndCheckNoError(document)
     })
 
-    // @TODO Do a test for each possible failure
+    // TODO Do a test for each possible failure
     it('should return an error if {test}', async function () {
-      // @TODO Minimal document to test the use case, no need for a complete one
+      // TODO Minimal document to test the use case, no need for a complete one
       const document = {
         some: 'thing'
       }
-      // @TODO The expected path returned by Spectral
+      // TODO The expected path returned by Spectral
       const errorPath = ['some']
       // Note: you can check multiple paths with const errorsPaths = [ ["one", "path"], ["another", "path"] ]
-      // @TODO The expected severity
+      // TODO The expected severity
       const errorSeverity = SEVERITY.error
       await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })

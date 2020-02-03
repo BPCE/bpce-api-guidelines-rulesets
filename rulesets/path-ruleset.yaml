@@ -15,10 +15,11 @@ rules:
         # Always put quotes around regex (it may work without them but not on all regex)
         notMatch: "\\/$"
 
-  path-not-include-query: 
+  path-no-query-parameter: 
       recommended: true
-      description: Path should not include a query string
+      description: Path should not include a query parameter (?name=value)
       message: '{{description}} ({{path}})'
+      severity: error
       given: $.paths
       then:
         field: "@key"
@@ -38,11 +39,11 @@ rules:
       field: "@key"
       function: pattern
       functionOptions:
-        match: "^(\/{?[a-z]+([A-Z0-9][a-z0-9]*)*}?)+$"
+        match: "^(\/{?[a-z]+([A-Z0-9][a-z0-9]+)*}?)+$"
 
   path-valid-structure:
     recommended: true
-    description: Resource path must conform to /resources/{id} pattern
+    description: "Resource path must conform to /resources/{id} pattern. Collection name must be plural. And {id} can be a magic one: me, current, latest, search."
     message: '{{description}} ({{path}})'
     severity: error
     tags:
@@ -52,18 +53,4 @@ rules:
       field: "@key"
       function: pattern
       functionOptions:
-        match: "^(\/[a-zA-Z0-9-_]+\/[v|V][0-9]+)?((\/[a-zA-Z0-9-_]+\/{[a-zA-Z0-9-_]+})*)(\/[a-zA-Z0-9-_]+$|\/[a-zA-Z0-9-_]+\/{[a-zA-Z0-9-_]+})$"
-
-  path-collections-plural-names:
-    recommended: true
-    description: Collection name must be a plural noun
-    message: '{{description}} ({{path}})'
-    severity: error
-    tags:
-      - path
-    given: $.paths
-    then:
-      field: "@key"
-      function: pattern
-      functionOptions:
-        match: "^(\/[a-zA-Z0-9-_]+\/[v|V][0-9]+)?((\/[a-zA-Z0-9-_]+(s|i?es|ves)\/{[a-zA-Z0-9-_]+})*)(\/[a-zA-Z0-9-_]+(s|i?es|ves)$|\/[a-zA-Z0-9-_]+(s|i?es|ves)\/{[a-zA-Z0-9-_]+})$"
+        match: "/^((\/[a-z0-9-_]+)?((\/v[0-9])+))?(\/[a-z0-9-_]+(s|i?es|ves))(\/({[a-z0-9-_]+}|me|current|latest|search)\/[a-z0-9-_]+(s|i?es|ves))*(\/({[a-z0-9-_]+}|me|current|latest|search))?$/i"
