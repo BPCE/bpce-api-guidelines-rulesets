@@ -17,8 +17,44 @@ async function loadRuleset (name, oasFormat) {
   return spectral
 }
 
-function currentRule (currentTest) {
-  return currentTest.test.parent.title
+function ruleset (test, level) {
+  let rulesetName
+  if (test.tests !== undefined) {
+    // inner describe level
+    rulesetName = test.title
+  } else {
+    if (test.currentTest === undefined) {
+      if (test.test.parent.suites.length > 0) {
+        // before level
+        rulesetName = test.test.parent.title
+      } else {
+        // it level
+        rulesetName = test.test.parent.parent.title
+      }
+    } else {
+      // inner describe or beforeEach
+      rulesetName = test.currentTest.parent.parent.title
+    }
+  }
+  return rulesetName
+}
+
+function rule (test) {
+  let rule
+  if (test.currentTest === undefined) {
+    rule = test.test.parent.title
+  } else {
+    rule = test.currentTest.parent.title
+  }
+  return rule
+}
+
+function isNotRulesetFullyTestedTestSuite (test) {
+  return rule(test).localeCompare(rulesetFullyTestedSuiteName(test))
+}
+
+function rulesetFullyTestedSuiteName (test) {
+  return ruleset(test, 'rulesetFullyTestedSuiteName') + ' ruleset fully tested'
 }
 
 // oasFormat: null, auto, forceOas2, forceOas3
@@ -142,10 +178,13 @@ SpectralTestWrapper.prototype.checkNoError = function (errors) {
   assert.deepStrictEqual(errors, [], 'unexpected error')
 }
 
-SpectralTestWrapper.prototype.checkAllRulesHaveBeenTest = function (spectralTestWrapper) {
-  assert.deepStrictEqual(spectralTestWrapper.listUntestedRules(), [], 'untested rules')
+SpectralTestWrapper.prototype.checkAllRulesHaveBeenTest = function () {
+  assert.deepStrictEqual(this.listUntestedRules(), [], 'untested rules')
 }
 
 module.exports.loadRuleset = loadRuleset
+module.exports.ruleset = ruleset
+module.exports.rule = rule
+module.exports.isNotRulesetFullyTestedTestSuite = isNotRulesetFullyTestedTestSuite
+module.exports.rulesetFullyTestedSuiteName = rulesetFullyTestedSuiteName
 module.exports.SEVERITY = SEVERITY
-module.exports.currentRule = currentRule

@@ -1,22 +1,18 @@
-const { loadRuleset, currentRule, SEVERITY } = require('./common/SpectralTestWrapper.js')
+const { loadRuleset, SEVERITY, ruleset, rule, isNotRulesetFullyTestedTestSuite, rulesetFullyTestedSuiteName } = require('./common/SpectralTestWrapper.js')
 
 describe('http-method', function () {
   let spectralTestWrapper
 
+  // Loads ruleset file based on the ruleset name set in the ruleset level test suite describe('{ruleset name}')
   before(async function () {
-    spectralTestWrapper = await loadRuleset(this.test.parent.title)
+    spectralTestWrapper = await loadRuleset(ruleset(this))
   })
 
+  // Disables all rules except the one indicated in rule level test suite describe('{rule name}'
   beforeEach(function () {
-    spectralTestWrapper.disableAllRulesExcept(this.currentTest.parent.title)
-  })
-
-  after(function () {
-    describe(this.test.parent.title + ' ruleset fully tested', function () {
-      it('all rules should have been tested', function () {
-        spectralTestWrapper.checkAllRulesHaveBeenTest(spectralTestWrapper)
-      })
-    })
+    if (isNotRulesetFullyTestedTestSuite(this)) {
+      spectralTestWrapper.disableAllRulesExcept(rule(this))
+    }
   })
 
   describe('http-method-allowed', function () {
@@ -110,8 +106,15 @@ describe('http-method', function () {
       }
       const errorPath = ['paths', '/another/path', 'options']
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+    })
+  })
+
+  // Checks that all rules have been tested
+  describe(rulesetFullyTestedSuiteName(this), function () {
+    it('all rules should have been tested', function () {
+      spectralTestWrapper.checkAllRulesHaveBeenTest()
     })
   })
 })

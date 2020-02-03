@@ -1,23 +1,19 @@
-const { loadRuleset, currentRule, SEVERITY } = require('./common/SpectralTestWrapper.js')
+const { loadRuleset, SEVERITY, ruleset, rule, isNotRulesetFullyTestedTestSuite, rulesetFullyTestedSuiteName } = require('./common/SpectralTestWrapper.js')
 
 // Set rule setname
 describe('http-status-code', function () {
   let spectralTestWrapper
 
+  // Loads ruleset file based on the ruleset name set in the ruleset level test suite describe('{ruleset name}')
   before(async function () {
-    spectralTestWrapper = await loadRuleset(this.test.parent.title)
+    spectralTestWrapper = await loadRuleset(ruleset(this))
   })
 
+  // Disables all rules except the one indicated in rule level test suite describe('{rule name}'
   beforeEach(function () {
-    spectralTestWrapper.disableAllRulesExcept(this.currentTest.parent.title)
-  })
-
-  after(function () {
-    describe(this.test.parent.title + ' ruleset fully tested', function () {
-      it('all rules should have been tested', function () {
-        spectralTestWrapper.checkAllRulesHaveBeenTest(spectralTestWrapper)
-      })
-    })
+    if (isNotRulesetFullyTestedTestSuite(this)) {
+      spectralTestWrapper.disableAllRulesExcept(rule(this))
+    }
   })
 
   describe('http-status-code-mandatory-2xx', function () {
@@ -96,8 +92,8 @@ describe('http-status-code', function () {
         ['paths', '/another/path', 'patch', 'responses']
       ]
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPaths, errorSeverity)
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
     })
   })
 
@@ -176,8 +172,8 @@ describe('http-status-code', function () {
         ['paths', '/another/path', 'patch', 'responses']
       ]
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPaths, errorSeverity)
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
     })
   })
 
@@ -255,8 +251,8 @@ describe('http-status-code', function () {
         ['paths', '/another/path', 'patch', 'responses']
       ]
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPaths, errorSeverity)
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
     })
   })
 
@@ -291,8 +287,8 @@ describe('http-status-code', function () {
         ['paths', '/some/path/with/path/{param}/somewhere', 'post', 'responses']
       ]
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPaths, errorSeverity)
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
     })
   })
 
@@ -324,8 +320,8 @@ describe('http-status-code', function () {
       }
       const errorPath = ['paths', '/some/path/without/path/param', 'post', 'responses', '404']
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
   })
 
@@ -385,8 +381,8 @@ describe('http-status-code', function () {
       // Bug the wrong path is returned but the error shows the good value:  `/some/path.responses[400]` property is not truthy',
       const errorPath = ['paths', '/some/path']
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
   })
 
@@ -446,8 +442,8 @@ describe('http-status-code', function () {
       // Bug the wrong path is returned but the error shows the good value:  `/some/path.responses[400]` property is not truthy',
       const errorPath = ['paths', '/some/path']
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
   })
 
@@ -507,8 +503,8 @@ describe('http-status-code', function () {
       // Bug the wrong path is returned but the error shows the good value:  `/some/path.responses[400]` property is not truthy',
       const errorPath = ['paths', '/some/path']
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
   })
 
@@ -554,8 +550,8 @@ describe('http-status-code', function () {
         ['paths', '/some/path', 'get', 'responses', '428']
       ]
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPaths, errorSeverity)
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
     })
   })
 
@@ -602,8 +598,8 @@ describe('http-status-code', function () {
         ['paths', '/some/path', 'put', 'responses', '428']
       ]
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPaths, errorSeverity)
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
     })
   })
 
@@ -650,8 +646,8 @@ describe('http-status-code', function () {
         ['paths', '/some/path', 'patch', 'responses', '428']
       ]
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPaths, errorSeverity)
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
     })
   })
 
@@ -697,8 +693,8 @@ describe('http-status-code', function () {
         ['paths', '/some/path', 'delete', 'responses', '428']
       ]
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPaths, errorSeverity)
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
     })
   })
 
@@ -742,8 +738,15 @@ describe('http-status-code', function () {
         ['paths', '/some/path', 'post', 'responses', '428']
       ]
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPaths, errorSeverity)
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+    })
+  })
+
+  // Checks that all rules have been tested
+  describe(rulesetFullyTestedSuiteName(this), function () {
+    it('all rules should have been tested', function () {
+      spectralTestWrapper.checkAllRulesHaveBeenTest()
     })
   })
 })

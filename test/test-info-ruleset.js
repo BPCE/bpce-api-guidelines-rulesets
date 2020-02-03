@@ -1,22 +1,16 @@
-const { loadRuleset, currentRule, SEVERITY } = require('./common/SpectralTestWrapper.js')
+const { loadRuleset, SEVERITY, ruleset, rule, isNotRulesetFullyTestedTestSuite, rulesetFullyTestedSuiteName } = require('./common/SpectralTestWrapper.js')
 
 describe('info', function () {
   let spectralTestWrapper
 
   before(async function () {
-    spectralTestWrapper = await loadRuleset(this.test.parent.title)
+    spectralTestWrapper = await loadRuleset(ruleset(this))
   })
 
   beforeEach(function () {
-    spectralTestWrapper.disableAllRulesExcept(this.currentTest.parent.title)
-  })
-
-  after(function () {
-    describe(this.test.parent.title + ' ruleset fully tested', function () {
-      it('all rules should have been tested', function () {
-        spectralTestWrapper.checkAllRulesHaveBeenTest(spectralTestWrapper)
-      })
-    })
+    if (isNotRulesetFullyTestedTestSuite(this)) {
+      spectralTestWrapper.disableAllRulesExcept(rule(this))
+    }
   })
 
   describe('info-defined', function () {
@@ -31,8 +25,7 @@ describe('info', function () {
       const document = {}
       const errorPath = []
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
   })
 
@@ -52,8 +45,7 @@ describe('info', function () {
       }
       const errorPath = ['info']
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
   })
 
@@ -75,8 +67,8 @@ describe('info', function () {
       }
       const errorPath = ['info', 'title']
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
 
     it('should return an error if the API name contains Api', async function () {
@@ -87,8 +79,7 @@ describe('info', function () {
       }
       const errorPath = ['info', 'title']
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
 
     it('should return an error if the API name is API', async function () {
@@ -99,8 +90,7 @@ describe('info', function () {
       }
       const errorPath = ['info', 'title']
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
   })
 
@@ -120,8 +110,7 @@ describe('info', function () {
       }
       const errorPath = ['info']
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
 
     it('should return an error if the API description is empty', async function () {
@@ -132,8 +121,7 @@ describe('info', function () {
       }
       const errorPath = ['info', 'description']
       const errorSeverity = SEVERITY.error
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
   })
 
@@ -146,8 +134,7 @@ describe('info', function () {
       }
       const errorPath = ['info', 'description']
       const errorSeverity = SEVERITY.info
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
 
     it('should return an error if the API description starts with "cette API"', async function () {
@@ -158,8 +145,7 @@ describe('info', function () {
       }
       const errorPath = ['info', 'description']
       const errorSeverity = SEVERITY.info
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
 
     it('should return an error if the API description starts contains "web service"', async function () {
@@ -170,8 +156,7 @@ describe('info', function () {
       }
       const errorPath = ['info', 'description']
       const errorSeverity = SEVERITY.info
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
 
     it('should return an error if the API description starts contains "API"', async function () {
@@ -182,8 +167,13 @@ describe('info', function () {
       }
       const errorPath = ['info', 'description']
       const errorSeverity = SEVERITY.info
-      const errorCode = currentRule(this)
-      await spectralTestWrapper.runAndCheckExpectedError(document, errorCode, errorPath, errorSeverity)
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+    })
+  })
+
+  describe(rulesetFullyTestedSuiteName(this), function () {
+    it('all rules should have been tested', function () {
+      spectralTestWrapper.checkAllRulesHaveBeenTest()
     })
   })
 })
