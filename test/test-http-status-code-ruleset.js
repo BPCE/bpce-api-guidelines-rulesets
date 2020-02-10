@@ -1039,7 +1039,7 @@ describe('http-status-code', function () {
 
   // Checks that all rules have been tested
   describe(rulesetFullyTestedSuiteName(this), function () {
-    it('all rules should have been tested', function () {
+    it('should return no untested rule', function () {
       spectralTestWrapper.checkAllRulesHaveBeenTest()
     })
   })
