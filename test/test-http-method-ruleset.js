@@ -16,19 +16,14 @@ describe('http-method', function () {
   })
 
   describe('http-method-allowed', function () {
-    it('should not return an error if get, post, patch, put or delete is used', async function () {
+    it('should return no error if get, post, patch, put or delete is used', async function () {
       const document = {
         paths: {
           '/some/path': {
             get: {},
-            post: {},
-            patch: {},
-            put: {},
-            delete: {}
+            post: {}
           },
           '/another/path': {
-            get: {},
-            post: {},
             patch: {},
             put: {},
             delete: {}
@@ -38,20 +33,15 @@ describe('http-method', function () {
       await spectralTestWrapper.runAndCheckNoError(document)
     })
 
-    it('should not return an error if there are operation level parameters', async function () {
+    it('should return no error if there are path level parameters', async function () {
       const document = {
         paths: {
           '/some/path': {
             parameters: [],
             get: {},
-            post: {},
-            patch: {},
-            put: {},
-            delete: {}
+            post: {}
           },
           '/another/path': {
-            get: {},
-            post: {},
             patch: {},
             put: {},
             delete: {}
@@ -61,20 +51,15 @@ describe('http-method', function () {
       await spectralTestWrapper.runAndCheckNoError(document)
     })
 
-    it('should not return an error if there is an x-tension', async function () {
+    it('should return no error if there is an x-tension', async function () {
       const document = {
         paths: {
           '/some/path': {
             'x-tension': 'dummy value',
             get: {},
-            post: {},
-            patch: {},
-            put: {},
-            delete: {}
+            post: {}
           },
           '/another/path': {
-            get: {},
-            post: {},
             patch: {},
             put: {},
             delete: {}
@@ -84,19 +69,15 @@ describe('http-method', function () {
       await spectralTestWrapper.runAndCheckNoError(document)
     })
 
-    it('should return an error if options HTTP method is used', async function () {
+    it('should return an error if unauthorized HTTP method is used', async function () {
       const document = {
         paths: {
           '/some/path': {
             get: {},
             post: {},
-            patch: {},
-            put: {},
-            delete: {}
+            unauthorized: {}
           },
           '/another/path': {
-            get: {},
-            post: {},
             patch: {},
             put: {},
             delete: {},
@@ -104,10 +85,98 @@ describe('http-method', function () {
           }
         }
       }
-      const errorPath = ['paths', '/another/path', 'options']
+      const errorPaths = [
+        ['paths', '/some/path', 'unauthorized'],
+        ['paths', '/another/path', 'options']
+      ]
       const errorSeverity = SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+    })
+  })
+
+  describe('http-method-post-only-on-search', function () {
+    it('should return no error if path does not end with /search and does not use post', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            get: {}
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if path ends with /search and uses only post', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            post: {}
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if path ends with /search, uses only post and has path level paramaters', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            paramaters: [],
+            post: {}
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if path ends with /search, uses only post and has path x-tension', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            'x-tension': {},
+            post: {}
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return an error if path ends with /search and uses post and other http method', async function () {
+      const document = {
+        paths: {
+          '/some/path/search': {
+            get: {},
+            post: {},
+            patch: {}
+          }
+        }
+      }
+      const errorPaths = [
+        ['paths', '/some/path/search', 'get'],
+        ['paths', '/some/path/search', 'patch']
+      ]
+      const errorSeverity = SEVERITY.error
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+    })
+
+    it('should return an error if path ends with /search and uses http method other than post', async function () {
+      const document = {
+        paths: {
+          '/some/path/search': {
+            get: {},
+            patch: {}
+          }
+        }
+      }
+      const errorPaths = [
+        ['paths', '/some/path/search', 'get'],
+        ['paths', '/some/path/search', 'patch']
+      ]
+      const errorSeverity = SEVERITY.error
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
     })
   })
 

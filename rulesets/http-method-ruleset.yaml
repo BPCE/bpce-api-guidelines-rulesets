@@ -2,12 +2,27 @@ rules:
   http-method-allowed:
     recommended: true
     description: Only post, get, put, patch and delete HTTP methods are allowed
+    message: "{{description}} ({{path}})"
     severity: error
     tags:
       - http method
     given: $.paths.*
     then:
-      field: "@key"
-      function: pattern
-      functionOptions:
-        match: "^(parameters|x-.*|post|get|put|patch|delete)$"
+      - field: "@key"
+        function: pattern
+        functionOptions:
+          match: "^(parameters|x-.*|post|get|put|patch|delete)$"
+
+  http-method-post-only-on-search:
+    recommended: true
+    description: Only post can be used on a /search path
+    message: "{{description}} ({{path}})"
+    severity: error
+    tags:
+      - http method
+    given: "$.paths[?(/search$/i.test(@property))]"
+    then:
+      - field: "@key"
+        function: pattern
+        functionOptions:
+          match: "^(parameters|x-.*|post)$"
