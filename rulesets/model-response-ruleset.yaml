@@ -1,0 +1,316 @@
+rules:
+
+  response-schema-is-an-object:
+    recommended: true
+    description: A success (2xx, except 204) or an error (4xx or 5xx) must return an object
+    message: '{{description}} ({{path}})'
+    severity: error
+    tags:
+      - model response
+    given: $.paths.*.*.responses[?(/^2(?!04)..|4..|5..$/.test(@property))]
+    then:
+      - field: schema
+        function: truthy
+      - field: schema
+        function: schema
+        functionOptions:
+          # Pay attention! It's a JSON Schema of the expected Schema (Inception!)
+          schema:
+            $schema: "http://json-schema.org/draft-04/schema#"
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - object
+
+  response-schema-is-not-defined-for-204-or-3xx:
+    recommended: true
+    description: A 204 No Content or 3xx redirection response cannot return data
+    message: '{{description}} ({{path}})'
+    severity: error
+    tags:
+      - model response
+    given: $.paths.*.*.responses[?(/^204|3..$/.test(@property))]
+    then:
+      - field: schema
+        function: falsy
+
+  response-error-schema-is-valid:
+    recommended: true
+    description: An error must conform to standard schema
+    message: '{{description}} ({{path}})'
+    severity: error
+    tags:
+      - model response
+    given: $.paths.*.*.responses[?(/4..|5../.test(@property))].schema
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          # Pay attention! It's a JSON Schema of the expected Schema (Inception!)
+          $schema: "http://json-schema.org/draft-04/schema#"
+          type: object
+          required:
+            - required
+            - properties
+          properties:
+            # Required properties (only errors)
+            required:
+              type: array
+              items:
+                type: string
+                enum:
+                  - errors
+                minItems: 1
+                maxItems: 1
+            # Root object property (errors)
+            properties:
+              type: object
+              additionalProperties: false
+              required:
+                - errors
+              properties:
+                errors:
+                  type: object
+                  required:
+                    - type
+                    - items
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                      - array
+                    items:
+                      type: object
+                      required:
+                        - properties
+                        - required
+                      properties:
+                        required:
+                          type: array
+                          items:
+                            type: string
+                            enum:
+                              - code
+                              - message
+                          minItems: 2
+                        properties:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                            code:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  enum:
+                                    - string
+                            message:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  enum:
+                                    - string
+                            attribute:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  enum:
+                                    - string
+                            path:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  enum:
+                                    - string
+                            additionalInformation:
+                              type: object
+                              # This check (additionalInformation content being described) should be in a separate rule as a warning because peopletend to use generic error object
+                              #required:
+                              #  - properties
+                              #properties:
+                              #  type:
+                              #    type: string
+                              #    enum:
+                              #      - object
+                              #  properties:
+                              #    type: object
+
+  response-collection-schema-is-valid:
+    recommended: true
+    description: A list response (get /resources or post /resources/search) must be an object with a mandatory property items which is a list and optional additionalInformation and page (pagination) properties
+    message: "{{description}} ({{path}})"
+    severity: error
+    tags:
+      - model response
+    given: 
+      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema
+      - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          # Pay attention! It's a JSON Schema of the expected Schema (Inception!)
+          $schema: "http://json-schema.org/draft-04/schema#"
+          type: object
+          required:
+            - properties
+          properties:
+            properties:
+              type: object
+              additionalProperties: false
+              required:
+                - items
+              properties:
+                items:
+                  type: object
+                  required:
+                    - type
+                    - items
+                  properties:
+                    type:
+                      type: string
+                      enum: 
+                        - array
+                    items:
+                      type: object
+                      # Testing that items are objects and not atomics or array in another rule                          
+                additionalInformation:
+                  type: object
+                  # Testing additionalInformation is an object and not atomic or array in another rule                    
+                page:
+                  type: object
+                  # Testing page object format in another rule
+
+  response-collection-items-schema-is-valid:
+    recommended: true
+    description: The items property of a list response (get /resources or post /resources/search) must be an array of object (no atomic like string or number nor array)
+    message: "{{description}} ({{path}})"
+    severity: error
+    tags:
+      - model response
+    given: 
+      # Same regex as response-collection-schema-is-valid, no need to test again that part
+      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema.properties.items.items
+      - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema.properties.items.items
+    then:
+      - function: schema
+        functionOptions:
+          # Pay attention! It's a JSON Schema of the expected Schema (Inception!)
+          schema:
+            $schema: "http://json-schema.org/draft-04/schema#"
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - object
+  
+  response-collection-additional-information-schema-is-valid:
+    recommended: true
+    description: The additionalInformation property of a list response (get /resources or post /resources/search) must be an object (no atomic like string or number nor array)
+    message: "{{description}} ({{path}})"
+    severity: error
+    tags:
+      - model response
+    given: 
+      # Same regex as response-collection-schema-is-valid, no need to test again that part
+      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema.properties.additionalInformation
+      - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema.properties.additionalInformation
+    then:
+      - function: schema
+        functionOptions:
+          # Pay attention! It's a JSON Schema of the expected Schema (Inception!)
+          schema:
+            $schema: "http://json-schema.org/draft-04/schema#"
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - object
+
+  response-collection-page-schema-is-valid:
+    recommended: true
+    description: The page property of a list response (get /resources or post /resources/search) which provide pagination data must conform to standard schema
+    message: "{{description}} ({{path}}) ({{error}})"
+    severity: error
+    tags:
+      - model response
+    given: 
+      # Same regex as response-collection-schema-is-valid, no need to test again that part
+      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema.properties.page
+      - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema.properties.page
+    then:
+      - function: schema
+        functionOptions:
+          # Pay attention! It's a JSON Schema of the expected Schema (Inception!)
+          schema:
+            $schema: "http://json-schema.org/draft-07/schema#"
+            oneOf:
+              - type: object
+                properties:
+                  properties:
+                    type: object
+                    additionalProperties: false
+                    required:
+                      - pageNumber
+                      - pageSize
+                    properties:
+                      pageSize:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            enum: 
+                              - number
+                      pageNumber:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            enum: 
+                              - number
+                      totalElements:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            enum: 
+                              - number
+                      totalPages:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            enum: 
+                              - number
+              - type: object
+                properties:
+                  properties:
+                    type: object
+                    additionalProperties: false
+                    required:
+                      - after
+                    properties:
+                        before:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - string
+                        after:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum: 
+                                - string
+
+# TODO info to alert when additionalInformation is used
+# TODO warn to alert when there's no pagination on collection
