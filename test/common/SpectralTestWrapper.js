@@ -129,15 +129,33 @@ SpectralTestWrapper.prototype.runAndCheckExpectedError = async function (documen
   this.checkExpectedError(results, codeOrCodes, pathOrPaths, severityOrSeverities)
 }
 
-SpectralTestWrapper.prototype.checkError = function (error, code, path, severity) {
-  assert.strictEqual(error.code, code, 'invalid error code')
-  assert.deepStrictEqual(error.path, path, 'invalid path')
-  assert.strictEqual(error.severity, severity, 'invalid severity')
+SpectralTestWrapper.prototype.checkSeverity = function (actual, expected) {
+  // Spectral returns numerical severity while text is used in ruleset file
+  // not easy to read when there's an error, so transforming back to text
+  let actualText
+  let expectedText
+  for (const key in SEVERITY) {
+    if (SEVERITY[key] === actual) {
+      actualText = key
+    }
+    if (SEVERITY[key] === expected) {
+      expectedText = key
+    }
+  }
+  assert.strictEqual(actualText, expectedText, 'invalid severity')
+}
+
+SpectralTestWrapper.prototype.checkError = function (actual, expected) {
+  assert.strictEqual(actual.code, expected.code, 'invalid error code')
+  assert.deepStrictEqual(actual.path, expected.path, 'invalid path')
+  this.checkSeverity(actual.severity, expected.severity)
+  // Not checking Spectral message or other value
 }
 
 SpectralTestWrapper.prototype.checkExpectedError = function (errors, codeOrCodes, pathOrPaths, severityOrSeverities) {
   assert.notDeepStrictEqual(errors, [], 'no error returned')
   if (errors.length > 0) {
+    // Building array of expected errors {code, path, severity}
     let expectedErrorCount
     if (Array.isArray(codeOrCodes[0])) {
       expectedErrorCount = codeOrCodes.length
@@ -146,9 +164,9 @@ SpectralTestWrapper.prototype.checkExpectedError = function (errors, codeOrCodes
     } else {
       expectedErrorCount = 1
     }
-    assert.strictEqual(errors.length, expectedErrorCount, 'more errors than expected')
 
-    for (let i = 0; i < errors.length; i++) {
+    const expectedErrors = []
+    for (let i = 0; i < expectedErrorCount; i++) {
       let code, path, severity
 
       if (Array.isArray(codeOrCodes[0])) {
@@ -169,7 +187,23 @@ SpectralTestWrapper.prototype.checkExpectedError = function (errors, codeOrCodes
         severity = severityOrSeverities
       }
 
-      this.checkError(errors[i], code, path, severity)
+      expectedErrors.push({ code: code, path: path, severity: severity })
+    }
+
+    // Building actual errors list (Spectral errors limited to code, path and severity) to have correct output when more or less errors
+    const actualErrors = []
+    for (let i = 0; i < errors.length; i++) {
+      actualErrors.push({ code: errors[i].code, path: errors[i].path, severity: errors[i].severity })
+    }
+
+    if (errors.length > expectedErrors.length) {
+      assert.fail(actualErrors, expectedErrors, 'more errors than expected')
+    } else if (errors.length < expectedErrors.length) {
+      assert.fail(actualErrors, expectedErrors, 'less errors than expected')
+    } else {
+      for (let i = 0; i < expectedErrors.length; i++) {
+        this.checkError(errors[i], expectedErrors[i])
+      }
     }
   }
 }
