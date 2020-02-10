@@ -269,7 +269,20 @@ describe('http-status-code', function () {
           }
         }
       }
-      spectralTestWrapper.runAndCheckNoError(document)
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if no 404 is returned on operation on resource having no path parameters', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            get: {
+              responses: {}
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
     })
 
     it('should return an error if 404 is missing on operation on resource having path parameters', async function () {
@@ -306,6 +319,21 @@ describe('http-status-code', function () {
       await spectralTestWrapper.runAndCheckNoError(document)
     })
 
+    it('should return no error if a 404 is returned on operation on resource having a path parameters', async function () {
+      const document = {
+        paths: {
+          '/some/path/{with}/path/param': {
+            post: {
+              responses: {
+                404: {}
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
     it('should return an error if 404 is returned on operation on resource having no path parameters', async function () {
       const document = {
         paths: {
@@ -325,16 +353,14 @@ describe('http-status-code', function () {
     })
   })
 
-  describe('http-status-code-400-operation-level-query-param', function () {
-    it('should return no error if 400 is returned on operation with query parameter', async function () {
+  describe('http-status-code-400-operation-level-query-body-header-param', function () {
+    it('should return no error if 400 is returned on operation with query, body or header parameter', async function () {
       const document = {
         paths: {
           '/some/path': {
             post: {
               parameters: [
-                { in: 'query' },
-                { in: 'body' },
-                { in: 'header' }
+                { in: 'query' }
               ],
               responses: {
                 400: {}
@@ -346,55 +372,30 @@ describe('http-status-code', function () {
       await spectralTestWrapper.runAndCheckNoError(document)
     })
 
-    it('should return no error if no 400 is returned on operation without query, body or header parameter but with path one', async function () {
-      const document = {
-        paths: {
-          '/some/{param}/path': {
-            post: {
-              parameters: [
-                { in: 'path' }
-              ],
-              responses: {}
-            }
-          }
-        }
-      }
-      await spectralTestWrapper.runAndCheckNoError(document)
-    })
-
-    it('should return an error if 400 is not returned on operation with query, body or header parameter', async function () {
-      const document = {
-        paths: {
-          '/some/path': {
-            post: {
-              parameters: [
-                { in: 'query' },
-                { in: 'body' },
-                { in: 'header' }
-              ],
-              responses: {}
-            }
-          }
-        }
-      }
-      // const errorPath = ['paths', '/some/path', 'post', 'responses', '400']
-      // Bug the wrong path is returned but the error shows the good value:  `/some/path.responses[400]` property is not truthy',
-      const errorPath = ['paths', '/some/path']
-      const errorSeverity = SEVERITY.error
-
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
-    })
-  })
-
-  describe('http-status-code-400-operation-level-body-param', function () {
     it('should return no error if 400 is returned on operation with body parameter', async function () {
       const document = {
         paths: {
           '/some/path': {
             post: {
               parameters: [
-                { in: 'query' },
-                { in: 'body' },
+                { in: 'body' }
+              ],
+              responses: {
+                400: {}
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if 400 is returned on operation with header parameter', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            post: {
+              parameters: [
                 { in: 'header' }
               ],
               responses: {
@@ -423,15 +424,40 @@ describe('http-status-code', function () {
       await spectralTestWrapper.runAndCheckNoError(document)
     })
 
-    it('should return an error if 400 is not returned on operation with body parameter', async function () {
+    it('should return no error if no 400 is returned on operation with empty parameters list', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            post: {
+              parameters: [],
+              responses: {}
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if no 400 is returned on operation without any parameter', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            post: {
+              responses: {}
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return an error if no 400 is returned on operation with query parameter', async function () {
       const document = {
         paths: {
           '/some/path': {
             post: {
               parameters: [
-                { in: 'query' },
-                { in: 'body' },
-                { in: 'header' }
+                { in: 'query' }
               ],
               responses: {}
             }
@@ -445,53 +471,34 @@ describe('http-status-code', function () {
 
       await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
-  })
 
-  describe('http-status-code-400-operation-level-header-param', function () {
-    it('should return no error if 400 is returned on operation with header parameter', async function () {
+    it('should return an error if no 400 is returned on operation with body parameter', async function () {
       const document = {
         paths: {
           '/some/path': {
             post: {
               parameters: [
-                { in: 'query' },
-                { in: 'body' },
-                { in: 'header' }
-              ],
-              responses: {
-                400: {}
-              }
-            }
-          }
-        }
-      }
-      await spectralTestWrapper.runAndCheckNoError(document)
-    })
-
-    it('should return no error if no 400 is returned on operation without query, body or header parameter but with path one', async function () {
-      const document = {
-        paths: {
-          '/some/{param}/path': {
-            post: {
-              parameters: [
-                { in: 'path' }
+                { in: 'body' }
               ],
               responses: {}
             }
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      // const errorPath = ['paths', '/some/path', 'post', 'responses', '400']
+      // Bug the wrong path is returned but the error shows the good value:  `/some/path.responses[400]` property is not truthy',
+      const errorPath = ['paths', '/some/path']
+      const errorSeverity = SEVERITY.error
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
 
-    it('should return an error if 400 is not returned on operation with header parameter', async function () {
+    it('should return an error if no 400 is returned on operation with header parameter', async function () {
       const document = {
         paths: {
           '/some/path': {
             post: {
               parameters: [
-                { in: 'query' },
-                { in: 'body' },
                 { in: 'header' }
               ],
               responses: {}
@@ -509,7 +516,7 @@ describe('http-status-code', function () {
   })
 
   describe('http-status-code-get', function () {
-    it('should return no error is get returns allowed HTTP status codes', async function () {
+    it('should return no error if get returns allowed HTTP status codes', async function () {
       const document = {
         paths: {
           '/some/path': {
@@ -528,6 +535,35 @@ describe('http-status-code', function () {
       }
       await spectralTestWrapper.runAndCheckNoError(document)
     })
+
+    it('should return no error if other HTTP method returns unallowed HTTP status codes', async function () {
+      const document = {
+        paths: {
+          '/some/path/put': {
+            put: {
+              responses: {
+                201: {},
+                202: {},
+                204: {},
+                428: {}
+              }
+            }
+          },
+          '/some/path/post': {
+            post: {
+              responses: {
+                201: {},
+                202: {},
+                204: {},
+                428: {}
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
     it('should return an error if get returns unallowed HTTP status codes', async function () {
       const document = {
         paths: {
@@ -556,7 +592,7 @@ describe('http-status-code', function () {
   })
 
   describe('http-status-code-put', function () {
-    it('should return no error is put returns allowed HTTP status codes', async function () {
+    it('should return no error if put returns allowed HTTP status codes', async function () {
       const document = {
         paths: {
           '/some/path': {
@@ -568,6 +604,34 @@ describe('http-status-code', function () {
                 403: {},
                 404: {},
                 500: {}
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if other HTTP method returns unallowed HTTP status codes', async function () {
+      const document = {
+        paths: {
+          '/some/path/get': {
+            get: {
+              responses: {
+                201: {},
+                202: {},
+                204: {},
+                428: {}
+              }
+            }
+          },
+          '/some/path/post': {
+            post: {
+              responses: {
+                201: {},
+                202: {},
+                204: {},
+                428: {}
               }
             }
           }
@@ -604,7 +668,7 @@ describe('http-status-code', function () {
   })
 
   describe('http-status-code-patch', function () {
-    it('should return no error is patch returns allowed HTTP status codes', async function () {
+    it('should return no error if patch returns allowed HTTP status codes', async function () {
       const document = {
         paths: {
           '/some/path': {
@@ -624,6 +688,32 @@ describe('http-status-code', function () {
       await spectralTestWrapper.runAndCheckNoError(document)
     })
 
+    it('should return no error if other HTTP method returns unallowed HTTP status codes', async function () {
+      const document = {
+        paths: {
+          '/some/path/post': {
+            post: {
+              responses: {
+                201: {},
+                202: {},
+                428: {}
+              }
+            }
+          },
+          '/some/path/get': {
+            get: {
+              responses: {
+                201: {},
+                202: {},
+                428: {}
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
     it('should return an error if patch returns unallowed HTTP status codes', async function () {
       const document = {
         paths: {
@@ -632,7 +722,6 @@ describe('http-status-code', function () {
               responses: {
                 201: {},
                 202: {},
-                204: {},
                 428: {}
               }
             }
@@ -642,7 +731,6 @@ describe('http-status-code', function () {
       const errorPaths = [
         ['paths', '/some/path', 'patch', 'responses', '201'],
         ['paths', '/some/path', 'patch', 'responses', '202'],
-        ['paths', '/some/path', 'patch', 'responses', '204'],
         ['paths', '/some/path', 'patch', 'responses', '428']
       ]
       const errorSeverity = SEVERITY.error
@@ -652,7 +740,7 @@ describe('http-status-code', function () {
   })
 
   describe('http-status-code-delete', function () {
-    it('should return no error is delete returns allowed HTTP status codes', async function () {
+    it('should return no error if delete returns allowed HTTP status codes', async function () {
       const document = {
         paths: {
           '/some/path': {
@@ -665,6 +753,32 @@ describe('http-status-code', function () {
                 403: {},
                 404: {},
                 500: {}
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if other HTTP method returns unallowed HTTP status codes', async function () {
+      const document = {
+        paths: {
+          '/some/path/get': {
+            get: {
+              responses: {
+                201: {},
+                202: {},
+                428: {}
+              }
+            }
+          },
+          '/some/path/post': {
+            post: {
+              responses: {
+                201: {},
+                202: {},
+                428: {}
               }
             }
           }
@@ -699,7 +813,7 @@ describe('http-status-code', function () {
   })
 
   describe('http-status-code-post', function () {
-    it('should return no error is post returns allowed HTTP status codes', async function () {
+    it('should return no error if post returns allowed HTTP status codes', async function () {
       const document = {
         paths: {
           '/some/path': {
@@ -720,6 +834,31 @@ describe('http-status-code', function () {
       }
       await spectralTestWrapper.runAndCheckNoError(document)
     })
+
+    it('should return no error if other HTTP method returns unallowed HTTP status codes', async function () {
+      const document = {
+        paths: {
+          '/some/path/get': {
+            get: {
+              responses: {
+                204: {},
+                428: {}
+              }
+            }
+          },
+          '/some/path/put': {
+            put: {
+              responses: {
+                204: {},
+                428: {}
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
     it('should return an error if post returns unallowed HTTP status codes', async function () {
       const document = {
         paths: {
@@ -740,6 +879,161 @@ describe('http-status-code', function () {
       const errorSeverity = SEVERITY.error
 
       await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+    })
+  })
+
+  describe('http-status-code-post-search', function () {
+    it('should return no error if post /search returns allowed HTTP status codes', async function () {
+      const document = {
+        paths: {
+          '/some/path/search': {
+            post: {
+              responses: {
+                200: {},
+                400: {},
+                401: {},
+                403: {},
+                404: {},
+                500: {}
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if non post /search returns unallowed HTTP status codes', async function () {
+      const document = {
+        paths: {
+          '/some/path/post': {
+            post: {
+              responses: {
+                201: {},
+                202: {},
+                204: {},
+                428: {}
+              }
+            }
+          },
+          '/some/path/get': {
+            get: {
+              responses: {
+                204: {},
+                428: {}
+              }
+            }
+          },
+          '/some/path/put': {
+            put: {
+              responses: {
+                204: {},
+                428: {}
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return an error if post /search returns unallowed HTTP status codes', async function () {
+      const document = {
+        paths: {
+          '/some/path/search': {
+            post: {
+              responses: {
+                201: {},
+                202: {},
+                204: {},
+                428: {}
+              }
+            }
+          }
+        }
+      }
+      const errorPaths = [
+        ['paths', '/some/path/search', 'post', 'responses', '201'],
+        ['paths', '/some/path/search', 'post', 'responses', '202'],
+        ['paths', '/some/path/search', 'post', 'responses', '204'],
+        ['paths', '/some/path/search', 'post', 'responses', '428']
+      ]
+      const errorSeverity = SEVERITY.error
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+    })
+  })
+
+  describe('http-status-code-post-unusual-200', function () {
+    it('should return no error if post /search returns 200 HTTP status code', async function () {
+      const document = {
+        paths: {
+          '/some/path/search': {
+            post: {
+              responses: {
+                200: {}
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if post non /search returns 201 or 202 HTTP status code', async function () {
+      const document = {
+        paths: {
+          '/some/path/search': {
+            post: {
+              responses: {
+                201: {},
+                202: {}
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if any other non post operation returns 200 HTTP status code', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            put: {
+              responses: {
+                200: {}
+              }
+            }
+          },
+          '/another/path': {
+            get: {
+              responses: {
+                200: {}
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return an error (info) if post non /search returns 200 HTTP status code', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            post: {
+              responses: {
+                200: {}
+              }
+            }
+          }
+        }
+      }
+      const errorPath = ['paths', '/some/path', 'post', 'responses', '200']
+      const errorSeverity = SEVERITY.info
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
   })
 

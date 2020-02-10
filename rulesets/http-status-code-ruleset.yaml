@@ -1,7 +1,7 @@
 extends:
   - [spectral:oas, off] # needed to activate Spectral operation-2xx-response rule or to use the oasOp2xxResponse function
 rules:
-  # Adapted from existing Spectral OAS rule to change rule name and description (only severity can be overiddden using the following one)
+  # Adapted from existing Spectral OAS rule to change rule name and description (only severity can be overiddden using the following line)
   #operation-2xx-response: error
   http-status-code-mandatory-2xx:
     recommended: true
@@ -12,8 +12,8 @@ rules:
       - http status code
     given: "$.paths.*[?( @property === 'get' || @property === 'put' || @property === 'post' || @property === 'delete' || @property === 'options' || @property === 'head' || @property === 'patch' || @property === 'trace' )]"
     then:
-      field: responses
-      function: oasOp2xxResponse
+      - field: responses
+        function: oasOp2xxResponse
 
   http-status-code-mandatory-401:
     recommended: true
@@ -42,11 +42,11 @@ rules:
   http-status-code-404-when-path-parameters:
     recommended: true
     description: On operation on a path with a path parameter must return a 404 HTTP status code
-    message: "{{description}}. {{path}}"
+    message: '{{description}} ({{path}})'
     severity: error
     tags:
       - http status code
-    given: "$.paths[?(@ =~ /{/i)].*.responses"
+    given: "$.paths[?(/{/i.test(@property))].*.responses"
     then:
       - field: "404"
         function: truthy
@@ -54,50 +54,24 @@ rules:
   http-status-code-no-404-when-no-path-parameters:
     recommended: true
     description: No 404 HTTP status code should be returned on operation on a path without path parameters
-    message: "{{description}}. {{path}}"
+    message: '{{description}} ({{path}})'
     severity: error
     tags:
       - http status code
-    given: "$.paths[?(@ =~ /[^{]/i)].*.responses"
+    given: "$.paths[?(!/{/i.test(@property))].*.responses"
     then:
       - field: "404"
         function: falsy
 
-  http-status-code-400-operation-level-query-param:
+  http-status-code-400-operation-level-query-body-header-param:
     recommended: true
     description: Operation must return a 400 HTTP status code in case of query, body or header parameters
-    message: "{{description}}. {{error}}"
+    # {{error}} and not {{path}} because when using the ^ operator, the returned path is not the good one but OK in error
+    message: '{{description}} ({{error}})'
     severity: error
     tags:
       - http status code
-    given: "$.paths[*][*][*][?(@.in == 'query')]^^^.responses"
-    #given: "$.paths[*][*][*][?(@.in =~ /(query|body|header)/)]^^^.responses" NOT WORKING :-( ->  3 separated rules
-    then:
-      - field: "400"
-        function: truthy
-
-  http-status-code-400-operation-level-body-param:
-    recommended: true
-    description: Operation must return a 400 HTTP status code in case of query, body or header parameters
-    message: "{{description}}. {{error}}"
-    severity: error
-    tags:
-      - http status code
-    given: "$.paths[*][*][*][?(@.in == 'body')]^^^.responses"
-    #given: "$.paths[*][*][*][?(@.in =~ /(query|body|header)/)]^^^.responses" NOT WORKING :-( ->  3 separated rules
-    then:
-      - field: "400"
-        function: truthy
-
-  http-status-code-400-operation-level-header-param:
-    recommended: true
-    description: Operation must return a 400 HTTP status code in case of query, body or header parameters
-    message: "{{description}}. {{error}}"
-    severity: error
-    tags:
-      - http status code
-    given: "$.paths[*][*][*][?(@.in == 'header')]^^^.responses"
-    #given: "$.paths[*][*][*][?(@.in =~ /(query|body|header)/)]^^^.responses" NOT WORKING :-( ->  3 separated rules
+    given: "$.paths[*][*][*][?(/(query|body|header)/.test(@.in))]^^^.responses"
     then:
       - field: "400"
         function: truthy
@@ -106,107 +80,137 @@ rules:
   http-status-code-get:
     recommended: true
     description: Get operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
-    message: "{{description}}. {{path}}"
+    message: '{{description}} ({{path}})'
     severity: error
     tags:
       - http status code
     given: $.paths.*.get.responses
     then:
-      field: "@key"
-      function: pattern
-      function: enumeration
-      functionOptions:
-        values:
-          - '200'
-          - '400'
-          - '401'
-          - '403'
-          - '404'
-          - '500'
+      - field: "@key"
+        function: enumeration
+        functionOptions:
+          values:
+            - '200'
+            - '400'
+            - '401'
+            - '403'
+            - '404'
+            - '500'
 
   http-status-code-put:
     recommended: true
     description: Put operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
-    message: "{{description}}. {{path}}"
+    message: '{{description}} ({{path}})'
     message: "{{error}}"
     severity: error
     tags:
       - http status code
     given: $.paths.*.put.responses
     then:
-      field: "@key"
-      function: enumeration
-      functionOptions:
-        values:
-          - '200'
-          - '400'
-          - '401'
-          - '403'
-          - '404'
-          - '500'
+      - field: "@key"
+        function: enumeration
+        functionOptions:
+          values:
+            - '200'
+            - '400'
+            - '401'
+            - '403'
+            - '404'
+            - '500'
 
   http-status-code-patch:
     recommended: true
-    description: Patch operation can only return 200, 400, 401, 403, 404, and 500 HTTP status codes
-    message: "{{description}}. {{path}}"
+    description: Patch operation can only return 200, 204, 400, 401, 403, 404, and 500 HTTP status codes
+    message: '{{description}} ({{path}})'
     severity: error
     tags:
       - http status code
     given: $.paths.*.patch.responses
     then:
-      field: "@key"
-      function: enumeration
-      functionOptions:
-        values:
-          - '200'
-          - '400'
-          - '401'
-          - '403'
-          - '404'
-          - '500'
+      - field: "@key"
+        function: enumeration
+        functionOptions:
+          values:
+            - '200'
+            - '204'
+            - '400'
+            - '401'
+            - '403'
+            - '404'
+            - '500'
 
   http-status-code-delete:
     recommended: true
     description: Delete operation can only return 200, 204, 400, 401, 403, 404, and 500 HTTP status codes
-    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    message: '{{description}} ({{path}})'
     severity: error
     tags:
       - http status code
     given: $.paths.*.delete.responses
     then:
-      field: "@key"
-      function: enumeration
-      functionOptions:
-        values:
-          - '200'
-          - '204'
-          - '400'
-          - '401'
-          - '403'
-          - '404'
-          - '500'
+      - field: "@key"
+        function: enumeration
+        functionOptions:
+          values:
+            - '200'
+            - '204'
+            - '400'
+            - '401'
+            - '403'
+            - '404'
+            - '500'
 
   http-status-code-post:
     recommended: true
     description: Post operation can only return 200, 201, 202, 400, 401, 403, 404, and 500 HTTP status codes
-    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    message: '{{description}} ({{path}})'
     severity: error
     tags:
       - http status code
-    # Test de filtre pour les post .../search: filtre en dure OK mais regex KO, fonction spécifique pour gérer finement les post à prévoir?
-    #given: $.paths[?(@property === "/somePath/search")].post.responses
-    #given: $.paths.[[?(@property =~ /\/search$/)]].post.responses
     given: $.paths.*.post.responses
     then:
-      field: "@key"
-      function: enumeration
-      functionOptions:
-        values:
-          - '200'
-          - '201'
-          - '202'
-          - '400'
-          - '401'
-          - '403'
-          - '404'
-          - '500'
+      - field: "@key"
+        function: enumeration
+        functionOptions:
+          values:
+            - '200'
+            - '201'
+            - '202'
+            - '400'
+            - '401'
+            - '403'
+            - '404'
+            - '500'
+
+  http-status-code-post-search:
+    recommended: true
+    description: Post /search operation can only return 200, 400, 401, 403 and 500 HTTP status codes 
+    message: '{{description}} ({{path}})'
+    severity: error
+    tags:
+      - http status code
+    given: "$.paths[?(/search$/i.test(@property))].post.responses"
+    then:
+      - field: "@key"
+        function: enumeration
+        functionOptions:
+          values:
+            - '200'
+            - '400'
+            - '401'
+            - '403'
+            - '404'
+            - '500'
+
+  http-status-code-post-unusual-200:
+    recommended: true
+    description: Post operation which are not /search returning 200 are unusual, did you mean 201 or 202? 
+    message: '{{description}} ({{path}})'
+    severity: info
+    tags:
+      - http status code
+      - manual check
+    given: "$.paths[?(!/search$/i.test(@property))].post.responses"
+    then:
+      - field: "200"
+        function: falsy
