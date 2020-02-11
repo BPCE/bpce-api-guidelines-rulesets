@@ -180,6 +180,84 @@ describe('http-method', function () {
     })
   })
 
+  describe('http-method-no-post-on-unit-resource', function () {
+    it('should ignore collections', async function () {
+      const document = {
+        paths: {
+          '/resources': {
+            post: {}
+          },
+          '/resources/{id}/resources': {
+            post: {}
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should ignore post /search', async function () {
+      const document = {
+        paths: {
+          '/resources/search': {
+            post: {}
+          },
+          '/resources/{id}/resources/search': {
+            post: {}
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if post is not used on unitary resource', async function () {
+      const pathObject = {
+        parameters: [],
+        'x-tension': 'dummy value',
+        get: {},
+        put: {},
+        patch: {},
+        delete: {},
+      }
+      const document = {
+        paths: {
+          '/name/v1/resources/{id}': pathObject,
+          '/v1/resources/{id}': pathObject,
+          '/resources/{id}': pathObject,
+          '/resources/{id}/resources/me': pathObject
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return an error if post is used on unitary resource', async function () {
+      const pathObject = {
+        parameters: [],
+        'x-tension': 'dummy value',
+        post: {},
+        get: {},
+        put: {},
+        patch: {},
+        delete: {},
+      }
+      const document = {
+        paths: {
+          '/name/v1/resources/{id}': pathObject,
+          '/v1/resources/{id}': pathObject,
+          '/resources/{id}': pathObject,
+          '/resources/{id}/resources/me': pathObject
+        }
+      }
+      const errorPaths = [
+        ['paths', '/name/v1/resources/{id}', 'post'],
+        ['paths', '/v1/resources/{id}', 'post'],
+        ['paths', '/resources/{id}', 'post'],
+        ['paths', '/resources/{id}/resources/me', 'post']
+      ]
+      const errorSeverity = SEVERITY.error
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+    })
+  })
+
   // Checks that all rules have been tested
   describe(rulesetFullyTestedSuiteName(this), function () {
     it('should return no untested rule', function () {

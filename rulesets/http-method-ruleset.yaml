@@ -20,9 +20,23 @@ rules:
     severity: error
     tags:
       - http method
-    given: "$.paths[?(/search$/i.test(@property))]"
+    given: $.paths[?(/search$/i.test(@property))]
     then:
       - field: "@key"
         function: pattern
         functionOptions:
           match: "^(parameters|x-.*|post)$"
+
+  http-method-no-post-on-unit-resource:
+    recommended: true
+    description: Post cannot be used on unitary resource (/resources/{id})
+    message: "{{description}} ({{path}})"
+    severity: error
+    tags:
+      - http method
+    given: $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?(\/[a-z0-9\-_]+\/(?!search)[a-z0-9\-_{}]+)+$/i.test(@property))]
+    then:
+      - field: "@key"
+        function: pattern
+        functionOptions:
+          match: "^(parameters|x-.*|get|put|patch|delete)$"
