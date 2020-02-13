@@ -60,7 +60,7 @@ function rulesetFullyTestedSuiteName (test) {
 // oasFormat: null, auto, forceOas2, forceOas3
 function SpectralTestWrapper (oasFormat) {
   this.spectral = new Spectral()
-
+  // TODO Check when testing main if this is style necessary
   switch (oasFormat) {
     case 'auto':
       this.spectral.registerFormat('oas2', isOpenApiv2)
@@ -99,6 +99,14 @@ SpectralTestWrapper.prototype.disableAllRulesExcept = function (name) {
   if (this.originalRuleset[name] === undefined) {
     throw new Error('Unknown rule ' + name)
   }
+
+  // Reseting registered formats and registering oas2 or oas3 format if rule name ends by it
+  this.spectral.formats = {}
+  if (/oas(2|3)$/.test(name)) {
+    this.spectral.registerFormat('oas2', isOpenApiv2)
+    this.spectral.registerFormat('oas3', isOpenApiv3)
+  }
+
   subRuleset[name] = this.originalRuleset[name]
   this.spectral.rules = subRuleset
 }
