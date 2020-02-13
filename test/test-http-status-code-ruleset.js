@@ -57,7 +57,6 @@ describe('http-status-code', function () {
 
     it('should return an error if a 2xx HTTP status code is missing', async function () {
       const document = {
-        swagger: '2.0',
         paths: {
           '/some/path': {
             get: {
@@ -372,7 +371,7 @@ describe('http-status-code', function () {
       await spectralTestWrapper.runAndCheckNoError(document)
     })
 
-    it('should return no error if 400 is returned on operation with body parameter', async function () {
+    it('should return no error if 400 is returned on operation with body parameter in oas2 document', async function () {
       const document = {
         paths: {
           '/some/path': {
@@ -380,6 +379,22 @@ describe('http-status-code', function () {
               parameters: [
                 { in: 'body' }
               ],
+              responses: {
+                400: {}
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if 400 is returned on operation with request body in oas3 document', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            post: {
+              requestBody: {},
               responses: {
                 400: {}
               }
@@ -472,7 +487,7 @@ describe('http-status-code', function () {
       await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
     })
 
-    it('should return an error if no 400 is returned on operation with body parameter', async function () {
+    it('should return an error if no 400 is returned on operation with body parameter in oas2 document', async function () {
       const document = {
         paths: {
           '/some/path': {
@@ -488,6 +503,24 @@ describe('http-status-code', function () {
       // const errorPath = ['paths', '/some/path', 'post', 'responses', '400']
       // Bug the wrong path is returned but the error shows the good value:  `/some/path.responses[400]` property is not truthy',
       const errorPath = ['paths', '/some/path']
+      const errorSeverity = SEVERITY.error
+
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+    })
+
+    it('should return an error if no 400 is returned on operation with request body in oas3 document', async function () {
+      const document = {
+        paths: {
+          '/some/path': {
+            post: {
+              requestBody: {},
+              responses: {}
+            }
+          }
+        }
+      }
+
+      const errorPath = ['paths', '/some/path', 'post', 'responses']
       const errorSeverity = SEVERITY.error
 
       await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
