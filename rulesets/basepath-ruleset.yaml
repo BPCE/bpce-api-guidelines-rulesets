@@ -1,8 +1,11 @@
+extends:
+  - [spectral:oas, off]
 rules:
-  basepath-defined:
+  basepath-defined-oas2:
+    formats: ["oas2"]
     recommended: true
     description: Base path must be defined
-    message: '{{description}} (#/basePath)'
+    message: "{{description}} (#/basePath) {{path}}"
     severity: error
     tags:
       - basepath
@@ -11,6 +14,23 @@ rules:
       field: basePath
       function: truthy
 
+  basepath-defined-oas3:
+    formats: ["oas3"]
+    recommended: true
+    description: Base path must be defined by a single item in servers
+    message: "{{description}} (#/servers)  {{path}}"
+    severity: error
+    tags:
+      - basepath
+    given: $
+    then:
+      - field: servers
+        function: truthy
+      - field: servers
+        function: length
+        functionOptions:
+          value: 1
+
   basepath-valid-structure:
     recommended: true
     description: Base path structure must be /apiName/version (for example /someName/v2)
@@ -18,12 +38,13 @@ rules:
     severity: error
     tags:
       - basepath
-    given: $
+    given: 
+      - $.basePath # oas2
+      - $.servers.*.url # oas3
     then:
-      field: basePath
       function: pattern
       functionOptions:
-        match: "^\/[a-zA-Z0-9_-]+\/(v)[0-9]+$"
+        match: "/^\/[a-z0-9_-]+\/(v)[0-9]+$/i"
   
   basepath-lowerCamelCased:
     recommended: true
@@ -32,13 +53,14 @@ rules:
     severity: error
     tags:
       - basepath
-    given: $
+    given:
+      - $.basePath # oas2
+      - $.servers.*.url # oas3
     then:
-      field: basePath
       function: pattern
       functionOptions:
         # added / use case to avoid having it trigger this rule
-        match: "(^\/$)|(^(\/{?[a-z]+([A-Z0-9][a-z0-9]+)*}?)+$)"
+        match: "(^\/$)|(^(\/[a-z0-9]+([A-Z0-9][a-z0-9]+)*)+$)"
 
   basepath-no-trailing-slash:
     recommended: true
@@ -47,9 +69,10 @@ rules:
     severity: error
     tags:
       - basepath
-    given: $
+    given:
+      - $.basePath # oas2
+      - $.servers.*.url # oas3
     then:
-      field: basePath
       function: pattern
       functionOptions:
         notMatch: "\\/$"
@@ -61,9 +84,10 @@ rules:
     severity: error
     tags:
       - basepath
-    given: $
+    given:
+      - $.basePath # oas2
+      - $.servers.*.url # oas3
     then:
-      field: basePath
       function: pattern
       functionOptions:
         notMatch: "/^.*api.*$/i"
