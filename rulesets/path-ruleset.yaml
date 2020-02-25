@@ -39,7 +39,7 @@ rules:
       field: "@key"
       function: pattern
       functionOptions:
-        match: "^(\/{?[a-z]+([A-Z0-9][a-z0-9]+)*}?)+$"
+        match: "^((\/(v|V)[0-9]+)?\/{?[a-z]+([A-Z0-9][a-z0-9]+)*}?)+$"
 
   path-valid-structure:
     recommended: true

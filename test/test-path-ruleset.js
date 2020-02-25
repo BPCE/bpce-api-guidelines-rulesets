@@ -69,7 +69,11 @@ describe('path', function () {
         paths: {
           '/some/validPath': {},
           '/someValid/path': {},
-          '/someValidPath': {}
+          '/someValidPath': {},
+          '/some/{someId}/path': {},
+          '/v1/some/{someId}/path': {},
+          '/v1/someValidPath': {},
+          '/v1/deliveryPoints/{deliveryPointId}/departments': {}
         }
       }
       await spectralTestWrapper.runAndCheckNoError(document)
