@@ -1,9 +1,19 @@
+# TODO Modification des guidelines pour ajouter "location" dans Error pour indiquer où est l'attribut en erreur (body, query, path, header)
+# TODO Modification de model response pour ajouter location
+# TODO Modification des tests pour ajouter location
+# TODO Ajout required pour type et enum sur les properties dans le modèle Error
+# TODO Modification des tests pour contrôler le required
+# TODO info to alert when additionalInformation is used
+# TODO warn to alert when there's no pagination on collection
+# TODO warn to alert when required query parameter (use optional with default value if possible)
+
 rules:
 
-  response-schema-is-an-object:
+  response-schema-is-defined-oas2:
+    formats: ['oas2']
     recommended: true
-    description: A success (2xx, except 204) or an error (4xx or 5xx) must return an object
-    message: '{{description}} ({{path}})'
+    description: A 2xx (except 204), 4xx or 5xx response must return data
+    message: "{{description}} ({{path}})"
     severity: error
     tags:
       - model response
@@ -11,12 +21,66 @@ rules:
     then:
       - field: schema
         function: truthy
-      - field: schema
-        function: schema
+
+  response-schema-is-defined-oas3:
+    formats: ['oas3']
+    recommended: true
+    description: A 2xx (except 204), 4xx or 5xx response must return data
+    message: "{{description}} ({{path}})"
+    severity: error
+    tags:
+      - model response
+    given: $.paths.*.*.responses[?(/^2(?!04)..|4..|5..$/.test(@property))]
+    then:
+      - function: schema
+        functionOptions:
+          schema:
+            $schema: "http://json-schema.org/draft-07/schema#"
+            additionalProperties: true
+            required:
+              - content
+            properties:
+              content:
+                type: object
+                minProperties: 1
+                additionalProperties:
+                  type: object
+                  required:
+                    - schema
+                  properties:
+                    schema:
+                      type: object
+
+  response-schema-is-not-defined-for-204-or-3xx:
+    recommended: true
+    description: A 204 No Content or 3xx redirection response cannot return data
+    message: "{{description}} ({{path}})"
+    severity: error
+    tags:
+      - model response
+    given: $.paths.*.*.responses[?(/^204|3..$/.test(@property))]
+    then:
+      - field: schema # oas 2
+        function: falsy
+      - field: content # oas 3
+        function: falsy
+
+  response-schema-is-an-object:
+    recommended: true
+    description: A success (2xx, except 204) or an error (4xx or 5xx) must return an object
+    message: "{{description}} ({{path}})"
+    severity: error
+    tags:
+      - model response
+    given:
+      - $.paths.*.*.responses[?(/^2(?!04)..|4..|5..$/.test(@property))].schema # oas2
+      - $.paths.*.*.responses[?(/^2(?!04)..|4..|5..$/.test(@property))].content.'application/json'.schema # oas3
+    then:
+      - function: schema
         functionOptions:
           # Pay attention! It's a JSON Schema of the expected Schema (Inception!)
           schema:
-            $schema: "http://json-schema.org/draft-04/schema#"
+            $schema: "http://json-schema.org/draft-07/schema#"
             type: object
             properties:
               type:
@@ -24,26 +88,16 @@ rules:
                 enum:
                   - object
 
-  response-schema-is-not-defined-for-204-or-3xx:
-    recommended: true
-    description: A 204 No Content or 3xx redirection response cannot return data
-    message: '{{description}} ({{path}})'
-    severity: error
-    tags:
-      - model response
-    given: $.paths.*.*.responses[?(/^204|3..$/.test(@property))]
-    then:
-      - field: schema
-        function: falsy
-
   response-error-schema-is-valid:
     recommended: true
     description: An error must conform to standard schema
-    message: '{{description}} ({{path}})'
+    message: "{{description}} ({{path}}) {{error}}"
     severity: error
     tags:
       - model response
-    given: $.paths.*.*.responses[?(/4..|5../.test(@property))].schema
+    given: 
+      - $.paths.*.*.responses[?(/4..|5../.test(@property))].schema # oas2
+      - $.paths.*.*.responses[?(/4..|5../.test(@property))].content.'application/json'.schema # oas3
     then:
       function: schema
       functionOptions:
@@ -127,6 +181,27 @@ rules:
                                   type: string
                                   enum:
                                     - string
+                            location:
+                              type: object
+                              required:
+                                - type
+                                - enum
+                              properties:
+                                type:
+                                  type: string
+                                  enum:
+                                    - string
+                                enum:
+                                  type: array
+                                  items:
+                                    type: string
+                                    enum:
+                                      - body
+                                      - query
+                                      - path
+                                      - header
+                                  minItems: 4
+                                  maxItems: 4
                             additionalInformation:
                               type: object
                               # This check (additionalInformation content being described) should be in a separate rule as a warning because peopletend to use generic error object
@@ -147,9 +222,11 @@ rules:
     severity: error
     tags:
       - model response
-    given: 
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema
-      - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema
+    given:
+      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema # oas2
+      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.content.'application/json'.schema # oas3
+      - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema # oas2
+      - $.paths[?(/\/search$/.test(@property))].post.responses.200.content.'application/json'.schema # oas3
     then:
       function: schema
       functionOptions:
@@ -195,8 +272,10 @@ rules:
       - model response
     given: 
       # Same regex as response-collection-schema-is-valid, no need to test again that part
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema.properties.items.items
-      - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema.properties.items.items
+      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema.properties.items.items # oas2
+      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.content.'application/json'.schema.properties.items.items # oas3
+      - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema.properties.items.items # oas2
+      - $.paths[?(/\/search$/.test(@property))].post.responses.200.content.'application/json'.schema.properties.items.items # oas3
     then:
       - function: schema
         functionOptions:
@@ -220,7 +299,9 @@ rules:
     given: 
       # Same regex as response-collection-schema-is-valid, no need to test again that part
       - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema.properties.additionalInformation
+      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.content.'application/json'.schema.properties.additionalInformation
       - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema.properties.additionalInformation
+      - $.paths[?(/\/search$/.test(@property))].post.responses.200.content.'application/json'.schema.properties.additionalInformation
     then:
       - function: schema
         functionOptions:
@@ -244,7 +325,9 @@ rules:
     given: 
       # Same regex as response-collection-schema-is-valid, no need to test again that part
       - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema.properties.page
+      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.content.'application/json'.schema.properties.page
       - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema.properties.page
+      - $.paths[?(/\/search$/.test(@property))].post.responses.200.content.'application/json'.schema.properties.page
     then:
       - function: schema
         functionOptions:
@@ -312,5 +395,21 @@ rules:
                               enum: 
                                 - string
 
-# TODO info to alert when additionalInformation is used
-# TODO warn to alert when there's no pagination on collection
+  # response-no-empty-required:
+  #   recommended: true
+  #   description: A response without any high level required property is not recommended
+  #   message: '{{description}} ({{path}})'
+  #   severity: warn
+  #   tags:
+  #     - model response
+  #   given: 
+  #     - $.paths.*.*.responses.*.schema
+  #     - $.paths.*.*.responses.*.schema.properties.items.items
+  #   then:
+  #     - field: required
+  #       function: truthy
+  #     - field: required
+  #       function: length
+  #       functionOptions:
+  #         min: 1
+          

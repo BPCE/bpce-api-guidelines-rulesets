@@ -1,0 +1,93 @@
+# TODO write tests
+
+rules:
+  security-rules-defined-oas2:
+    formats: ["oas2"]
+    recommended: true
+    description: Security definitions must be defined
+    severity: error
+    tags:
+      - security
+    given: $
+    then:
+      field: securityDefinitions
+      function: truthy
+
+  security-rules-defined-oas3:
+    formats: ["oas3"]
+    recommended: true
+    description: Security schemes must be defined
+    severity: error
+    tags:
+      - security
+    given: $
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          $schema: "http://json-schema.org/draft-07/schema#"
+          additionalProperties: true
+          required:
+            - components
+          properties:
+            components:
+              additionalProperties: true
+              required:
+                - securitySchemes
+              properties:
+                securitySchemes:
+                  type: object
+
+  security-types-authorized:
+    recommended: true
+    description: Only apiKey and oauth security definitions are allowed
+    severity: error
+    tags:
+      - security
+    given: 
+      - $.securityDefinitions.*
+      - $.components.securitySchemes.*
+    then:
+      field: type
+      function: enumeration
+      functionOptions:
+        values:
+          - apiKey
+          - oauth2
+
+  security-definitions-oauth-scopes-defined:
+    recommended: true
+    description: Scopes must be defined for all Oauth2 security definitions
+    severity: error
+    tags:
+      - security
+    given: 
+      - $.securityDefinitions[?(@.type==='oauth2')]
+      - $.components.securitySchemes[?(@.type==='oauth2')].flows.*
+    then:
+      field: scopes
+      function: truthy
+
+  security-no-api-level:
+    recommended: true
+    description: API level security is forbidden (must be configured at operation level)
+    severity: error
+    tags:
+      - security
+    given: $
+    then:
+      field: security
+      function: falsy
+  
+  security-operation-defined:
+    recommended: true
+    description: Security must be defined on each operation
+    message: "{{description}} ({{path}})"
+    severity: error
+    tags:
+      - security
+    given: $.paths.*[?( @property === 'get' || @property === 'put' || @property === 'post' || @property === 'delete' || @property === 'options' || @property === 'head' || @property === 'patch' || @property === 'trace' )]
+    #$.paths[].*.* # TODO exclude path level parameters or x-tensions
+    then:
+      field: security
+      function: truthy

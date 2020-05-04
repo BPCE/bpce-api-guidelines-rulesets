@@ -9,6 +9,7 @@
   "author": "Arnaud Lauret",
   "license": "ISC",
   "devDependencies": {
+    "jsonpath-plus": "^3.0.0",
     "mocha": "^6.2.2",
     "standard": "^14.3.1"
   },

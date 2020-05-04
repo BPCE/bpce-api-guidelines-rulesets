@@ -1,5 +1,6 @@
 const assert = require('assert')
 const path = require('@stoplight/path')
+const { JSONPath } = require('jsonpath-plus')
 const { Spectral, isOpenApiv2, isOpenApiv3 } = require('@stoplight/spectral')
 
 const SEVERITY = {
@@ -10,6 +11,10 @@ const SEVERITY = {
   hint: 3
 }
 
+const FORMATS = {
+  oas2: 'oas2',
+  oas3: 'oas3'
+}
 // Rulesets file paths are expected to be GIT_REPO/rulesets/{name}-ruleset.yaml
 async function loadRuleset (name, oasFormat) {
   const spectral = new SpectralTestWrapper(oasFormat)
@@ -57,6 +62,17 @@ function rulesetFullyTestedSuiteName (test) {
   return ruleset(test, 'rulesetFullyTestedSuiteName') + ' ruleset fully tested'
 }
 
+function jsonPointerToArray (pointer) {
+  const split = pointer.split('/')
+  const result = []
+  for (const i in split) {
+    if (split[i].length > 0) {
+      result.push(split[i].replace(/~1/g, '/'))
+    }
+  }
+  return result
+}
+
 // oasFormat: null, auto, forceOas2, forceOas3
 function SpectralTestWrapper (oasFormat) {
   this.spectral = new Spectral()
@@ -80,6 +96,7 @@ function SpectralTestWrapper (oasFormat) {
 
   this.originalRuleset = this.spectral.rules
   this.testedRules = []
+  this.currentRuleName = undefined
 }
 
 SpectralTestWrapper.prototype.loadRuleset = async function (path) {
@@ -109,10 +126,16 @@ SpectralTestWrapper.prototype.disableAllRulesExcept = function (name) {
 
   subRuleset[name] = this.originalRuleset[name]
   this.spectral.rules = subRuleset
+  this.currentRuleName = name
 }
 
 SpectralTestWrapper.prototype.resetToOriginalRuleSet = function () {
   this.spectral.rules = this.originalRuleset
+  this.currentRuleName = undefined
+}
+
+SpectralTestWrapper.prototype.getCurrentRule = function () {
+  return this.spectral.rules[this.currentRuleName]
 }
 
 // Rules are added to tested rule when using disableAllRulesExcept
@@ -220,6 +243,66 @@ SpectralTestWrapper.prototype.checkNoError = function (errors) {
   assert.deepStrictEqual(errors, [], 'unexpected error')
 }
 
+SpectralTestWrapper.prototype.checkExpectedFoundPath = function (document, pathOrPaths, givenIndex) {
+  const rule = this.getCurrentRule()
+  let jsonPath
+  if (Array.isArray(rule.given)) {
+    jsonPath = rule.given[givenIndex]
+  } else {
+    jsonPath = rule.given
+  }
+
+  let expectedPaths
+  if (Array.isArray(pathOrPaths[0])) {
+    expectedPaths = pathOrPaths
+  } else {
+    expectedPaths = [pathOrPaths]
+  }
+
+  const foundPointers = JSONPath({ resultType: 'pointer', path: jsonPath, json: document })
+  const foundPaths = []
+  for (const i in foundPointers) {
+    foundPaths.push(jsonPointerToArray(foundPointers[i]))
+  }
+
+  assert.deepStrictEqual(foundPaths, expectedPaths, 'Found paths for given ' + jsonPath + ' differ from expected')
+}
+
+// Checks that no path matching rule given[givenIndex] or all given if givenIndex is not provided is found is document
+SpectralTestWrapper.prototype.checkNoFoundPath = function (document, givenIndex) {
+  const rule = this.getCurrentRule()
+  let jsonPath
+  if (Array.isArray(rule.given)) {
+    if (givenIndex !== undefined) {
+      jsonPath = rule.given[givenIndex]
+    } else {
+      throw new Error('Rule has multiple given, a givenIndex must be provided')
+    }
+  } else {
+    jsonPath = rule.given
+  }
+
+  const expectedPaths = []
+  const foundPaths = []
+
+  const foundPointers = JSONPath({ resultType: 'pointer', path: jsonPath, json: document })
+  for (const i in foundPointers) {
+    foundPaths.push(jsonPointerToArray(foundPointers[i]))
+  }
+
+  assert.deepStrictEqual(foundPaths, expectedPaths, 'Rule\'s given json path ' + jsonPath + ' returned unexpected paths')
+}
+
+SpectralTestWrapper.prototype.checkRunOnlyOn = function (expectedFormat) {
+  const rule = this.getCurrentRule()
+  assert.deepStrictEqual(rule.formats, [expectedFormat], 'Unexpected rule formats')
+}
+
+SpectralTestWrapper.prototype.checkAlwaysRun = function () {
+  const rule = this.getCurrentRule()
+  assert.deepStrictEqual(rule.formats, undefined, 'Unexpected rule formats')
+}
+
 SpectralTestWrapper.prototype.checkAllRulesHaveBeenTest = function () {
   assert.deepStrictEqual(this.listUntestedRules(), [], 'untested rules')
 }
@@ -230,3 +313,4 @@ module.exports.rule = rule
 module.exports.isNotRulesetFullyTestedTestSuite = isNotRulesetFullyTestedTestSuite
 module.exports.rulesetFullyTestedSuiteName = rulesetFullyTestedSuiteName
 module.exports.SEVERITY = SEVERITY
+module.exports.FORMATS = FORMATS

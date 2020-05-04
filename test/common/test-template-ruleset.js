@@ -19,7 +19,16 @@ describe('{ruleset name}', function () {
   // TODO Add test suite for each rule in rule set
   // TODO Set the rule name as defined in the Spectral ruleset
   describe('{rule name}', function () {
-    // TODO Do a test for each possible success
+    // TODO Do tests to check that some components are ignored
+    it('should ignore {test}', async function () {
+      // TODO Minimal document to test the use case, no need for a complete one
+      const document = {
+        some: 'thing'
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    // TODO Do tests for each possible success
     it('should return no error if {test}', async function () {
       // TODO Minimal document to test the use case, no need for a complete one
       const document = {
@@ -28,7 +37,7 @@ describe('{ruleset name}', function () {
       await spectralTestWrapper.runAndCheckNoError(document)
     })
 
-    // TODO Do a test for each possible failure
+    // TODO Do tests for each possible failure
     it('should return an error if {test}', async function () {
       // TODO Minimal document to test the use case, no need for a complete one
       const document = {

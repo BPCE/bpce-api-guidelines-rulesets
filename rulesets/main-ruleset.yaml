@@ -1,15 +1,12 @@
 extends:
   # These 2 includes are done in oas-ruleset but must be redone here to deactivate oas2&3 rules
-  - [spectral:oas2, off] 
-  - [spectral:oas3, off]
-  - oas-ruleset.yaml
+  - [spectral:oas, off] 
   - info-ruleset.yaml
-  - http-methods-ruleset.yaml
-  - http-status-codes-ruleset.yaml
   - basepath-ruleset.yaml
   - path-ruleset.yaml
-  - models-ruleset.yaml
-  - models-response-rulesets.yaml
-rules:
-  oas2-schema: true
-  oas3-schema: true
+  - http-method-ruleset.yaml
+  - http-status-code-ruleset.yaml
+  - parameter-ruleset.yaml
+  - model-ruleset.yaml
+  - model-response-ruleset.yaml
+  - security-ruleset.yaml

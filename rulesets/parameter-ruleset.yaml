@@ -1,0 +1,112 @@
+rules:
+
+  parameter-query-forbidden-on-post-put-patch:
+    recommended: true
+    description: Query parameter allowed only on get and delete, cannot be used on post, put, patch
+    message: '{{description}} ({{path}})'
+    severity: error
+    tags:
+      - query parameter
+    given: $.paths.*.[?(@property == 'post' || @property === 'put' || @property === 'patch')].parameters.*
+    then:
+      - field: in
+        function: pattern
+        functionOptions:
+          notMatch: "^query$"
+
+  parameter-body-forbidden-on-get-delete:
+    recommended: true
+    description: Body parameter allowed only on post, patch and put and cannot be used on get or delete
+    message: '{{description}} ({{path}})'
+    severity: error
+    tags:
+      - body parameter
+    given: $.paths.*.[?(@property == 'get' || @property === 'delete')].parameters.*
+    then:
+      - field: in
+        function: pattern
+        functionOptions:
+          notMatch: "^body$"
+
+  parameter-body-is-an-object:
+    recommended: true
+    description: A JSON body parameter must be an object
+    message: '{{description}} ({{path}})'
+    severity: error
+    tags:
+      - body parameter
+    given: $.paths.*.[?(@property == 'post' || @property === 'put' || @property === 'patch')].parameters[?(@.in === 'body')]
+    then:
+      - field: schema
+        function: truthy
+      - field: schema
+        function: schema
+        functionOptions:
+          # Pay attention! It's a JSON Schema of the expected Schema (Inception!)
+          schema:
+            $schema: "http://json-schema.org/draft-04/schema#"
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - object
+
+  parameter-body-required-properties-on-post-put:
+    recommended: true
+    description: A post/put body without any required property is not recommended
+    message: '{{description}} ({{path}})'
+    severity: warn
+    tags:
+      - body parameter
+    given: $.paths.*.[?(@property == 'post' || @property === 'put')].parameters[?(@.in === 'body')]
+    then:
+      - field: required
+        function: truthy
+      - field: required
+        function: length
+        functionOptions:
+          min: 1
+
+  parameter-query-path-body-name-lowercamelcase:
+    recommended: true
+    description: Path, query and body parameter name must be in lowerCamelCase
+    message: 'PROPERTY: {{property}}, ERROR: {{error}}, DESCRIPTION: {{description}}'
+    given: 
+      - $.paths.*.*.parameters[?( @.in === 'query' || @.in === 'body' || @.in === 'path' )].name
+      - $.paths.*.parameters[?( @.in === 'query' || @.in === 'body' || @.in === 'path' )].name
+    severity: error
+    then:
+        - function: pattern
+          functionOptions:
+            match: "^[a-z0-9]+([A-Z][a-z0-9]*)*$"
+
+  parameter-query-path-body-name-no-number:
+    recommended: true
+    description: Parameter name should not contain numbers
+    message: '{{description}} ({{path}})'
+    given: 
+      - $.paths.*.*.parameters[?( @.in === 'query' || @.in === 'body' || @.in === 'path' )].name
+      - $.paths.*.parameters[?( @.in === 'query' || @.in === 'body' || @.in === 'path' )].name
+    severity: warn
+    then:
+      - function: pattern
+        functionOptions:
+          notMatch: "/[0-9]+/i"
+    tags:
+      - property
+
+  parameter-path-name-not-id:
+    recommended: true
+    description: Path parameter name cannot be just id, it should be "<resource name>Id".
+    message: '{{description}} ({{path}})'
+    given: 
+      - $.paths.*.*.parameters[?( @.in === 'path' )].name
+      - $.paths.*.parameters[?( @.in === 'path' )].name
+    severity: warn
+    then:
+      - function: pattern
+        functionOptions:
+          notMatch: "/^id$/i"
+    tags:
+      - parameter

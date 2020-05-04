@@ -216,7 +216,7 @@ describe('http-method', function () {
         get: {},
         put: {},
         patch: {},
-        delete: {},
+        delete: {}
       }
       const document = {
         paths: {
@@ -237,7 +237,7 @@ describe('http-method', function () {
         get: {},
         put: {},
         patch: {},
-        delete: {},
+        delete: {}
       }
       const document = {
         paths: {

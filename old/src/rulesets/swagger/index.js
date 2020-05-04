@@ -1,16 +1,16 @@
-const { RuleFunction, RuleType } = require('@stoplight/spectral');
-const { DiagnosticSeverity } = require('@stoplight/types');
-const { commonRules, commonFunctions, COMMON_OPTIONS } = require('../common');
-const merge = require('lodash').merge;
+const { RuleFunction, RuleType } = require('@stoplight/spectral')
+const { DiagnosticSeverity } = require('@stoplight/types')
+const { commonRules, commonFunctions, COMMON_OPTIONS } = require('../common')
+const merge = require('lodash').merge
 
 const functions = () => {
   return {
-    //exampleFunction: require('./functions/example').exampleFunction
+    // exampleFunction: require('./functions/example').exampleFunction
   }
-};
+}
 
 const rules = () => {
-  return { 
+  return {
     'definition-name-is-valid': {
       summary: 'A definition name must be in UpperCamelCase',
       given: '$.definitions',
@@ -30,7 +30,7 @@ const rules = () => {
       given: '$..definitions.*',
       type: RuleType.STYLE,
       severity: DiagnosticSeverity.Warning,
-      then :
+      then:
         {
           field: 'required',
           function: RuleFunction.TRUTHY
@@ -41,7 +41,7 @@ const rules = () => {
       given: '$..definitions.*.required',
       type: RuleType.STYLE,
       severity: DiagnosticSeverity.Warning,
-      then :
+      then:
         {
           function: RuleFunction.LENGTH,
           functionOptions: {
@@ -60,17 +60,17 @@ const rules = () => {
       }
     }
   }
-};
+}
 
 const allRules = () => {
-  return merge(commonRules(), rules());;
+  return merge(commonRules(), rules())
 }
 
 const allFunctions = () => {
-  return merge(commonFunctions(), functions());
+  return merge(commonFunctions(), functions())
 }
 
 module.exports = {
   swaggerFunctions: allFunctions,
   swaggerRules: allRules
-};
+}

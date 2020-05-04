@@ -1,13 +1,13 @@
-const { RuleFunction, RuleType } = require('@stoplight/spectral');
-const { DiagnosticSeverity } = require('@stoplight/types');
-const { commonRules, commonFunctions, COMMON_OPTIONS } = require('../common');
-const merge = require('lodash').merge;
+const { RuleFunction, RuleType } = require('@stoplight/spectral')
+const { DiagnosticSeverity } = require('@stoplight/types')
+const { commonRules, commonFunctions, COMMON_OPTIONS } = require('../common')
+const merge = require('lodash').merge
 
 const functions = () => {
   return {
-    //exampleFunction: require('./functions/example').exampleFunction
+    // exampleFunction: require('./functions/example').exampleFunction
   }
-};
+}
 
 const rules = () => {
   return {
@@ -26,17 +26,17 @@ const rules = () => {
       }
     }
   }
-};
-  
+}
+
 const allRules = () => {
-  return merge(commonRules(), rules());;
+  return merge(commonRules(), rules())
 }
 
 const allFunctions = () => {
-  return merge(commonFunctions(), functions());
+  return merge(commonFunctions(), functions())
 }
 
 module.exports = {
   openapiFunctions: allFunctions,
   openapiRules: allRules
-};
+}

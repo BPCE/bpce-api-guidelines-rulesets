@@ -1,5 +1,5 @@
-const { RuleFunction, RuleType } = require('@stoplight/spectral');
-const { DiagnosticSeverity } = require('@stoplight/types');
+const { RuleFunction, RuleType } = require('@stoplight/spectral')
+const { DiagnosticSeverity } = require('@stoplight/types')
 
 const OPTIONS = {
   PATTERN_SCHEMA_NAME: '^[A-Z][a-z0-9]+([A-Z][a-z0-9]*)*$',
@@ -7,7 +7,7 @@ const OPTIONS = {
 }
 
 const SCHEMAS = {
-  ERROR : require('./schemas/error.json')
+  ERROR: require('./schemas/error.json')
 }
 
 const functions = () => {
@@ -15,9 +15,9 @@ const functions = () => {
     echo: require('./functions/echo').echo,
     versionNotInPathFunction: require('./functions/checkPath').versionNotInPathFunction,
     pathStructureFunction: require('./functions/checkPath').pathStructureFunction
-    //exampleFunction: require('./functions/example').exampleFunction
+    // exampleFunction: require('./functions/example').exampleFunction
   }
-};
+}
 
 // functions are needed to be able to merge sets
 const rules = () => {
@@ -37,8 +37,8 @@ const rules = () => {
       },
       tags: ['dataRepresentationRule']
     },
-    
-    'arrays-as-responses-not-allowed' : {
+
+    'arrays-as-responses-not-allowed': {
       summary: 'Arrays must not be used at the root of a response object',
       given: '$..responses[*].schema.type',
       type: RuleType.VALIDATION,
@@ -48,43 +48,43 @@ const rules = () => {
         functionOptions: {
           notMatch: /array/i
         },
-      tags: ['dataRepresentationRule']
+        tags: ['dataRepresentationRule']
       }
-  },
-  'versioning-in-path': {
-    summary: 'Versioning should not be found in any path',
-    type: RuleType.VALIDATION,
-    severity: DiagnosticSeverity.Error,
-    given: '$..paths',
-    then: {      
-      function: 'versionNotInPathFunction'
     },
-    tags: ['apiVersionRule'],
-  },
-  'api-in-path': {
-    summary: 'The acronym <api> should not be used the resources paths',
-    type: RuleType.VALIDATION,
-    severity: DiagnosticSeverity.Error,
-    given: '$..paths',
-    then: { 
-        field: '@key',    
+    'versioning-in-path': {
+      summary: 'Versioning should not be found in any path',
+      type: RuleType.VALIDATION,
+      severity: DiagnosticSeverity.Error,
+      given: '$..paths',
+      then: {
+        function: 'versionNotInPathFunction'
+      },
+      tags: ['apiVersionRule']
+    },
+    'api-in-path': {
+      summary: 'The acronym <api> should not be used the resources paths',
+      type: RuleType.VALIDATION,
+      severity: DiagnosticSeverity.Error,
+      given: '$..paths',
+      then: {
+        field: '@key',
         function: RuleFunction.PATTERN,
         functionOptions: {
           notMatch: /\/api/i
-        },
+        }
+      },
+      tags: ['resourcePathRule']
     },
-    tags: ['resourcePathRule'],
-  },
-  'path-structure': {
-    summary: 'Resources paths must follow a pattern',
-    type: RuleType.VALIDATION,
-    severity: DiagnosticSeverity.Error,
-    given: '$..paths',
-    then: {      
-      function: 'pathStructureFunction'
-    },
-    tags: ['resourcePathRule'],
-  }
+    'path-structure': {
+      summary: 'Resources paths must follow a pattern',
+      type: RuleType.VALIDATION,
+      severity: DiagnosticSeverity.Error,
+      given: '$..paths',
+      then: {
+        function: 'pathStructureFunction'
+      },
+      tags: ['resourcePathRule']
+    }
     /*,
     'test-with-example-function': {
       summary: 'simple function echoing match object and options',
@@ -96,13 +96,13 @@ const rules = () => {
           exampleOption: "some value"
         }
       }
-    }*/
+    } */
   }
-};
+}
 
 module.exports = {
   COMMON_OPTIONS: OPTIONS,
   COMMON_SCHEMAS: SCHEMAS,
   commonFunctions: functions,
   commonRules: rules
-};
+}
