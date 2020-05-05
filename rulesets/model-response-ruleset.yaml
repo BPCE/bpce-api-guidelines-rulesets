@@ -395,21 +395,23 @@ rules:
                               enum: 
                                 - string
 
-  # response-no-empty-required:
-  #   recommended: true
-  #   description: A response without any high level required property is not recommended
-  #   message: '{{description}} ({{path}})'
-  #   severity: warn
-  #   tags:
-  #     - model response
-  #   given: 
-  #     - $.paths.*.*.responses.*.schema
-  #     - $.paths.*.*.responses.*.schema.properties.items.items
-  #   then:
-  #     - field: required
-  #       function: truthy
-  #     - field: required
-  #       function: length
-  #       functionOptions:
-  #         min: 1
+  response-no-empty-required:
+     recommended: true
+     description: A response without any high level required property is not recommended
+     message: '{{description}} ({{path}})'
+     severity: warn
+     tags:
+       - model response
+     given: 
+       - $.paths.*.*.responses.*.schema
+       - $.paths.*.*.responses.*.content.'application/json'.schema
+       - $.paths.*.*.responses.*.schema.properties.items.items
+       - $.paths.*.*.responses.*.content.'application/json'.schema.properties.items.items
+     then:
+       - field: required
+         function: truthy
+       - field: required
+         function: length
+         functionOptions:
+           min: 1
           

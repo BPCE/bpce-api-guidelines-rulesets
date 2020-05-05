@@ -333,7 +333,7 @@ describe('model-response', function () {
       spectralTestWrapper.checkNoFoundPath(document, 0)
     })
 
-    it('should check 2xx (expect 204), 4xx and 5xx response oas2 schema', function () {
+    it('should check 2xx (except 204), 4xx and 5xx response oas2 schema', function () {
       const response = {
         schema: {}
       }
@@ -2071,6 +2071,402 @@ describe('model-response', function () {
       ]
 
       const errorSeverity = SEVERITY.error
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+    })
+  })
+
+  describe('response-no-empty-required', function () {
+    it('should run on all formats', checkAlwaysRun)
+
+    it('should ignore any non application/json response in oas3', function () {
+      const document = {
+        paths: {
+          anypath: {
+            anymethod: {
+              responses: {
+                anyresponse: {
+                  content: {
+                    'not application/json': {
+                      schema: {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      spectralTestWrapper.checkNoFoundPath(document, 1)
+    })
+
+    it('should ignore list items in any non application/json response in oas3', function () {
+      const document = {
+        paths: {
+          anypath: {
+            anymethod: {
+              responses: {
+                anyresponse: {
+                  content: {
+                    'not application/json': {
+                      schema: {
+                        properties: {
+                          items: {
+                            items: {}
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      spectralTestWrapper.checkNoFoundPath(document, 1)
+    })
+
+    it('should check any response in oas2', function () {
+      const document = {
+        paths: {
+          anypath: {
+            anymethod: {
+              responses: {
+                anyresponse: {
+                  schema: {}
+                }
+              }
+            }
+          }
+        }
+      }
+      const expectedPaths = [
+        ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema']
+      ]
+      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 0)
+    })
+
+    it('should check any application/json response in oas3', function () {
+      const document = {
+        paths: {
+          anypath: {
+            anymethod: {
+              responses: {
+                anyresponse: {
+                  content: {
+                    'application/json': {
+                      schema: {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      const expectedPaths = [
+        ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'content', 'application/json', 'schema']
+      ]
+      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 1)
+    })
+
+    it('should check list items in any response in oas2', function () {
+      const document = {
+        paths: {
+          anypath: {
+            anymethod: {
+              responses: {
+                anyresponse: {
+                  schema: {
+                    properties: {
+                      items: {
+                        items: {}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      const expectedPaths = [
+        ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema', 'properties', 'items', 'items']
+      ]
+      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 2)
+    })
+
+    it('should check list items in any application/json response in oas3', function () {
+      const document = {
+        paths: {
+          anypath: {
+            anymethod: {
+              responses: {
+                anyresponse: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        properties: {
+                          items: {
+                            items: {}
+                          }
+                        }    
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      const expectedPaths = [
+        ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'content', 'application/json', 'schema', 'properties', 'items', 'items']
+      ]
+      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 3)
+    })
+
+    it('shoud return no error if response has at least one required propery', async function () {
+      const schema = {
+        required: [ 'requiredproperty' ],
+        properties: {
+          requiredproperty: {}
+        }
+      }
+      const document = {
+        paths: {
+          anypath: {
+            anymethod: {
+              responses: {
+                anyresponse: {
+                  schema: schema
+                }
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return no error if response items is required and list items has at least one required property', async function () {
+      const schema = {
+        required: ['items'],
+        properties: {
+          items: {
+            type: 'array',
+            items: {
+              required: [ 'requiredproperty' ],
+              properties: {
+                requiredproperty: {}
+              }
+            }
+          }
+        }
+      }
+      const document = {
+        paths: {
+          anypath: {
+            anymethod: {
+              responses: {
+                anyresponse: {
+                  schema: schema
+                }
+              }
+            }
+          }
+        }
+      }
+      await spectralTestWrapper.runAndCheckNoError(document)
+    })
+
+    it('should return a warning if root required is not defined', async function () {
+      const schema = {
+        properties: {
+          notRequiredproperty: {}
+        }
+      }
+      const document = {
+        paths: {
+          anypath: {
+            anymethod: {
+              responses: {
+                anyresponse: {
+                  schema: schema
+                }
+              }
+            }
+          }
+        }
+      }
+      const errorPaths = [
+        ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema']
+      ]
+      const errorSeverity = SEVERITY.warn
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+    })
+
+    it('should return a warning if root required is empty', async function () {
+      const schema = {
+        required: [],
+        properties: {
+          notRequiredproperty: {}
+        }
+      }
+      const document = {
+        paths: {
+          anypath: {
+            anymethod: {
+              responses: {
+                anyresponse: {
+                  schema: schema
+                }
+              }
+            }
+          }
+        }
+      }
+      const errorPaths = [
+        ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema', 'required']
+      ]
+      const errorSeverity = SEVERITY.warn
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+    })
+
+    it('should return a warning if root required is ok and items required is not defined', async function () {
+      const schema = {
+        required: ['items'],
+        properties: {
+          items: {
+            type: 'array',
+            items: {
+              properties: {
+                notRequiredproperty: {}
+              }
+            }
+          }
+        }
+      }
+      const document = {
+        paths: {
+          anypath: {
+            anymethod: {
+              responses: {
+                anyresponse: {
+                  schema: schema
+                }
+              }
+            }
+          }
+        }
+      }
+      const errorPaths = [
+        ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema', 'properties', 'items', 'items']
+      ]
+      const errorSeverity = SEVERITY.warn
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+    })
+
+    it('should return a warning if root required is ok and items required is empty', async function () {
+      const schema = {
+        required: ['items'],
+        properties: {
+          items: {
+            type: 'array',
+            items: {
+              required: [],
+              properties: {
+                notRequiredproperty: {}
+              }
+            }
+          }
+        }
+      }
+      const document = {
+        paths: {
+          anypath: {
+            anymethod: {
+              responses: {
+                anyresponse: {
+                  schema: schema
+                }
+              }
+            }
+          }
+        }
+      }
+      const errorPaths = [
+        ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema', 'properties', 'items', 'items', 'required']
+      ]
+      const errorSeverity = SEVERITY.warn
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+    })
+
+    it('should return a warning if root required is not ok and items required is ok', async function () {
+      const schema = {
+        properties: {
+          items: {
+            type: 'array',
+            items: {
+              required: ['notRequiredproperty'],
+              properties: {
+                notRequiredproperty: {}
+              }
+            }
+          }
+        }
+      }
+      const document = {
+        paths: {
+          anypath: {
+            anymethod: {
+              responses: {
+                anyresponse: {
+                  schema: schema
+                }
+              }
+            }
+          }
+        }
+      }
+      const errorPaths = [
+        ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema']
+      ]
+      const errorSeverity = SEVERITY.warn
+      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+    })
+
+    it('should return two warnings if root required is not ok and items required is not ok', async function () {
+      const schema = {
+        properties: {
+          items: {
+            type: 'array',
+            items: {
+              properties: {
+                notRequiredproperty: {}
+              }
+            }
+          }
+        }
+      }
+      const document = {
+        paths: {
+          anypath: {
+            anymethod: {
+              responses: {
+                anyresponse: {
+                  schema: schema
+                }
+              }
+            }
+          }
+        }
+      }
+      const errorPaths = [
+        ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema'],
+        ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema', 'properties', 'items', 'items']
+      ]
+      const errorSeverity = SEVERITY.warn
       await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
     })
   })
