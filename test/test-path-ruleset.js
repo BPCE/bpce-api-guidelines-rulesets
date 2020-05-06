@@ -3,8 +3,23 @@ const linterTestSuite = require('./common/linter-test-suite.js')
 describe('path', function () {
   linterTestSuite.initialize()
 
+  function checkPathsFound () {
+    it('should check paths', function () {
+      const document = {
+        paths: {}
+      }
+      const expectedPaths = [
+        ['paths']
+      ]
+      const givenIndex = undefined
+      this.linterTester.checkGivenFound(document, expectedPaths, givenIndex)
+    })
+  }
+
   describe('path-no-trailing-slash', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
+    checkPathsFound()
 
     it('should return no error if no path ends with trailing slash', async function () {
       const document = {
@@ -34,6 +49,8 @@ describe('path', function () {
   describe('path-no-query-parameter', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
 
+    checkPathsFound()
+
     it('should return no error if no path contains no query parameter', async function () {
       const document = {
         paths: {
@@ -57,6 +74,8 @@ describe('path', function () {
 
   describe('path-lower-camel-case', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
+    checkPathsFound()
 
     it('should return no error if path is lowerCamelCased', async function () {
       const document = {
@@ -94,6 +113,8 @@ describe('path', function () {
 
   describe('path-valid-structure', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
+    checkPathsFound()
 
     it('should return no error if path structure is valid', async function () {
       const document = {
