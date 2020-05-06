@@ -1,5 +1,4 @@
 const assert = require('assert')
-const path = require('@stoplight/path')
 const { JSONPath } = require('jsonpath-plus')
 const { Spectral, isOpenApiv2, isOpenApiv3 } = require('@stoplight/spectral')
 
@@ -14,52 +13,6 @@ const SEVERITY = {
 const FORMATS = {
   oas2: 'oas2',
   oas3: 'oas3'
-}
-// Rulesets file paths are expected to be GIT_REPO/rulesets/{name}-ruleset.yaml
-async function loadRuleset (name, oasFormat) {
-  const spectral = new SpectralTestWrapper(oasFormat)
-  await spectral.loadRuleset(path.join(__dirname, '../../rulesets/' + name + '-ruleset.yaml'))
-  return spectral
-}
-
-function ruleset (test, level) {
-  let rulesetName
-  if (test.tests !== undefined) {
-    // inner describe level
-    rulesetName = test.title
-  } else {
-    if (test.currentTest === undefined) {
-      if (test.test.parent.suites.length > 0) {
-        // before level
-        rulesetName = test.test.parent.title
-      } else {
-        // it level
-        rulesetName = test.test.parent.parent.title
-      }
-    } else {
-      // inner describe or beforeEach
-      rulesetName = test.currentTest.parent.parent.title
-    }
-  }
-  return rulesetName
-}
-
-function rule (test) {
-  let rule
-  if (test.currentTest === undefined) {
-    rule = test.test.parent.title
-  } else {
-    rule = test.currentTest.parent.title
-  }
-  return rule
-}
-
-function isNotRulesetFullyTestedTestSuite (test) {
-  return rule(test).localeCompare(rulesetFullyTestedSuiteName(test))
-}
-
-function rulesetFullyTestedSuiteName (test) {
-  return ruleset(test, 'rulesetFullyTestedSuiteName') + ' ruleset fully tested'
 }
 
 function jsonPointerToArray (pointer) {
@@ -97,6 +50,7 @@ function SpectralTestWrapper (oasFormat) {
   this.originalRuleset = this.spectral.rules
   this.testedRules = []
   this.currentRuleName = undefined
+
 }
 
 SpectralTestWrapper.prototype.loadRuleset = async function (path) {
@@ -150,14 +104,15 @@ SpectralTestWrapper.prototype.listUntestedRules = function () {
   return untestedRules
 }
 
-SpectralTestWrapper.prototype.runAndCheckNoError = async function (document) {
-  const results = await this.run(document)
-  this.checkNoError(results)
-}
-
-SpectralTestWrapper.prototype.runAndCheckExpectedError = async function (document, codeOrCodes, pathOrPaths, severityOrSeverities) {
-  const results = await this.run(document)
-  this.checkExpectedError(results, codeOrCodes, pathOrPaths, severityOrSeverities)
+SpectralTestWrapper.prototype.listRuleNames = function () {
+  const names = []
+  for (const ruleName in this.originalRuleset) {
+    // disabled rules have -1 severity
+    if (this.originalRuleset[ruleName].severity >= 0) {
+      names.push(ruleName)
+    }
+  }
+  return names
 }
 
 SpectralTestWrapper.prototype.checkSeverity = function (actual, expected) {
@@ -181,6 +136,23 @@ SpectralTestWrapper.prototype.checkError = function (actual, expected) {
   assert.deepStrictEqual(actual.path, expected.path, 'invalid path')
   this.checkSeverity(actual.severity, expected.severity)
   // Not checking Spectral message or other value
+}
+
+SpectralTestWrapper.prototype.checkRunOnlyOn = function (expectedFormat) {
+  const rule = this.getCurrentRule()
+  assert.deepStrictEqual(rule.formats, [expectedFormat], 'Unexpected rule formats, it should be [' + expectedFormat + ']')
+  assert.strictEqual(this.currentRuleName.endsWith(expectedFormat), true, 'Rule name must end with -' + expectedFormat)
+}
+
+SpectralTestWrapper.prototype.checkAlwaysRun = function () {
+  const rule = this.getCurrentRule()
+  assert.deepStrictEqual(rule.formats, undefined, 'Rule formats must be empty if rule runs on all formats')
+  assert.strictEqual(this.currentRuleName.endsWith(FORMATS.oas2), false, 'Rule name must not end with -' + FORMATS.oas2)
+  assert.strictEqual(this.currentRuleName.endsWith(FORMATS.oas3), false, 'Rule name must not end with -' + FORMATS.oas3)
+}
+
+SpectralTestWrapper.prototype.checkAllRulesHaveBeenTest = function () {
+  assert.deepStrictEqual(this.listUntestedRules(), [], 'untested rules')
 }
 
 SpectralTestWrapper.prototype.checkExpectedError = function (errors, codeOrCodes, pathOrPaths, severityOrSeverities) {
@@ -243,7 +215,9 @@ SpectralTestWrapper.prototype.checkNoError = function (errors) {
   assert.deepStrictEqual(errors, [], 'unexpected error')
 }
 
-SpectralTestWrapper.prototype.checkExpectedFoundPath = function (document, pathOrPaths, givenIndex) {
+// To use in test suites
+
+SpectralTestWrapper.prototype.checkGivenFound = function (document, pathOrPaths, givenIndex) {
   const rule = this.getCurrentRule()
   let jsonPath
   if (Array.isArray(rule.given)) {
@@ -269,7 +243,7 @@ SpectralTestWrapper.prototype.checkExpectedFoundPath = function (document, pathO
 }
 
 // Checks that no path matching rule given[givenIndex] or all given if givenIndex is not provided is found is document
-SpectralTestWrapper.prototype.checkNoFoundPath = function (document, givenIndex) {
+SpectralTestWrapper.prototype.checkGivenNotFound = function (document, givenIndex) {
   const rule = this.getCurrentRule()
   let jsonPath
   if (Array.isArray(rule.given)) {
@@ -293,24 +267,22 @@ SpectralTestWrapper.prototype.checkNoFoundPath = function (document, givenIndex)
   assert.deepStrictEqual(foundPaths, expectedPaths, 'Rule\'s given json path ' + jsonPath + ' returned unexpected paths')
 }
 
-SpectralTestWrapper.prototype.checkRunOnlyOn = function (expectedFormat) {
-  const rule = this.getCurrentRule()
-  assert.deepStrictEqual(rule.formats, [expectedFormat], 'Unexpected rule formats')
+SpectralTestWrapper.prototype.runAndCheckNoError = async function (document) {
+  const results = await this.run(document)
+  this.checkNoError(results)
 }
 
-SpectralTestWrapper.prototype.checkAlwaysRun = function () {
-  const rule = this.getCurrentRule()
-  assert.deepStrictEqual(rule.formats, undefined, 'Unexpected rule formats')
+SpectralTestWrapper.prototype.runAndCheckExpectedError = async function (document, pathOrPaths, severityOrSeverities, codeOrCodes) {
+  const results = await this.run(document)
+  let localCodeOrCodes
+  if (codeOrCodes === undefined) {
+    localCodeOrCodes = this.currentRuleName
+  } else {
+    localCodeOrCodes = codeOrCodes
+  }
+  this.checkExpectedError(results, localCodeOrCodes, pathOrPaths, severityOrSeverities)
 }
 
-SpectralTestWrapper.prototype.checkAllRulesHaveBeenTest = function () {
-  assert.deepStrictEqual(this.listUntestedRules(), [], 'untested rules')
-}
-
-module.exports.loadRuleset = loadRuleset
-module.exports.ruleset = ruleset
-module.exports.rule = rule
-module.exports.isNotRulesetFullyTestedTestSuite = isNotRulesetFullyTestedTestSuite
-module.exports.rulesetFullyTestedSuiteName = rulesetFullyTestedSuiteName
 module.exports.SEVERITY = SEVERITY
 module.exports.FORMATS = FORMATS
+module.exports.SpectralTestWrapper = SpectralTestWrapper

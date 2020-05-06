@@ -1,22 +1,12 @@
-const { loadRuleset, SEVERITY, ruleset, rule, isNotRulesetFullyTestedTestSuite, rulesetFullyTestedSuiteName } = require('./common/SpectralTestWrapper.js')
+const linterTestSuite = require('./common/linter-test-suite.js')
 
 // Set rule setname
 describe('http-status-code', function () {
-  let spectralTestWrapper
-
-  // Loads ruleset file based on the ruleset name set in the ruleset level test suite describe('{ruleset name}')
-  before(async function () {
-    spectralTestWrapper = await loadRuleset(ruleset(this))
-  })
-
-  // Disables all rules except the one indicated in rule level test suite describe('{rule name}'
-  beforeEach(function () {
-    if (isNotRulesetFullyTestedTestSuite(this)) {
-      spectralTestWrapper.disableAllRulesExcept(rule(this))
-    }
-  })
+  linterTestSuite.initialize()
 
   describe('http-status-code-mandatory-2xx', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if 2xx HTTP status code is used on each operation', async function () {
       const document = {
         swagger: '2.0',
@@ -52,7 +42,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if a 2xx HTTP status code is missing', async function () {
@@ -90,13 +80,15 @@ describe('http-status-code', function () {
         ['paths', '/some/path', 'post', 'responses'],
         ['paths', '/another/path', 'patch', 'responses']
       ]
-      const errorSeverity = SEVERITY.error
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('http-status-code-mandatory-401', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if 401 HTTP status code is used on each operation', async function () {
       const document = {
         paths: {
@@ -131,7 +123,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if a 401 HTTP status code is missing', async function () {
@@ -170,13 +162,15 @@ describe('http-status-code', function () {
         ['paths', '/some/path', 'post', 'responses'],
         ['paths', '/another/path', 'patch', 'responses']
       ]
-      const errorSeverity = SEVERITY.error
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('http-status-code-mandatory-500', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if 500 HTTP status code is used on each operation', async function () {
       const document = {
         paths: {
@@ -211,7 +205,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if a 500 HTTP status code is missing', async function () {
@@ -249,13 +243,15 @@ describe('http-status-code', function () {
         ['paths', '/some/path', 'post', 'responses'],
         ['paths', '/another/path', 'patch', 'responses']
       ]
-      const errorSeverity = SEVERITY.error
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('http-status-code-404-when-path-parameters', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if 404 is returned on operation on resource having path parameters', async function () {
       const document = {
         paths: {
@@ -268,7 +264,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if no 404 is returned on operation on resource having no path parameters', async function () {
@@ -281,7 +277,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if 404 is missing on operation on resource having path parameters', async function () {
@@ -298,13 +294,15 @@ describe('http-status-code', function () {
       const errorPaths = [
         ['paths', '/some/path/with/path/{param}/somewhere', 'post', 'responses']
       ]
-      const errorSeverity = SEVERITY.error
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('http-status-code-no-404-when-no-path-parameters', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if no 404 is returned on operation on resource having no path parameters', async function () {
       const document = {
         paths: {
@@ -315,7 +313,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if a 404 is returned on operation on resource having a path parameters', async function () {
@@ -330,7 +328,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if 404 is returned on operation on resource having no path parameters', async function () {
@@ -345,14 +343,16 @@ describe('http-status-code', function () {
           }
         }
       }
-      const errorPath = ['paths', '/some/path/without/path/param', 'post', 'responses', '404']
-      const errorSeverity = SEVERITY.error
+      const errorPaths = ['paths', '/some/path/without/path/param', 'post', 'responses', '404']
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('http-status-code-400-operation-level-query-body-header-param', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if 400 is returned on operation with query, body or header parameter', async function () {
       const document = {
         paths: {
@@ -368,7 +368,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if 400 is returned on operation with body parameter in oas2 document', async function () {
@@ -386,7 +386,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if 400 is returned on operation with request body in oas3 document', async function () {
@@ -402,7 +402,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if 400 is returned on operation with header parameter', async function () {
@@ -420,7 +420,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if no 400 is returned on operation without query, body or header parameter but with path one', async function () {
@@ -436,7 +436,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if no 400 is returned on operation with empty parameters list', async function () {
@@ -450,7 +450,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if no 400 is returned on operation without any parameter', async function () {
@@ -463,7 +463,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if no 400 is returned on operation with query parameter', async function () {
@@ -479,12 +479,12 @@ describe('http-status-code', function () {
           }
         }
       }
-      // const errorPath = ['paths', '/some/path', 'post', 'responses', '400']
+      // const errorPaths = ['paths', '/some/path', 'post', 'responses', '400']
       // Bug the wrong path is returned but the error shows the good value:  `/some/path.responses[400]` property is not truthy',
-      const errorPath = ['paths', '/some/path']
-      const errorSeverity = SEVERITY.error
+      const errorPaths = ['paths', '/some/path']
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return an error if no 400 is returned on operation with body parameter in oas2 document', async function () {
@@ -500,12 +500,12 @@ describe('http-status-code', function () {
           }
         }
       }
-      // const errorPath = ['paths', '/some/path', 'post', 'responses', '400']
+      // const errorPaths = ['paths', '/some/path', 'post', 'responses', '400']
       // Bug the wrong path is returned but the error shows the good value:  `/some/path.responses[400]` property is not truthy',
-      const errorPath = ['paths', '/some/path']
-      const errorSeverity = SEVERITY.error
+      const errorPaths = ['paths', '/some/path']
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return an error if no 400 is returned on operation with request body in oas3 document', async function () {
@@ -520,10 +520,10 @@ describe('http-status-code', function () {
         }
       }
 
-      const errorPath = ['paths', '/some/path', 'post', 'responses']
-      const errorSeverity = SEVERITY.error
+      const errorPaths = ['paths', '/some/path', 'post', 'responses']
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return an error if no 400 is returned on operation with header parameter', async function () {
@@ -539,16 +539,18 @@ describe('http-status-code', function () {
           }
         }
       }
-      // const errorPath = ['paths', '/some/path', 'post', 'responses', '400']
+      // const errorPaths = ['paths', '/some/path', 'post', 'responses', '400']
       // Bug the wrong path is returned but the error shows the good value:  `/some/path.responses[400]` property is not truthy',
-      const errorPath = ['paths', '/some/path']
-      const errorSeverity = SEVERITY.error
+      const errorPaths = ['paths', '/some/path']
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('http-status-code-get', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if get returns allowed HTTP status codes', async function () {
       const document = {
         paths: {
@@ -566,7 +568,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if other HTTP method returns unallowed HTTP status codes', async function () {
@@ -594,7 +596,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if get returns unallowed HTTP status codes', async function () {
@@ -618,13 +620,15 @@ describe('http-status-code', function () {
         ['paths', '/some/path', 'get', 'responses', '204'],
         ['paths', '/some/path', 'get', 'responses', '428']
       ]
-      const errorSeverity = SEVERITY.error
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('http-status-code-put', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if put returns allowed HTTP status codes', async function () {
       const document = {
         paths: {
@@ -642,7 +646,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if other HTTP method returns unallowed HTTP status codes', async function () {
@@ -670,7 +674,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if put returns unallowed HTTP status codes', async function () {
@@ -694,13 +698,15 @@ describe('http-status-code', function () {
         ['paths', '/some/path', 'put', 'responses', '204'],
         ['paths', '/some/path', 'put', 'responses', '428']
       ]
-      const errorSeverity = SEVERITY.error
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('http-status-code-patch', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if patch returns allowed HTTP status codes', async function () {
       const document = {
         paths: {
@@ -718,7 +724,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if other HTTP method returns unallowed HTTP status codes', async function () {
@@ -744,7 +750,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if patch returns unallowed HTTP status codes', async function () {
@@ -766,13 +772,15 @@ describe('http-status-code', function () {
         ['paths', '/some/path', 'patch', 'responses', '202'],
         ['paths', '/some/path', 'patch', 'responses', '428']
       ]
-      const errorSeverity = SEVERITY.error
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('http-status-code-delete', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if delete returns allowed HTTP status codes', async function () {
       const document = {
         paths: {
@@ -791,7 +799,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if other HTTP method returns unallowed HTTP status codes', async function () {
@@ -817,7 +825,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if delete returns unallowed HTTP status codes', async function () {
@@ -839,13 +847,15 @@ describe('http-status-code', function () {
         ['paths', '/some/path', 'delete', 'responses', '202'],
         ['paths', '/some/path', 'delete', 'responses', '428']
       ]
-      const errorSeverity = SEVERITY.error
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('http-status-code-post', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if post returns allowed HTTP status codes', async function () {
       const document = {
         paths: {
@@ -865,7 +875,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if other HTTP method returns unallowed HTTP status codes', async function () {
@@ -889,7 +899,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if post returns unallowed HTTP status codes', async function () {
@@ -909,13 +919,15 @@ describe('http-status-code', function () {
         ['paths', '/some/path', 'post', 'responses', '204'],
         ['paths', '/some/path', 'post', 'responses', '428']
       ]
-      const errorSeverity = SEVERITY.error
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('http-status-code-post-search', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if post /search returns allowed HTTP status codes', async function () {
       const document = {
         paths: {
@@ -933,7 +945,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if non post /search returns unallowed HTTP status codes', async function () {
@@ -967,7 +979,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if post /search returns unallowed HTTP status codes', async function () {
@@ -991,13 +1003,15 @@ describe('http-status-code', function () {
         ['paths', '/some/path/search', 'post', 'responses', '204'],
         ['paths', '/some/path/search', 'post', 'responses', '428']
       ]
-      const errorSeverity = SEVERITY.error
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('http-status-code-post-unusual-200', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if post /search returns 200 HTTP status code', async function () {
       const document = {
         paths: {
@@ -1010,7 +1024,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if post non /search returns 201 or 202 HTTP status code', async function () {
@@ -1026,7 +1040,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if any other non post operation returns 200 HTTP status code', async function () {
@@ -1048,7 +1062,7 @@ describe('http-status-code', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error (info) if post non /search returns 200 HTTP status code', async function () {
@@ -1063,17 +1077,12 @@ describe('http-status-code', function () {
           }
         }
       }
-      const errorPath = ['paths', '/some/path', 'post', 'responses', '200']
-      const errorSeverity = SEVERITY.info
+      const errorPaths = ['paths', '/some/path', 'post', 'responses', '200']
+      const errorSeverity = linterTestSuite.SEVERITY.info
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
-  // Checks that all rules have been tested
-  describe(rulesetFullyTestedSuiteName(this), function () {
-    it('should return no untested rule', function () {
-      spectralTestWrapper.checkAllRulesHaveBeenTest()
-    })
-  })
+  linterTestSuite.finalize()
 })

@@ -1,28 +1,18 @@
-const { loadRuleset, SEVERITY, ruleset, rule, isNotRulesetFullyTestedTestSuite, rulesetFullyTestedSuiteName } = require('./common/SpectralTestWrapper.js')
+const linterTestSuite = require('./common/linter-test-suite.js')
 
 describe('model', function () {
-  let spectralTestWrapper
-
-  // Loads ruleset file based on the ruleset name set in the ruleset level test suite describe('{ruleset name}')
-  before(async function () {
-    spectralTestWrapper = await loadRuleset(ruleset(this))
-  })
-
-  // Disables all rules except the one indicated in rule level test suite describe('{rule name}'
-  beforeEach(function () {
-    if (isNotRulesetFullyTestedTestSuite(this)) {
-      spectralTestWrapper.disableAllRulesExcept(rule(this))
-    }
-  })
+  linterTestSuite.initialize()
 
   describe('schema-name-uppercamelcase', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if schema name is UpperCamelCased', async function () {
       const document = {
         definitions: {
           SomeSchema: {}
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if schema name is not UpperCamelCased', async function () {
@@ -42,19 +32,21 @@ describe('model', function () {
       ]
       // Note: you can check multiple paths with const errorsPaths = [ ["one", "path"], ["another", "path"] ]
       // TODO The expected severity
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('schema-name-no-number', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if schema name contains no number', async function () {
       const document = {
         definitions: {
           SomeSchema: {}
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if schema name contains a number', async function () {
@@ -68,19 +60,21 @@ describe('model', function () {
         ['definitions', 'Some1Schema'],
         ['definitions', 'SomeSchema1']
       ]
-      const errorSeverity = SEVERITY.warn
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.warn
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('schema-name-no-technical-prefix-suffix', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if model name contains no technical suffix or prefix', async function () {
       const document = {
         definitions: {
           SomeSchema: {}
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if model name contains technical suffix or prefix', async function () {
@@ -100,12 +94,14 @@ describe('model', function () {
         ['definitions', 'DtoExample'],
         ['definitions', 'DtosExample']
       ]
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('property-name-lowercamelcase', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if property name is lowerCamelCased or is _links', async function () {
       const document = {
         definitions: {
@@ -128,7 +124,7 @@ describe('model', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if property name is not lowerCamelCased', async function () {
@@ -155,12 +151,14 @@ describe('model', function () {
         ['definitions', 'SomeSchema', 'properties', 'SomeProperty'],
         ['definitions', 'AnotherSchema', 'properties', 'someProperty', 'properties', 'AnotherProperty']
       ]
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('property-name-no-number', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if property name contains no number', async function () {
       const document = {
         definitions: {
@@ -183,7 +181,7 @@ describe('model', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if property name contains a number', async function () {
@@ -210,12 +208,14 @@ describe('model', function () {
         ['definitions', 'SomeSchema', 'properties', 'someProperty1'],
         ['definitions', 'AnotherSchema', 'properties', 'someProperty', 'properties', 'another1Property']
       ]
-      const errorSeverity = SEVERITY.warn
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.warn
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('property-name-no-technical-prefix-suffix', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if property name contains no technical suffix or prefix', async function () {
       const document = {
         definitions: {
@@ -238,7 +238,7 @@ describe('model', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if property name technical suffix or prefix', async function () {
@@ -265,12 +265,14 @@ describe('model', function () {
         ['definitions', 'SomeSchema', 'properties', 'somePropertyDto'],
         ['definitions', 'AnotherSchema', 'properties', 'someProperty', 'properties', 'dtoAnotherProperty']
       ]
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('model-empty-required', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if model has required properties', async function () {
       const document = {
         definitions: {
@@ -281,7 +283,7 @@ describe('model', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if model has no required properties', async function () {
@@ -299,15 +301,10 @@ describe('model', function () {
       ]
       // Note: you can check multiple paths with const errorsPaths = [ ["one", "path"], ["another", "path"] ]
       // TODO The expected severity
-      const errorSeverity = SEVERITY.info
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.info
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
-  // Checks that all rules have been tested
-  describe(rulesetFullyTestedSuiteName(this), function () {
-    it('should return no untested rule', function () {
-      spectralTestWrapper.checkAllRulesHaveBeenTest()
-    })
-  })
+  linterTestSuite.finalize()
 })

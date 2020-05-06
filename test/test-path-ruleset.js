@@ -1,28 +1,18 @@
-const { loadRuleset, SEVERITY, ruleset, rule, isNotRulesetFullyTestedTestSuite, rulesetFullyTestedSuiteName } = require('./common/SpectralTestWrapper.js')
+const linterTestSuite = require('./common/linter-test-suite.js')
 
 describe('path', function () {
-  let spectralTestWrapper
-
-  // Loads ruleset file based on the ruleset name set in the ruleset level test suite describe('{ruleset name}')
-  before(async function () {
-    spectralTestWrapper = await loadRuleset(ruleset(this))
-  })
-
-  // Disables all rules except the one indicated in rule level test suite describe('{rule name}'
-  beforeEach(function () {
-    if (isNotRulesetFullyTestedTestSuite(this)) {
-      spectralTestWrapper.disableAllRulesExcept(rule(this))
-    }
-  })
+  linterTestSuite.initialize()
 
   describe('path-no-trailing-slash', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if no path ends with trailing slash', async function () {
       const document = {
         paths: {
           '/some/valid/path': {}
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if a path ends with a trailing slash', async function () {
@@ -36,19 +26,21 @@ describe('path', function () {
         ['paths', '/some/invalid/path/'],
         ['paths', '/']
       ]
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('path-no-query-parameter', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if no path contains no query parameter', async function () {
       const document = {
         paths: {
           '/some/valid/path': {}
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if a path contains a query parameter', async function () {
@@ -57,13 +49,15 @@ describe('path', function () {
           '/some/invalid/path?with=query': {}
         }
       }
-      const errorPath = ['paths', '/some/invalid/path?with=query']
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      const errorPaths = ['paths', '/some/invalid/path?with=query']
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('path-lower-camel-case', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if path is lowerCamelCased', async function () {
       const document = {
         paths: {
@@ -76,7 +70,7 @@ describe('path', function () {
           '/v1/deliveryPoints/{deliveryPointId}/departments': {}
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if a path is not lowerCamelCased', async function () {
@@ -88,17 +82,19 @@ describe('path', function () {
 
         }
       }
-      const errorPath = [
+      const errorPaths = [
         ['paths', '/some-invalid/path'],
         ['paths', '/some/invalid_path'],
         ['paths', '/someINVALID/path']
       ]
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('path-valid-structure', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if path structure is valid', async function () {
       const document = {
         paths: {
@@ -120,7 +116,7 @@ describe('path', function () {
           '/name/v1/customers': {} // avoiding to trigger error, having basepath in path is checked in basepath ruleset
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if path structure is invalid', async function () {
@@ -135,15 +131,10 @@ describe('path', function () {
         ['paths', '/collection/something'],
         ['paths', '/collection/something/{id}'],
         ['paths', '/{id}']]
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
-  // Checks that all rules have been tested
-  describe(rulesetFullyTestedSuiteName(this), function () {
-    it('should return no untested rule', function () {
-      spectralTestWrapper.checkAllRulesHaveBeenTest()
-    })
-  })
+  linterTestSuite.finalize()
 })

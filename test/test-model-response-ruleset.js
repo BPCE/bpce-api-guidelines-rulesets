@@ -1,31 +1,7 @@
-const { loadRuleset, SEVERITY, FORMATS, ruleset, rule, isNotRulesetFullyTestedTestSuite, rulesetFullyTestedSuiteName } = require('./common/SpectralTestWrapper.js')
+const linterTestSuite = require('./common/linter-test-suite.js')
 
 describe('model-response', function () {
-  let spectralTestWrapper
-
-  // Loads ruleset file based on the ruleset name set in the ruleset level test suite describe('{ruleset name}')
-  before(async function () {
-    spectralTestWrapper = await loadRuleset(ruleset(this))
-  })
-
-  // Disables all rules except the one indicated in rule level test suite describe('{rule name}'
-  beforeEach(function () {
-    if (isNotRulesetFullyTestedTestSuite(this)) {
-      spectralTestWrapper.disableAllRulesExcept(rule(this))
-    }
-  })
-
-  function checkAlwaysRun () {
-    spectralTestWrapper.checkAlwaysRun()
-  }
-
-  function checkRunOnlyOnOas2 () {
-    spectralTestWrapper.checkRunOnlyOn(FORMATS.oas2)
-  }
-
-  function checkRunOnlyOnOas3 () {
-    spectralTestWrapper.checkRunOnlyOn(FORMATS.oas3)
-  }
+  linterTestSuite.initialize()
 
   function responseSchemaIsDefinedIgnore204And3xx () {
     const document = {
@@ -40,7 +16,7 @@ describe('model-response', function () {
         }
       }
     }
-    spectralTestWrapper.checkNoFoundPath(document)
+    this.linterTester.checkGivenNotFound(document)
   }
 
   function responseSchemaIsDefinedCheck2xx4xx5xx () {
@@ -62,11 +38,11 @@ describe('model-response', function () {
       ['paths', '/some/path', 'anymethod', 'responses', '401'],
       ['paths', '/some/path', 'anymethod', 'responses', '500']
     ]
-    spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths)
+    this.linterTester.checkGivenFound(document, expectedPaths)
   }
 
   describe('response-schema-is-defined-oas2', function () {
-    it('should run only on oas2 document', checkRunOnlyOnOas2)
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.oas2)
 
     it('should ignore 204 and 3xx responses', responseSchemaIsDefinedIgnore204And3xx)
 
@@ -91,7 +67,7 @@ describe('model-response', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if schema is undefined in 2xx, 4xx and 5xx oas2 response', async function () {
@@ -117,13 +93,13 @@ describe('model-response', function () {
         ['paths', '/some/path', 'anymethod', 'responses', '401'],
         ['paths', '/some/path', 'anymethod', 'responses', '500']
       ]
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('response-schema-is-defined-oas3', function () {
-    it('should run only on oas3 document', checkRunOnlyOnOas3)
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.oas3)
 
     it('should ignore 204 and 3xx responses', responseSchemaIsDefinedIgnore204And3xx)
 
@@ -152,7 +128,7 @@ describe('model-response', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if schema is undefined in 2xx, 4xx and 5xx oas3 response', async function () {
@@ -183,13 +159,13 @@ describe('model-response', function () {
         ['paths', '/some/path', 'anymethod', 'responses', '401', 'content'],
         ['paths', '/some/path', 'anymethod', 'responses', '500', 'content', 'application/json']
       ]
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('response-schema-is-not-defined-for-204-or-3xx', function () {
-    it('should run on all formats', checkAlwaysRun)
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
 
     it('should ignore 2xx other than 204, 4xx and 5xx response', function () {
       const document = {
@@ -210,7 +186,7 @@ describe('model-response', function () {
           }
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, rule(this))
+      this.linterTester.checkGivenNotFound(document, this.rule)
     })
 
     it('should check 204 and 3xx response', function () {
@@ -232,7 +208,7 @@ describe('model-response', function () {
         ['paths', '/some/path', 'anymethod', 'responses', '301'],
         ['paths', '/some/path', 'anymethod', 'responses', '302']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths)
+      this.linterTester.checkGivenFound(document, expectedPaths)
     })
 
     it('should return no error if 204 or 3xx response schema is not defined', async function () {
@@ -250,7 +226,7 @@ describe('model-response', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if schema is defined in 204 or 3xx oas2 response', async function () {
@@ -277,8 +253,8 @@ describe('model-response', function () {
         ['paths', '/some/path', 'anymethod', 'responses', '302', 'schema'],
         ['paths', '/some/path', 'anymethod', 'responses', '303', 'schema']
       ]
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return an error if schema is defined in 204 or 3xx oas3 response', async function () {
@@ -306,13 +282,13 @@ describe('model-response', function () {
         ['paths', '/some/path', 'anymethod', 'responses', '302', 'content'],
         ['paths', '/some/path', 'anymethod', 'responses', '303', 'content']
       ]
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('response-schema-is-an-object', function () {
-    it('should run on all formats', checkAlwaysRun)
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
 
     it('should ignore 204 and 3xx response oas2 schema', function () {
       const response = {
@@ -330,7 +306,7 @@ describe('model-response', function () {
           }
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 0)
+      this.linterTester.checkGivenNotFound(document, 0)
     })
 
     it('should check 2xx (except 204), 4xx and 5xx response oas2 schema', function () {
@@ -355,7 +331,7 @@ describe('model-response', function () {
         ['paths', '/some/path', 'anymethod', 'responses', '401', 'schema'],
         ['paths', '/some/path', 'anymethod', 'responses', '500', 'schema']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 0)
+      this.linterTester.checkGivenFound(document, expectedPaths, 0)
     })
 
     it('should ignore 204 and 3xx response application/json oas3 response', function () {
@@ -378,7 +354,7 @@ describe('model-response', function () {
           }
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 1)
+      this.linterTester.checkGivenNotFound(document, 1)
     })
 
     it('should ignore 2xx (except 204), 4xx and 5xx non application/json oas3 response', function () {
@@ -402,7 +378,7 @@ describe('model-response', function () {
           }
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 0)
+      this.linterTester.checkGivenNotFound(document, 0)
     })
 
     it('should check 2xx (except 204), 4xx and 5xx application/json oas3 response', function () {
@@ -431,7 +407,7 @@ describe('model-response', function () {
         ['paths', '/some/path', 'anymethod', 'responses', '401', 'content', 'application/json', 'schema'],
         ['paths', '/some/path', 'anymethod', 'responses', '500', 'content', 'application/json', 'schema']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 1)
+      this.linterTester.checkGivenFound(document, expectedPaths, 1)
     })
 
     it('should return no error if 2xx, 4xx, 5xx oas2 response is an object', async function () {
@@ -459,7 +435,7 @@ describe('model-response', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if 2xx, 4xx, 5xx oas3 response is an object', async function () {
@@ -495,7 +471,7 @@ describe('model-response', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if 2xx, 4xx, 5xx oas2 response is not an object (array or string for example)', async function () {
@@ -530,8 +506,8 @@ describe('model-response', function () {
         ['paths', '/some/path', 'get', 'responses', '404', 'schema', 'type'],
         ['paths', '/some/path', 'get', 'responses', '500', 'schema', 'type']
       ]
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return an error if 2xx, 4xx, 5xx oas3 response is not an object (array or string for example)', async function () {
@@ -584,12 +560,14 @@ describe('model-response', function () {
         ['paths', '/some/path', 'get', 'responses', '404', 'content', 'application/json', 'schema', 'type'],
         ['paths', '/some/path', 'get', 'responses', '500', 'content', 'application/json', 'schema', 'type']
       ]
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('response-error-schema-is-valid', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     const errorSchema = {
       required: ['errors'],
       properties: {
@@ -624,8 +602,6 @@ describe('model-response', function () {
       }
     }
 
-    it('should run on all formats', checkAlwaysRun)
-
     it('should ignore 2xx responses in oas2', function () {
       const document = {
         paths: {
@@ -638,7 +614,7 @@ describe('model-response', function () {
           }
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 0)
+      this.linterTester.checkGivenNotFound(document, 0)
     })
 
     it('should ignore 2xx responses in oas3', function () {
@@ -659,7 +635,7 @@ describe('model-response', function () {
           }
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 1)
+      this.linterTester.checkGivenNotFound(document, 1)
     })
 
     it('should check 4xx and 5xx response schema in oas2', function () {
@@ -680,7 +656,7 @@ describe('model-response', function () {
         ['paths', '/some/path', 'anymethod', 'responses', '400', 'schema'],
         ['paths', '/some/path', 'anymethod', 'responses', '500', 'schema']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 0)
+      this.linterTester.checkGivenFound(document, expectedPaths, 0)
     })
 
     it('should check 4xx and 5xx response schema in oas3', function () {
@@ -707,7 +683,7 @@ describe('model-response', function () {
         ['paths', '/some/path', 'anymethod', 'responses', '400', 'content', 'application/json', 'schema'],
         ['paths', '/some/path', 'anymethod', 'responses', '500', 'content', 'application/json', 'schema']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 1)
+      this.linterTester.checkGivenFound(document, expectedPaths, 1)
     })
 
     it('should return no error if schema matches standard error one on all 4xx and 5xx responses', async function () {
@@ -726,7 +702,7 @@ describe('model-response', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if schema other than for responses 4xx and 5xx do not match error model', async function () {
@@ -741,7 +717,7 @@ describe('model-response', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if schema does not match standard error one on a 4xx or 5xx response', async function () {
@@ -775,13 +751,13 @@ describe('model-response', function () {
         ['paths', '/some/path', 'anymethod', 'responses', '401', 'schema'],
         ['paths', '/some/path', 'anymethod', 'responses', '500', 'schema']
       ]
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('response-collection-schema-is-valid', function () {
-    it('should run on all formats', checkAlwaysRun)
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
 
     it('should ignore get unitary resource 200 response in oas2', function () {
       const pathObject = {
@@ -806,7 +782,7 @@ describe('model-response', function () {
           '/resources/{id}/resources/magic': pathObject
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 0) // get collection oas 2
+      this.linterTester.checkGivenNotFound(document, 0) // get collection oas 2
     })
 
     it('should ignore get unitary resource 200 response in oas3', function () {
@@ -836,8 +812,8 @@ describe('model-response', function () {
           '/resources/{id}/resources/magic': pathObject
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 1) // get collection
-      spectralTestWrapper.checkNoFoundPath(document, 3) // post search
+      this.linterTester.checkGivenNotFound(document, 1) // get collection
+      this.linterTester.checkGivenNotFound(document, 3) // post search
     })
 
     it('should ignore post non search resource 200 response in oas2', function () {
@@ -864,7 +840,7 @@ describe('model-response', function () {
           '/resources/{id}/resources/magic/resources': pathObject
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 2)
+      this.linterTester.checkGivenNotFound(document, 2)
     })
 
     it('should ignore post non search resource 200 response in oas3', function () {
@@ -895,7 +871,7 @@ describe('model-response', function () {
           '/resources/{id}/resources/magic/resources': pathObject
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 3)
+      this.linterTester.checkGivenNotFound(document, 3)
     })
 
     it('should ignore any put, patch, delete collection 200 response in oas2', async function () {
@@ -925,8 +901,8 @@ describe('model-response', function () {
           '/resources/{id}/resources/magic/resources': pathObject
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 0)
-      spectralTestWrapper.checkNoFoundPath(document, 2)
+      this.linterTester.checkGivenNotFound(document, 0)
+      this.linterTester.checkGivenNotFound(document, 2)
     })
 
     it('should ignore any put, patch, delete collection 200 response in oas3', async function () {
@@ -960,8 +936,8 @@ describe('model-response', function () {
           '/resources/{id}/resources/magic/resources': pathObject
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 1)
-      spectralTestWrapper.checkNoFoundPath(document, 3)
+      this.linterTester.checkGivenNotFound(document, 1)
+      this.linterTester.checkGivenNotFound(document, 3)
     })
 
     it('should ignore get collection resource non 200 response in oas2', function () {
@@ -991,7 +967,7 @@ describe('model-response', function () {
           '/resources/{id}/resources/magic/resources': pathObject
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 0)
+      this.linterTester.checkGivenNotFound(document, 0)
     })
 
     it('should ignore get collection resource non 200 response in oas3', function () {
@@ -1025,7 +1001,7 @@ describe('model-response', function () {
           '/resources/{id}/resources/magic/resources': pathObject
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 1)
+      this.linterTester.checkGivenNotFound(document, 1)
     })
 
     it('should ignore post search resource non 200 response in oas2', function () {
@@ -1055,7 +1031,7 @@ describe('model-response', function () {
           '/resources/{id}/resources/magic/resources/search': pathObject
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 2)
+      this.linterTester.checkGivenNotFound(document, 2)
     })
 
     it('should ignore post search resource non 200 response in oas3', function () {
@@ -1089,7 +1065,7 @@ describe('model-response', function () {
           '/resources/{id}/resources/magic/resources/search': pathObject
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 3)
+      this.linterTester.checkGivenNotFound(document, 3)
     })
 
     it('should check get collection 200 response in oas2', function () {
@@ -1127,7 +1103,7 @@ describe('model-response', function () {
         ['paths', '/resources/{id}/resources/{anotherId}-{composite}/resources', 'get', 'responses', '200', 'schema'],
         ['paths', '/resources/{id}/resources/magic/resources', 'get', 'responses', '200', 'schema']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 0)
+      this.linterTester.checkGivenFound(document, expectedPaths, 0)
     })
 
     it('should check get collection 200 response in oas3', function () {
@@ -1169,7 +1145,7 @@ describe('model-response', function () {
         ['paths', '/resources/{id}/resources/{anotherId}-{composite}/resources', 'get', 'responses', '200', 'content', 'application/json', 'schema'],
         ['paths', '/resources/{id}/resources/magic/resources', 'get', 'responses', '200', 'content', 'application/json', 'schema']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 1)
+      this.linterTester.checkGivenFound(document, expectedPaths, 1)
     })
 
     it('should check post search 200 response in oas2', function () {
@@ -1207,7 +1183,7 @@ describe('model-response', function () {
         ['paths', '/resources/{id}/resources/{anotherId}-{composite}/resources/search', 'post', 'responses', '200', 'schema'],
         ['paths', '/resources/{id}/resources/magic/resources/search', 'post', 'responses', '200', 'schema']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 2)
+      this.linterTester.checkGivenFound(document, expectedPaths, 2)
     })
 
     it('should check post search 200 response in oas3', function () {
@@ -1249,7 +1225,7 @@ describe('model-response', function () {
         ['paths', '/resources/{id}/resources/{anotherId}-{composite}/resources/search', 'post', 'responses', '200', 'content', 'application/json', 'schema'],
         ['paths', '/resources/{id}/resources/magic/resources/search', 'post', 'responses', '200', 'content', 'application/json', 'schema']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 3)
+      this.linterTester.checkGivenFound(document, expectedPaths, 3)
     })
 
     it('should return no error if response is an object containing an items list', async function () {
@@ -1276,7 +1252,7 @@ describe('model-response', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error response is an object with items optional additionalInformation or page', async function () {
@@ -1305,7 +1281,7 @@ describe('model-response', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if a get collection 200 response is not an object containing an items list', async function () {
@@ -1335,8 +1311,8 @@ describe('model-response', function () {
         ['paths', '/resources', 'get', 'responses', '200', 'schema', 'properties']
       ]
 
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return an error if response contains unexpected properties besides items, additionalInformation or page', async function () {
@@ -1370,12 +1346,14 @@ describe('model-response', function () {
         ['paths', '/resources', 'get', 'responses', '200', 'schema', 'properties']
       ]
 
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('response-collection-items-schema-is-valid', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     // Note the root of regex have been tested in response-collection-schema-is-valid
 
     it('should check get collection items property schema in oas2', function () {
@@ -1404,7 +1382,7 @@ describe('model-response', function () {
       const expectedPaths = [
         ['paths', '/resources', 'get', 'responses', '200', 'schema', 'properties', 'items', 'items']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 0)
+      this.linterTester.checkGivenFound(document, expectedPaths, 0)
     })
 
     it('should check get collection items property schema in oas3', function () {
@@ -1437,7 +1415,7 @@ describe('model-response', function () {
       const expectedPaths = [
         ['paths', '/resources', 'get', 'responses', '200', 'content', 'application/json', 'schema', 'properties', 'items', 'items']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 1)
+      this.linterTester.checkGivenFound(document, expectedPaths, 1)
     })
 
     it('should check post search items property schema in oas2', function () {
@@ -1466,7 +1444,7 @@ describe('model-response', function () {
       const expectedPaths = [
         ['paths', '/resources/search', 'post', 'responses', '200', 'schema', 'properties', 'items', 'items']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 2)
+      this.linterTester.checkGivenFound(document, expectedPaths, 2)
     })
 
     it('should check get collection items property schema in oas3', function () {
@@ -1499,7 +1477,7 @@ describe('model-response', function () {
       const expectedPaths = [
         ['paths', '/resources/search', 'post', 'responses', '200', 'content', 'application/json', 'schema', 'properties', 'items', 'items']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 3)
+      this.linterTester.checkGivenFound(document, expectedPaths, 3)
     })
 
     it('should return no error if items is an implicit object list', async function () {
@@ -1525,7 +1503,7 @@ describe('model-response', function () {
           '/resources': pathObject
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if items is an explicit object list', async function () {
@@ -1553,7 +1531,7 @@ describe('model-response', function () {
           '/resources': pathObject
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if items is not an object list', async function () {
@@ -1589,12 +1567,14 @@ describe('model-response', function () {
         ['paths', '/resources', 'get', 'responses', '200', 'schema', 'properties', 'items', 'items', 'type']
       ]
 
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('response-collection-additional-information-schema-is-valid', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should check get collection additionalInformation schema in oas2', function () {
       const operationObject = {
         responses: {
@@ -1619,7 +1599,7 @@ describe('model-response', function () {
       const expectedPaths = [
         ['paths', '/resources', 'get', 'responses', '200', 'schema', 'properties', 'additionalInformation']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 0)
+      this.linterTester.checkGivenFound(document, expectedPaths, 0)
     })
 
     it('should check get collection additionalInformation schema in oas3', function () {
@@ -1650,7 +1630,7 @@ describe('model-response', function () {
       const expectedPaths = [
         ['paths', '/resources', 'get', 'responses', '200', 'content', 'application/json', 'schema', 'properties', 'additionalInformation']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 1)
+      this.linterTester.checkGivenFound(document, expectedPaths, 1)
     })
 
     it('should check post search additionalInformation schema in oas2', function () {
@@ -1677,7 +1657,7 @@ describe('model-response', function () {
       const expectedPaths = [
         ['paths', '/resources/search', 'post', 'responses', '200', 'schema', 'properties', 'additionalInformation']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 2)
+      this.linterTester.checkGivenFound(document, expectedPaths, 2)
     })
 
     it('should check get collection additionalInformation schema in oas3', function () {
@@ -1710,7 +1690,7 @@ describe('model-response', function () {
       const expectedPaths = [
         ['paths', '/resources/search', 'post', 'responses', '200', 'content', 'application/json', 'schema', 'properties', 'additionalInformation']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 3)
+      this.linterTester.checkGivenFound(document, expectedPaths, 3)
     })
 
     it('should return no error if additionalInformation is an implicit object', async function () {
@@ -1735,7 +1715,7 @@ describe('model-response', function () {
           '/resources': pathObject
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if additionalInformation is an explicit object', async function () {
@@ -1762,7 +1742,7 @@ describe('model-response', function () {
           '/resources': pathObject
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if additionalInformation is not an object', async function () {
@@ -1795,12 +1775,14 @@ describe('model-response', function () {
         ['paths', '/resources', 'get', 'responses', '200', 'schema', 'properties', 'additionalInformation', 'type']
       ]
 
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('response-collection-page-schema-is-valid', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should check get collection page schema in oas2', function () {
       const operationObject = {
         responses: {
@@ -1825,7 +1807,7 @@ describe('model-response', function () {
       const expectedPaths = [
         ['paths', '/resources', 'get', 'responses', '200', 'schema', 'properties', 'page']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 0)
+      this.linterTester.checkGivenFound(document, expectedPaths, 0)
     })
 
     it('should check get collection page schema in oas3', function () {
@@ -1856,7 +1838,7 @@ describe('model-response', function () {
       const expectedPaths = [
         ['paths', '/resources', 'get', 'responses', '200', 'content', 'application/json', 'schema', 'properties', 'page']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 1)
+      this.linterTester.checkGivenFound(document, expectedPaths, 1)
     })
 
     it('should check post search page schema in oas2', function () {
@@ -1883,7 +1865,7 @@ describe('model-response', function () {
       const expectedPaths = [
         ['paths', '/resources/search', 'post', 'responses', '200', 'schema', 'properties', 'page']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 2)
+      this.linterTester.checkGivenFound(document, expectedPaths, 2)
     })
 
     it('should check get collection page schema in oas3', function () {
@@ -1916,7 +1898,7 @@ describe('model-response', function () {
       const expectedPaths = [
         ['paths', '/resources/search', 'post', 'responses', '200', 'content', 'application/json', 'schema', 'properties', 'page']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 3)
+      this.linterTester.checkGivenFound(document, expectedPaths, 3)
     })
 
     it('should return no error if page is valid index pagination', async function () {
@@ -1962,7 +1944,7 @@ describe('model-response', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if page is valid cursor pagination', async function () {
@@ -2006,7 +1988,7 @@ describe('model-response', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if page is invalid', async function () {
@@ -2037,8 +2019,8 @@ describe('model-response', function () {
         ['paths', '/resources', 'get', 'responses', '200', 'schema', 'properties', 'page', 'properties']
       ]
 
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return an error if page mixes index and cursor pagination', async function () {
@@ -2070,13 +2052,13 @@ describe('model-response', function () {
         ['paths', '/resources', 'get', 'responses', '200', 'schema', 'properties', 'page', 'properties']
       ]
 
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('response-no-empty-required', function () {
-    it('should run on all formats', checkAlwaysRun)
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
 
     it('should ignore any non application/json response in oas3', function () {
       const document = {
@@ -2096,7 +2078,7 @@ describe('model-response', function () {
           }
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 1)
+      this.linterTester.checkGivenNotFound(document, 1)
     })
 
     it('should ignore list items in any non application/json response in oas3', function () {
@@ -2123,7 +2105,7 @@ describe('model-response', function () {
           }
         }
       }
-      spectralTestWrapper.checkNoFoundPath(document, 1)
+      this.linterTester.checkGivenNotFound(document, 1)
     })
 
     it('should check any response in oas2', function () {
@@ -2143,7 +2125,7 @@ describe('model-response', function () {
       const expectedPaths = [
         ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 0)
+      this.linterTester.checkGivenFound(document, expectedPaths, 0)
     })
 
     it('should check any application/json response in oas3', function () {
@@ -2167,7 +2149,7 @@ describe('model-response', function () {
       const expectedPaths = [
         ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'content', 'application/json', 'schema']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 1)
+      this.linterTester.checkGivenFound(document, expectedPaths, 1)
     })
 
     it('should check list items in any response in oas2', function () {
@@ -2193,7 +2175,7 @@ describe('model-response', function () {
       const expectedPaths = [
         ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema', 'properties', 'items', 'items']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 2)
+      this.linterTester.checkGivenFound(document, expectedPaths, 2)
     })
 
     it('should check list items in any application/json response in oas3', function () {
@@ -2210,7 +2192,7 @@ describe('model-response', function () {
                           items: {
                             items: {}
                           }
-                        }    
+                        }
                       }
                     }
                   }
@@ -2223,12 +2205,12 @@ describe('model-response', function () {
       const expectedPaths = [
         ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'content', 'application/json', 'schema', 'properties', 'items', 'items']
       ]
-      spectralTestWrapper.checkExpectedFoundPath(document, expectedPaths, 3)
+      this.linterTester.checkGivenFound(document, expectedPaths, 3)
     })
 
-    it('shoud return no error if response has at least one required propery', async function () {
+    it('should return no error if response has at least one required propery', async function () {
       const schema = {
-        required: [ 'requiredproperty' ],
+        required: ['requiredproperty'],
         properties: {
           requiredproperty: {}
         }
@@ -2246,7 +2228,7 @@ describe('model-response', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if response items is required and list items has at least one required property', async function () {
@@ -2256,7 +2238,7 @@ describe('model-response', function () {
           items: {
             type: 'array',
             items: {
-              required: [ 'requiredproperty' ],
+              required: ['requiredproperty'],
               properties: {
                 requiredproperty: {}
               }
@@ -2277,7 +2259,7 @@ describe('model-response', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return a warning if root required is not defined', async function () {
@@ -2302,8 +2284,8 @@ describe('model-response', function () {
       const errorPaths = [
         ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema']
       ]
-      const errorSeverity = SEVERITY.warn
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.warn
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return a warning if root required is empty', async function () {
@@ -2329,8 +2311,8 @@ describe('model-response', function () {
       const errorPaths = [
         ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema', 'required']
       ]
-      const errorSeverity = SEVERITY.warn
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.warn
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return a warning if root required is ok and items required is not defined', async function () {
@@ -2363,8 +2345,8 @@ describe('model-response', function () {
       const errorPaths = [
         ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema', 'properties', 'items', 'items']
       ]
-      const errorSeverity = SEVERITY.warn
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.warn
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return a warning if root required is ok and items required is empty', async function () {
@@ -2398,8 +2380,8 @@ describe('model-response', function () {
       const errorPaths = [
         ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema', 'properties', 'items', 'items', 'required']
       ]
-      const errorSeverity = SEVERITY.warn
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.warn
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return a warning if root required is not ok and items required is ok', async function () {
@@ -2432,8 +2414,8 @@ describe('model-response', function () {
       const errorPaths = [
         ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema']
       ]
-      const errorSeverity = SEVERITY.warn
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.warn
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return two warnings if root required is not ok and items required is not ok', async function () {
@@ -2466,15 +2448,10 @@ describe('model-response', function () {
         ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema'],
         ['paths', 'anypath', 'anymethod', 'responses', 'anyresponse', 'schema', 'properties', 'items', 'items']
       ]
-      const errorSeverity = SEVERITY.warn
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.warn
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
-  // Checks that all rules have been tested
-  describe(rulesetFullyTestedSuiteName(this), function () {
-    it('should return no untested rule', function () {
-      spectralTestWrapper.checkAllRulesHaveBeenTest()
-    })
-  })
+  linterTestSuite.finalize()
 })

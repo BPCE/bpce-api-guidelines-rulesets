@@ -1,21 +1,11 @@
-const { loadRuleset, SEVERITY, ruleset, rule, isNotRulesetFullyTestedTestSuite, rulesetFullyTestedSuiteName } = require('./common/SpectralTestWrapper.js')
+const linterTestSuite = require('./common/linter-test-suite.js')
 
 describe('http-method', function () {
-  let spectralTestWrapper
-
-  // Loads ruleset file based on the ruleset name set in the ruleset level test suite describe('{ruleset name}')
-  before(async function () {
-    spectralTestWrapper = await loadRuleset(ruleset(this))
-  })
-
-  // Disables all rules except the one indicated in rule level test suite describe('{rule name}'
-  beforeEach(function () {
-    if (isNotRulesetFullyTestedTestSuite(this)) {
-      spectralTestWrapper.disableAllRulesExcept(rule(this))
-    }
-  })
+  linterTestSuite.initialize()
 
   describe('http-method-allowed', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if get, post, patch, put or delete is used', async function () {
       const document = {
         paths: {
@@ -30,7 +20,7 @@ describe('http-method', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if there are path level parameters', async function () {
@@ -48,7 +38,7 @@ describe('http-method', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if there is an x-tension', async function () {
@@ -66,7 +56,7 @@ describe('http-method', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if unauthorized HTTP method is used', async function () {
@@ -89,13 +79,15 @@ describe('http-method', function () {
         ['paths', '/some/path', 'unauthorized'],
         ['paths', '/another/path', 'options']
       ]
-      const errorSeverity = SEVERITY.error
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('http-method-post-only-on-search', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if path does not end with /search and does not use post', async function () {
       const document = {
         paths: {
@@ -104,7 +96,7 @@ describe('http-method', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if path ends with /search and uses only post', async function () {
@@ -115,7 +107,7 @@ describe('http-method', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if path ends with /search, uses only post and has path level paramaters', async function () {
@@ -127,7 +119,7 @@ describe('http-method', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if path ends with /search, uses only post and has path x-tension', async function () {
@@ -139,7 +131,7 @@ describe('http-method', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if path ends with /search and uses post and other http method', async function () {
@@ -156,9 +148,9 @@ describe('http-method', function () {
         ['paths', '/some/path/search', 'get'],
         ['paths', '/some/path/search', 'patch']
       ]
-      const errorSeverity = SEVERITY.error
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return an error if path ends with /search and uses http method other than post', async function () {
@@ -174,13 +166,15 @@ describe('http-method', function () {
         ['paths', '/some/path/search', 'get'],
         ['paths', '/some/path/search', 'patch']
       ]
-      const errorSeverity = SEVERITY.error
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('http-method-no-post-on-unit-resource', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should ignore collections', async function () {
       const document = {
         paths: {
@@ -192,7 +186,7 @@ describe('http-method', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should ignore post /search', async function () {
@@ -206,7 +200,7 @@ describe('http-method', function () {
           }
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return no error if post is not used on unitary resource', async function () {
@@ -226,7 +220,7 @@ describe('http-method', function () {
           '/resources/{id}/resources/me': pathObject
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if post is used on unitary resource', async function () {
@@ -253,15 +247,10 @@ describe('http-method', function () {
         ['paths', '/resources/{id}', 'post'],
         ['paths', '/resources/{id}/resources/me', 'post']
       ]
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPaths, errorSeverity)
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
-  // Checks that all rules have been tested
-  describe(rulesetFullyTestedSuiteName(this), function () {
-    it('should return no untested rule', function () {
-      spectralTestWrapper.checkAllRulesHaveBeenTest()
-    })
-  })
+  linterTestSuite.finalize()
 })

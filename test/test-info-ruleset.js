@@ -1,62 +1,58 @@
-const { loadRuleset, SEVERITY, ruleset, rule, isNotRulesetFullyTestedTestSuite, rulesetFullyTestedSuiteName } = require('./common/SpectralTestWrapper.js')
+const linterTestSuite = require('./common/linter-test-suite.js')
 
 describe('info', function () {
-  let spectralTestWrapper
-
-  before(async function () {
-    spectralTestWrapper = await loadRuleset(ruleset(this))
-  })
-
-  beforeEach(function () {
-    if (isNotRulesetFullyTestedTestSuite(this)) {
-      spectralTestWrapper.disableAllRulesExcept(rule(this))
-    }
-  })
+  linterTestSuite.initialize()
 
   describe('info-defined', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if info is defined', async function () {
       const document = {
         info: {}
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if info is not defined', async function () {
       const document = {}
-      const errorPath = []
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      const errorPaths = []
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('info-name-defined', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if API name is defined in info', async function () {
       const document = {
         info: {
           title: 'some API name'
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if no API name is not defined in info', async function () {
       const document = {
         info: {}
       }
-      const errorPath = ['info']
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      const errorPaths = ['info']
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('info-name-not-contain-api', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if the API name does not contain api', async function () {
       const document = {
         info: {
           title: 'some name'
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if the API name contains API', async function () {
@@ -65,10 +61,10 @@ describe('info', function () {
           title: 'Some API name'
         }
       }
-      const errorPath = ['info', 'title']
-      const errorSeverity = SEVERITY.error
+      const errorPaths = ['info', 'title']
+      const errorSeverity = linterTestSuite.SEVERITY.error
 
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return an error if the API name contains Api', async function () {
@@ -77,9 +73,9 @@ describe('info', function () {
           title: 'Some Api name'
         }
       }
-      const errorPath = ['info', 'title']
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      const errorPaths = ['info', 'title']
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return an error if the API name is API', async function () {
@@ -88,29 +84,31 @@ describe('info', function () {
           title: 'API'
         }
       }
-      const errorPath = ['info', 'title']
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      const errorPaths = ['info', 'title']
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('info-description-provided', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return no error if API description is provided', async function () {
       const document = {
         info: {
           description: 'some description'
         }
       }
-      await spectralTestWrapper.runAndCheckNoError(document)
+      await this.linterTester.runAndCheckNoError(document)
     })
 
     it('should return an error if the API description is not provided', async function () {
       const document = {
         info: {}
       }
-      const errorPath = ['info']
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      const errorPaths = ['info']
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return an error if the API description is empty', async function () {
@@ -119,22 +117,24 @@ describe('info', function () {
           description: ''
         }
       }
-      const errorPath = ['info', 'description']
-      const errorSeverity = SEVERITY.error
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      const errorPaths = ['info', 'description']
+      const errorSeverity = linterTestSuite.SEVERITY.error
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
   describe('info-description-valid-content', function () {
+    linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
     it('should return an error if the API description starts with "this API"', async function () {
       const document = {
         info: {
           description: 'this API allows to do something'
         }
       }
-      const errorPath = ['info', 'description']
-      const errorSeverity = SEVERITY.info
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      const errorPaths = ['info', 'description']
+      const errorSeverity = linterTestSuite.SEVERITY.info
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return an error if the API description starts with "cette API"', async function () {
@@ -143,9 +143,9 @@ describe('info', function () {
           description: 'Cette API permet de faire des choses'
         }
       }
-      const errorPath = ['info', 'description']
-      const errorSeverity = SEVERITY.info
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      const errorPaths = ['info', 'description']
+      const errorSeverity = linterTestSuite.SEVERITY.info
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return an error if the API description starts contains "web service"', async function () {
@@ -154,9 +154,9 @@ describe('info', function () {
           description: 'Some description talking about web services and a few other things'
         }
       }
-      const errorPath = ['info', 'description']
-      const errorSeverity = SEVERITY.info
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      const errorPaths = ['info', 'description']
+      const errorSeverity = linterTestSuite.SEVERITY.info
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
     it('should return an error if the API description starts contains "API"', async function () {
@@ -165,15 +165,11 @@ describe('info', function () {
           description: 'Some description talking about API and a few other things'
         }
       }
-      const errorPath = ['info', 'description']
-      const errorSeverity = SEVERITY.info
-      await spectralTestWrapper.runAndCheckExpectedError(document, rule(this), errorPath, errorSeverity)
+      const errorPaths = ['info', 'description']
+      const errorSeverity = linterTestSuite.SEVERITY.info
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
   })
 
-  describe(rulesetFullyTestedSuiteName(this), function () {
-    it('should return no untested rule', function () {
-      spectralTestWrapper.checkAllRulesHaveBeenTest()
-    })
-  })
+  linterTestSuite.finalize()
 })
