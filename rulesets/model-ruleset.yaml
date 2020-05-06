@@ -4,7 +4,9 @@ rules:
     recommended: true
     description: Definitionname must be in UpperCamelCase
     message: '{{description}} ({{path}})'
-    given: $.definitions
+    given: 
+      - $.definitions
+      - $.components.schemas
     severity: error
     tags:
       - model
@@ -21,7 +23,9 @@ rules:
     recommended: true
     description: Definitionname should not contain number
     message: '{{description}} ({{path}})'
-    given: $.definitions
+    given: 
+      - $.definitions
+      - $.components.schemas
     severity: warn
     tags:
       - model
@@ -35,7 +39,9 @@ rules:
     recommended: true
     description: Definitionname must not contain technical suffix or prefix
     message: '{{description}} ({{path}})'
-    given: $.definitions
+    given: 
+      - $.definitions
+      - $.components.schemas
     severity: error
     tags:
       - model
@@ -102,7 +108,9 @@ rules:
     severity: info
     tags:
       - model
-    given: $.definitions.*
+    given: 
+      - $.definitions.*
+      - $.components.schemas.*
     then:
       - field: required
         function: truthy

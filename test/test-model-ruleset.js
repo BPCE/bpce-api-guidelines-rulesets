@@ -3,8 +3,90 @@ const linterTestSuite = require('./common/linter-test-suite.js')
 describe('model', function () {
   linterTestSuite.initialize()
 
+  function checkSchemasDefinitionsFound () {
+    it('should check oas2 definitions', function () {
+      const document = {
+        definitions: {}
+      }
+      const expectedPaths = [
+        ['definitions']
+      ]
+      const givenIndex = 0
+      this.linterTester.checkGivenFound(document, expectedPaths, givenIndex)
+    })
+
+    it('should check oas3 components.schemas', function () {
+      const document = {
+        components: {
+          schemas: {}
+        }
+      }
+      const expectedPaths = [
+        ['components', 'schemas']
+      ]
+      const givenIndex = 1
+      this.linterTester.checkGivenFound(document, expectedPaths, givenIndex)
+    })
+  }
+
+  function checkPropertiesFound () {
+    it('should check oas2 definitions properties', function () {
+      const document = {
+        definitions: {
+          SomeDefinition: {
+            properties: {}
+          }
+        }
+      }
+      const expectedPaths = [
+        ['definitions', 'SomeDefinition', 'properties']
+      ]
+      const givenIndex = 0
+      this.linterTester.checkGivenFound(document, expectedPaths, givenIndex)
+    })
+
+    it('should check oas3 components.schemas properties', function () {
+      const document = {
+        components: {
+          schemas: {
+            SomeDefinition: {
+              properties: {}
+            }
+          }
+        }
+      }
+      const expectedPaths = [
+        ['components', 'schemas', 'SomeDefinition', 'properties']
+      ]
+      const givenIndex = 0
+      this.linterTester.checkGivenFound(document, expectedPaths, givenIndex)
+    })
+
+    it('should check inner properties', function () {
+      const document = {
+        definitions: {
+          SomeDefinition: {
+            properties: {
+              aProperty: {
+                properties: {}
+              }
+            }
+          }
+        }
+      }
+      const expectedPaths = [
+        ['definitions', 'SomeDefinition', 'properties'],
+        ['definitions', 'SomeDefinition', 'properties', 'aProperty', 'properties']
+      ]
+      const givenIndex = 0
+      this.linterTester.checkGivenFound(document, expectedPaths, givenIndex)
+    })
+  }
+
   describe('schema-name-uppercamelcase', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
+    checkSchemasDefinitionsFound()
 
     it('should return no error if schema name is UpperCamelCased', async function () {
       const document = {
@@ -40,6 +122,8 @@ describe('model', function () {
   describe('schema-name-no-number', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
 
+    checkSchemasDefinitionsFound()
+
     it('should return no error if schema name contains no number', async function () {
       const document = {
         definitions: {
@@ -67,6 +151,8 @@ describe('model', function () {
 
   describe('schema-name-no-technical-prefix-suffix', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
+    checkSchemasDefinitionsFound()
 
     it('should return no error if model name contains no technical suffix or prefix', async function () {
       const document = {
@@ -101,6 +187,8 @@ describe('model', function () {
 
   describe('property-name-lowercamelcase', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
+    checkPropertiesFound()
 
     it('should return no error if property name is lowerCamelCased or is _links', async function () {
       const document = {
@@ -159,6 +247,8 @@ describe('model', function () {
   describe('property-name-no-number', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
 
+    checkPropertiesFound()
+
     it('should return no error if property name contains no number', async function () {
       const document = {
         definitions: {
@@ -215,6 +305,8 @@ describe('model', function () {
 
   describe('property-name-no-technical-prefix-suffix', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
+    checkPropertiesFound()
 
     it('should return no error if property name contains no technical suffix or prefix', async function () {
       const document = {
@@ -273,6 +365,34 @@ describe('model', function () {
   describe('model-empty-required', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
 
+    it('should check oas2 definitions', function () {
+      const document = {
+        definitions: {
+          SomeDefinition: {}
+        }
+      }
+      const expectedPaths = [
+        ['definitions', 'SomeDefinition']
+      ]
+      const givenIndex = 0
+      this.linterTester.checkGivenFound(document, expectedPaths, givenIndex)
+    })
+
+    it('should check oas3 components.schemas', function () {
+      const document = {
+        components: {
+          schemas: {
+            SomeDefinition: {}
+          }
+        }
+      }
+      const expectedPaths = [
+        ['components', 'schemas', 'SomeDefinition']
+      ]
+      const givenIndex = 1
+      this.linterTester.checkGivenFound(document, expectedPaths, givenIndex)
+    })
+
     it('should return no error if model has required properties', async function () {
       const document = {
         definitions: {
@@ -286,21 +406,19 @@ describe('model', function () {
       await this.linterTester.runAndCheckNoError(document)
     })
 
-    it('should return an error if model has no required properties', async function () {
+    it('should return an info if model has empty required or no required', async function () {
       const document = {
         definitions: {
-          SomeSchema: {},
-          AnotherSchema: {
+          SchemaWithoutRequired: {},
+          SchemaWithEmptyRequired: {
             required: []
           }
         }
       }
       const errorPaths = [
-        ['definitions', 'SomeSchema'],
-        ['definitions', 'AnotherSchema', 'required']
+        ['definitions', 'SchemaWithoutRequired'],
+        ['definitions', 'SchemaWithEmptyRequired', 'required']
       ]
-      // Note: you can check multiple paths with const errorsPaths = [ ["one", "path"], ["another", "path"] ]
-      // TODO The expected severity
       const errorSeverity = linterTestSuite.SEVERITY.info
       await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
