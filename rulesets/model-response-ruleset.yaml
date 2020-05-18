@@ -196,10 +196,10 @@ rules:
                                   items:
                                     type: string
                                     enum:
-                                      - body
-                                      - query
-                                      - path
-                                      - header
+                                      - BODY
+                                      - QUERY
+                                      - PATH
+                                      - HEADER
                                   minItems: 4
                                   maxItems: 4
                             additionalInformation:

@@ -61,7 +61,7 @@ exports.initialize = function () {
     linterTester = await loadRuleset(ruleset(this))
     ruleTestsReport = {}
     const linterTesterRules = linterTester.listRuleNames()
-    for ( const rule in linterTesterRules ) {
+    for (const rule in linterTesterRules) {
       ruleTestsReport[linterTesterRules[rule]] = {
         commonTests: false
       }
@@ -82,18 +82,16 @@ exports.initialize = function () {
 exports.commonTests = function (format) {
   it('should run on', function () {
     this.ruleTestsReport[this.rule].commonTests = true
-    if (format === undefined ) {
+    if (format === undefined) {
       throw new Error('Missing format when calling ruleInitialize, oas2, oas3 or all value must be provided')
     }
     if (format.localeCompare(TESTER_FORMATS.oas2) === 0 || format.localeCompare(TESTER_FORMATS.oas3) === 0) {
       this._runnable.title = 'should run only on ' + format + ' document'
       this.linterTester.checkRunOnlyOn(format)
-    }
-    else if (format.localeCompare(TESTER_FORMATS.all) === 0) {
+    } else if (format.localeCompare(TESTER_FORMATS.all) === 0) {
       this._runnable.title = 'should run on any document'
       this.linterTester.checkAlwaysRun()
-    }
-    else {
+    } else {
       throw new Error('Unexpected format provided to ruleInitialize, only oas2, oas3 or all value allowed')
     }
   })
@@ -102,12 +100,11 @@ exports.commonTests = function (format) {
 exports.finalize = function () {
   describe(FINALIZE_RULESET, function () {
     it('should have no untested rule', function () {
-
       this.linterTester.checkAllRulesHaveBeenTest()
     })
 
     it('should have no rule test suite without linterTestSuite.commonTests called', function () {
-      const invalidRuleTestSuite =  []
+      const invalidRuleTestSuite = []
       for (const ruleName in this.ruleTestsReport) {
         if (!this.ruleTestsReport[ruleName].commonTests) {
           invalidRuleTestSuite.push(ruleName)
@@ -115,7 +112,6 @@ exports.finalize = function () {
       }
       assert.deepStrictEqual(invalidRuleTestSuite, [], 'Some rule test suite do not have linterTestSuite.ruleInitialize called')
     })
-
   })
 }
 

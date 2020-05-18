@@ -1,3 +1,7 @@
+// TODO check that each include actually exists
+// TODO check that all files in rulesets are included
+// TODO check that at least one rule of each rule set works or only oas check?
+
 const assert = require('assert')
 const path = require('@stoplight/path')
 const { Spectral, isOpenApiv2, isOpenApiv3 } = require('@stoplight/spectral')

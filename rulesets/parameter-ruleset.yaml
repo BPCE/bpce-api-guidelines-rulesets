@@ -1,20 +1,21 @@
 rules:
 
-  parameter-query-forbidden-on-post-put-patch:
+  parameter-query-forbidden-on-post-put-patch-delete:
     recommended: true
-    description: Query parameter allowed only on get and delete, cannot be used on post, put, patch
+    description: Query parameter allowed only on get, cannot be used on post, put, patch or delete
     message: '{{description}} ({{path}})'
     severity: error
     tags:
       - query parameter
-    given: $.paths.*.[?(@property == 'post' || @property === 'put' || @property === 'patch')].parameters.*
+    given: $.paths.*.[?(@property == 'post' || @property === 'put' || @property === 'patch' || @property === 'delete')].parameters.*
     then:
       - field: in
         function: pattern
         functionOptions:
           notMatch: "^query$"
 
-  parameter-body-forbidden-on-get-delete:
+  parameter-body-forbidden-on-get-delete-oas2:
+    formats: ['oas2']
     recommended: true
     description: Body parameter allowed only on post, patch and put and cannot be used on get or delete
     message: '{{description}} ({{path}})'
@@ -28,6 +29,19 @@ rules:
         functionOptions:
           notMatch: "^body$"
 
+  parameter-body-forbidden-on-get-delete-oas3:
+    formats: ['oas3']
+    recommended: true
+    description: Body parameter allowed only on post, patch and put and cannot be used on get or delete
+    message: '{{description}} ({{path}})'
+    severity: error
+    tags:
+      - body parameter
+    given: $.paths.*.[?(@property == 'get' || @property === 'delete')]
+    then:
+      - field: requestBody
+        function: falsy
+
   parameter-body-is-an-object:
     recommended: true
     description: A JSON body parameter must be an object
@@ -35,7 +49,9 @@ rules:
     severity: error
     tags:
       - body parameter
-    given: $.paths.*.[?(@property == 'post' || @property === 'put' || @property === 'patch')].parameters[?(@.in === 'body')]
+    given: 
+      - $.paths.*.*.parameters[?(@.in === 'body')]
+      - $.paths.*.*.requestBody.content.'application/json'
     then:
       - field: schema
         function: truthy
@@ -54,12 +70,14 @@ rules:
 
   parameter-body-required-properties-on-post-put:
     recommended: true
-    description: A post/put body without any required property is not recommended
+    description: A post/put body without any required property is suspicious (but it can be normal)
     message: '{{description}} ({{path}})'
     severity: warn
     tags:
       - body parameter
-    given: $.paths.*.[?(@property == 'post' || @property === 'put')].parameters[?(@.in === 'body')]
+    given: 
+      - $.paths.*.[?(@property == 'post' || @property === 'put')].parameters[?(@.in === 'body')].schema
+      - $.paths.*.[?(@property == 'post' || @property === 'put')].requestBody.content.'application/json'.schema
     then:
       - field: required
         function: truthy
@@ -76,6 +94,10 @@ rules:
       - $.paths.*.*.parameters[?( @.in === 'query' || @.in === 'body' || @.in === 'path' )].name
       - $.paths.*.parameters[?( @.in === 'query' || @.in === 'body' || @.in === 'path' )].name
     severity: error
+    tags:
+      - query parameter
+      - path parameter
+      - body parameter
     then:
         - function: pattern
           functionOptions:
@@ -89,12 +111,14 @@ rules:
       - $.paths.*.*.parameters[?( @.in === 'query' || @.in === 'body' || @.in === 'path' )].name
       - $.paths.*.parameters[?( @.in === 'query' || @.in === 'body' || @.in === 'path' )].name
     severity: warn
+    tags:
+      - query parameter
+      - path parameter
+      - body parameter
     then:
       - function: pattern
         functionOptions:
           notMatch: "/[0-9]+/i"
-    tags:
-      - property
 
   parameter-path-name-not-id:
     recommended: true
@@ -104,9 +128,86 @@ rules:
       - $.paths.*.*.parameters[?( @.in === 'path' )].name
       - $.paths.*.parameters[?( @.in === 'path' )].name
     severity: warn
+    tags:
+      - path parameter
     then:
       - function: pattern
         functionOptions:
           notMatch: "/^id$/i"
+
+  parameter-query-not-required:
+    recommended: true
+    description: Required query parameter may be a sign of a missing resource and path parameter in path, if not it should be made optional with a default value if it is possible.
+    message: '{{description}} ({{path}})'
+    given: 
+      - $.paths.*.*.parameters[?( @.in === 'query' )].required
+      - $.paths.*.parameters[?( @.in === 'query' )].required
     tags:
-      - parameter
+      - query parameter
+    then:
+      - function: falsy
+  
+  parameter-path-required:
+    recommended: true
+    description: According to OpenAPI 3 and Swagger 2 specification, a path parameter must be required.
+    message: '{{description}} ({{path}})'
+    given: 
+      - $.paths.*.*.parameters[?( @.in === 'path' )]
+      - $.paths.*.parameters[?( @.in === 'path' )]
+    severity: error
+    tags:
+      - path parameter
+    then:
+      - field: required
+        function: truthy
+
+  parameter-header-check-with-reviewer:
+    recommended: true
+    description: As using HTTP headers (even authorized ones) is unusual, their use must be checked with an API Design Reviewer. Consistency with returned headers must be checked too.
+    message: '{{description}} ({{path}})'
+    given: 
+      - $.paths.*.*.parameters.*.in
+      - $.paths.*.parameters.*.in
+    severity: hint
+    tags:
+      - header parameter
+    then:
+      - function: pattern
+        functionOptions:
+          notMatch: "header"
+
+  parameter-header-name-case:
+    recommended: true
+    description: Header parameter names must be in Hyphened-Pascal-Case.
+    message: '{{description}} ({{path}})'
+    given: 
+      - $.paths.*.*.parameters[?( @.in === 'header' )].name
+      - $.paths.*.parameters[?( @.in === 'header' )].name
+    severity: error
+    tags:
+      - header parameter
+    then:
+      - function: casing
+        functionOptions:
+          type: pascal
+          separator:
+            char: "-"
+
+  parameter-header-authorized-name:
+    recommended: true
+    description: Custom HTTP header are not authorized and only a subset of standard HTTP headers are allowed.
+    message: '{{description}} ({{path}})'
+    given: 
+      - $.paths.*.*.parameters[?( @.in === 'header' )].name
+      - $.paths.*.parameters[?( @.in === 'header' )].name
+    severity: error
+    tags:
+      - header parameter
+    then:
+      - function: enumeration
+        functionOptions:
+          values:
+            - Accept
+            - Accept-Datetime
+            - Accept-Language
+    
