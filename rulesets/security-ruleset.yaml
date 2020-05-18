@@ -65,8 +65,12 @@ rules:
       - $.securityDefinitions[?(@.type==='oauth2')]
       - $.components.securitySchemes[?(@.type==='oauth2')].flows.*
     then:
-      field: scopes
-      function: truthy
+      - field: scopes
+        function: truthy
+      - field: scopes
+        function: length
+        functionOptions:
+          min: 1
 
   security-no-api-level:
     recommended: true
@@ -86,8 +90,12 @@ rules:
     severity: error
     tags:
       - security
-    given: $.paths.*[?( @property === 'get' || @property === 'put' || @property === 'post' || @property === 'delete' || @property === 'options' || @property === 'head' || @property === 'patch' || @property === 'trace' )]
-    #$.paths[].*.* # TODO exclude path level parameters or x-tensions
+    # selects everything that is not a HTTP method in a path
+    given: $.paths.*[?(!(/(parameters|^x-)/.test(@property)))] 
     then:
-      field: security
-      function: truthy
+      - field: security
+        function: truthy
+      - field: security
+        function: length
+        functionOptions:
+          min: 1
