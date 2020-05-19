@@ -74,15 +74,17 @@ SpectralTestWrapper.prototype.disableAllRulesExcept = function (name) {
   this.spectral.rules = subRuleset
   this.currentRuleName = name
 
-  // TODO fix that to check rule actual format instead of name
-  // Reseting registered formats and registering oas2 or oas3 format if rule name ends by it
+  // Reseting registered formats and registering oas2 or oas3 format
+  // Allows to use not valid and incomplete documents
   this.spectral.formats = {}
-  if (/oas2$/.test(name)) {
-    this.spectral.registerFormat('oas2', function (document) { return true })
-    this.spectral.registerFormat('oas3', function (document) { return false })
-  } else if (/oas3$/.test(name)) {
-    this.spectral.registerFormat('oas2', function (document) { return false })
-    this.spectral.registerFormat('oas3', function (document) { return true })
+  if (this.originalRuleset[name].formats !== undefined) {
+    if (this.originalRuleset[name].formats.includes('oas2')) {
+      this.spectral.registerFormat('oas2', function (document) { return true })
+      this.spectral.registerFormat('oas3', function (document) { return false })
+    } else if (this.originalRuleset[name].formats.includes('oas3')) {
+      this.spectral.registerFormat('oas2', function (document) { return false })
+      this.spectral.registerFormat('oas3', function (document) { return true })
+    }
   }
 }
 
@@ -141,10 +143,13 @@ SpectralTestWrapper.prototype.checkError = function (actual, expected) {
   // Not checking Spectral message or other value
 }
 
-SpectralTestWrapper.prototype.checkRunOnlyOn = function (expectedFormat) {
+SpectralTestWrapper.prototype.checkRunOnlyOn = function (expectedFormat, disableNameCheck) {
   const rule = this.getCurrentRule()
   assert.deepStrictEqual(rule.formats, [expectedFormat], 'Unexpected rule formats, it should be [' + expectedFormat + ']')
-  assert.strictEqual(this.currentRuleName.endsWith(expectedFormat), true, 'Rule name must end with -' + expectedFormat)
+  // For Spectral standard rules which not use same naming patterns
+  if (!disableNameCheck) {
+    assert.strictEqual(this.currentRuleName.endsWith(expectedFormat), true, 'Rule name must end with -' + expectedFormat)
+  }
 }
 
 SpectralTestWrapper.prototype.checkAlwaysRun = function () {
@@ -275,13 +280,16 @@ SpectralTestWrapper.prototype.runAndCheckNoError = async function (document) {
   this.checkNoError(results)
 }
 
-SpectralTestWrapper.prototype.runAndCheckExpectedError = async function (document, pathOrPaths, severityOrSeverities, codeOrCodes) {
+SpectralTestWrapper.prototype.runAndCheckExpectedError = async function (document, pathOrPaths, severityOrSeverities, codeOrCodes, debugResults) {
   const results = await this.run(document)
   let localCodeOrCodes
   if (codeOrCodes === undefined) {
     localCodeOrCodes = this.currentRuleName
   } else {
     localCodeOrCodes = codeOrCodes
+  }
+  if (debugResults) {
+    console.log(results)
   }
   this.checkExpectedError(results, localCodeOrCodes, pathOrPaths, severityOrSeverities)
 }

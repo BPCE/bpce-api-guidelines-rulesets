@@ -79,7 +79,7 @@ exports.initialize = function () {
   })
 }
 
-exports.commonTests = function (format) {
+exports.commonTests = function (format, standardSpectralRule) {
   it('should run on', function () {
     this.ruleTestsReport[this.rule].commonTests = true
     if (format === undefined) {
@@ -87,7 +87,8 @@ exports.commonTests = function (format) {
     }
     if (format.localeCompare(TESTER_FORMATS.oas2) === 0 || format.localeCompare(TESTER_FORMATS.oas3) === 0) {
       this._runnable.title = 'should run only on ' + format + ' document'
-      this.linterTester.checkRunOnlyOn(format)
+      const disableNameCheck = standardSpectralRule
+      this.linterTester.checkRunOnlyOn(format, disableNameCheck)
     } else if (format.localeCompare(TESTER_FORMATS.all) === 0) {
       this._runnable.title = 'should run on any document'
       this.linterTester.checkAlwaysRun()
@@ -117,3 +118,4 @@ exports.finalize = function () {
 
 exports.SEVERITY = SEVERITY
 exports.FORMATS = TESTER_FORMATS
+exports.STANDARD_SPECTRAL_RULE = true
