@@ -1,5 +1,5 @@
 extends:
-  # These 2 includes are done in oas-ruleset but must be redone here to deactivate oas2&3 rules
+  - oas-ruleset.yaml
   - [spectral:oas, off] 
   - info-ruleset.yaml
   - basepath-ruleset.yaml
