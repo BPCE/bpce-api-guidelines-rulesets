@@ -6,13 +6,6 @@ describe('basepath', function () {
   describe('basepath-defined-oas2', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.oas2)
 
-    it('should ignore missing basepath in oas3 document', async function () {
-      const document = {
-        openapi: '3.0'
-      }
-      await this.linterTester.runAndCheckNoError(document)
-    })
-
     it('should return no error if basepath is defined in oas2 document', async function () {
       const document = {
         swagger: '2.0',
@@ -35,14 +28,7 @@ describe('basepath', function () {
   describe('basepath-defined-oas3', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.oas3)
 
-    it('should ignore missing servers[0].url in oas2 document', async function () {
-      const document = {
-        swagger: '2.0'
-      }
-      await this.linterTester.runAndCheckNoError(document)
-    })
-
-    it('should return no error if servers[0].url is defined in oas3 document', async function () {
+    it('should return no error if servers is defined and not empty', async function () {
       const document = {
         openapi: '3.0',
         servers: [{ url: '/someBasePath' }]
@@ -50,7 +36,7 @@ describe('basepath', function () {
       await this.linterTester.runAndCheckNoError(document)
     })
 
-    it('should return an error if servers[0].url is not defined in oas3 document', async function () {
+    it('should return an error if servers is not defined', async function () {
       const document = {
         openapi: '3.0'
       }
@@ -59,75 +45,84 @@ describe('basepath', function () {
 
       await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
+
+    it('should return an error if servers is empty', async function () {
+      const document = {
+        openapi: '3.0',
+        servers: []
+      }
+      const errorPaths = [
+        ['servers']
+      ]
+      const errorSeverity = linterTestSuite.SEVERITY.error
+
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
+    })
   })
+
+  function checkBasePathGivenFound () {
+    it('should check oas2 basePath', function () {
+      const document = {
+        basePath: ''
+      }
+      const expectedPaths = [
+        ['basePath']
+      ]
+      const givenIndex = 0
+      this.linterTester.checkGivenFound(document, expectedPaths, givenIndex)
+    })
+
+    it('should check all oas3 servers urls', function () {
+      const document = {
+        servers: [
+          { url: '' },
+          { url: '' }
+        ]
+      }
+      const expectedPaths = [
+        ['servers', '0', 'url'],
+        ['servers', '1', 'url']
+      ]
+      const givenIndex = 1
+      this.linterTester.checkGivenFound(document, expectedPaths, givenIndex)
+    })
+  }
 
   describe('basepath-valid-structure', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
 
-    it('should return no error if oas2 basepath is /name/v2', async function () {
-      const document = {
-        basePath: '/name/v2'
-      }
-      await this.linterTester.runAndCheckNoError(document)
-    })
+    checkBasePathGivenFound()
 
-    it('should return no error if oas2 basepath is /some-name/v22', async function () {
-      const document = {
-        basePath: '/some-name/v22'
-      }
-      await this.linterTester.runAndCheckNoError(document)
-    })
-
-    it('should return no error if oas2 basepath is /some_name/v22', async function () {
-      const document = {
-        basePath: '/some_name/v22'
-      }
-      await this.linterTester.runAndCheckNoError(document)
-    })
-
-    it('should return no error if oas2 basepath is /someName/v1', async function () {
-      const document = {
-        basePath: '/someName/v1'
-      }
-      await this.linterTester.runAndCheckNoError(document)
-    })
-
-    it('should return an error if oas2 basepath is /nameWithoutVersion', async function () {
-      const document = {
-        basePath: '/nameWithoutVersion'
-      }
-      const errorPaths = ['basePath']
-      const errorSeverity = linterTestSuite.SEVERITY.error
-
-      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
-    })
-
-    it('should return an error if oas2 basepath is /v1', async function () {
-      const document = {
-        basePath: '/v1'
-      }
-      const errorPaths = ['basePath']
-      const errorSeverity = linterTestSuite.SEVERITY.error
-
-      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
-    })
-
-    it('should return no error if oas3 server url has a valid structure (no need to check all regex cases again)', async function () {
+    it('should return no error if base path has a valid structure', async function () {
       const document = {
         servers: [
-          { url: '/someName/v1' }
+          { url: '/name/v1' },
+          { url: '/someName/v1' },
+          { url: '/some_name/v22' },
+          { url: '/some-name/v234' },
+          { url: 'http://sldcfrgos942.intranet.fr/bamMonitoring/v2' }
         ]
       }
       await this.linterTester.runAndCheckNoError(document)
     })
 
-    it('should return an error if oas3 server url has an invalid structure (no need to check all regex cases again)', async function () {
+    it('should return an error if base path has invalid structure', async function () {
       const document = {
         servers: [
-          { url: '/nameWithoutVersion' }
+          { url: '/nameWithoutVersion' },
+          { url: '/v1' },
+          { url: '/too/many/v1' },
+          { url: 'http://sldcfrgos942.intranet.fr/nameWithoutVersion' },
+          { url: 'http://sldcfrgos942.intranet.fr/v2' }
         ]
       }
-      const errorPaths = ['servers', '0', 'url']
+      const errorPaths = [
+        ['servers', '0', 'url'],
+        ['servers', '1', 'url'],
+        ['servers', '2', 'url'],
+        ['servers', '3', 'url'],
+        ['servers', '4', 'url']
+      ]
       const errorSeverity = linterTestSuite.SEVERITY.error
 
       await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
@@ -137,74 +132,36 @@ describe('basepath', function () {
   describe('basepath-lowerCamelCased', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
 
-    it('should not return no error if oas2 basepath is /lowerCamelCased', async function () {
-      const document = {
-        basePath: '/lowerCamelCased'
-      }
-      await this.linterTester.runAndCheckNoError(document)
-    })
+    checkBasePathGivenFound()
 
-    it('should not return no error if oas2 basepath is /v1', async function () {
-      const document = {
-        basePath: '/v1'
-      }
-      await this.linterTester.runAndCheckNoError(document)
-    })
-
-    it('should not return no error if oas2 basepath is /lowerCamelCased/v1', async function () {
-      const document = {
-        basePath: '/lowerCamelCased/v1'
-      }
-      await this.linterTester.runAndCheckNoError(document)
-    })
-
-    it('should return an error if oas2 basepath is /NotLowerCamelCased', async function () {
-      const document = {
-        basePath: '/NotLowerCamelCased'
-      }
-      const errorPaths = ['basePath']
-      const errorSeverity = linterTestSuite.SEVERITY.error
-
-      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
-    })
-
-    it('should return an error if oas2 basepath is /V1', async function () {
-      const document = {
-        basePath: '/V1'
-      }
-      const errorPaths = ['basePath']
-      const errorSeverity = linterTestSuite.SEVERITY.error
-
-      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
-    })
-
-    it('should return an error if oas2 basepath is /NotLowerCamelCased/V1', async function () {
-      const document = {
-        basePath: '/NotLowerCamelCased/V1'
-      }
-      const errorPaths = ['basePath']
-      const errorSeverity = linterTestSuite.SEVERITY.error
-
-      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
-    })
-
-    it('should return no error if oas3 server url is lowerCamelCased (no need to check all regex cases again)', async function () {
+    it('should not return no error if base path is lowerCamelCased', async function () {
       const document = {
         servers: [
-          { url: '/lowerCamelCased/v1' }
+          { url: '/lowerCamelCased' },
+          { url: '/lower' },
+          { url: '/lower/lowerCamelCased' },
+          { url: 'http://sldcfrgos942.intranet.fr/bamMonitoring/v2' },
+          { url: 'http://SERVER.intranet.fr/bamMonitoring/v2' }
         ]
       }
-
       await this.linterTester.runAndCheckNoError(document)
     })
 
-    it('should return an error if oas3 server url is not lowerCamelCased (no need to check all regex cases again)', async function () {
+    it('should return an error if base path is not lowerCamelCased', async function () {
       const document = {
         servers: [
-          { url: '/NotLowerCamelCased/V1' }
+          { url: '/NotLowerCamelCased' },
+          { url: '/Not' },
+          { url: '/lower/NotLowerCamelCased' },
+          { url: 'http://sldcfrgos942.intranet.fr/BAMMonitoring/v2' }
         ]
       }
-      const errorPaths = ['servers', '0', 'url']
+      const errorPaths = [
+        ['servers', '0', 'url'],
+        ['servers', '1', 'url'],
+        ['servers', '2', 'url'],
+        ['servers', '3', 'url']
+      ]
       const errorSeverity = linterTestSuite.SEVERITY.error
 
       await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
@@ -214,14 +171,16 @@ describe('basepath', function () {
   describe('basepath-no-trailing-slash', async function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
 
-    it('should return no error if oas2 basepath has no trailing slash', async function () {
+    checkBasePathGivenFound()
+
+    it('should return no error if basepath has no trailing slash', async function () {
       const document = {
         basePath: '/no-trailing-slash'
       }
       await this.linterTester.runAndCheckNoError(document)
     })
 
-    it('should return an error if oas2 basepath has a trailing slash', async function () {
+    it('should return an error if basepath has a trailing slash', async function () {
       const document = {
         basePath: '/forbidden-trailing-slash/'
       }
@@ -231,28 +190,11 @@ describe('basepath', function () {
       await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
 
-    it('should return an error if oas2 basepath is just slash', async function () {
+    it('should return an error if basepath is just slash', async function () {
       const document = {
         basePath: '/'
       }
       const errorPaths = ['basePath']
-      const errorSeverity = linterTestSuite.SEVERITY.error
-
-      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
-    })
-
-    it('should return no error if oas3 server url has no trailing slash', async function () {
-      const document = {
-        servers: [{ url: '/no-trailing-slash' }]
-      }
-      await this.linterTester.runAndCheckNoError(document)
-    })
-
-    it('should return an error if oas3 server url has a trailing slash (no need to check all regex cases again)', async function () {
-      const document = {
-        servers: [{ url: '/forbidden-trailing-slash/' }]
-      }
-      const errorPaths = ['servers', '0', 'url']
       const errorSeverity = linterTestSuite.SEVERITY.error
 
       await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
@@ -262,14 +204,16 @@ describe('basepath', function () {
   describe('basepath-no-api', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
 
-    it('should return no error if oas2 basepath does not contain api', async function () {
+    checkBasePathGivenFound()
+
+    it('should return no error if base path does not contain api', async function () {
       const document = {
         basePath: '/some/path'
       }
       await this.linterTester.runAndCheckNoError(document)
     })
 
-    it('should return an error if oas2 basepath contains api', async function () {
+    it('should return an error if base path contains api', async function () {
       const document = {
         basePath: '/api/path'
       }
@@ -278,27 +222,25 @@ describe('basepath', function () {
 
       await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
     })
-
-    it('should return no error if oas3 server url does not contain api', async function () {
-      const document = {
-        servers: [{ url: '/some/path' }]
-      }
-      await this.linterTester.runAndCheckNoError(document)
-    })
-
-    it('should return an error if oas3 server url contains api', async function () {
-      const document = {
-        servers: [{ url: '/api/path' }]
-      }
-      const errorPaths = ['servers', '0', 'url']
-      const errorSeverity = linterTestSuite.SEVERITY.error
-
-      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
-    })
   })
+
+  function checkGivenPath () {
+    it('should check paths', function () {
+      const document = {
+        paths: {}
+      }
+      const expectedPaths = [
+        ['paths']
+      ]
+      const givenIndex = 0
+      this.linterTester.checkGivenFound(document, expectedPaths, givenIndex)
+    })
+  }
 
   describe('basepath-not-in-path', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
+    checkGivenPath()
 
     it('should return no error if path does not contain basepath', async function () {
       const document = {
@@ -324,6 +266,8 @@ describe('basepath', function () {
 
   describe('basepath-version-not-in-path', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.all)
+
+    checkGivenPath()
 
     it('should return no error if path does not contain version', async function () {
       const document = {

@@ -1,10 +1,10 @@
-extends:
-  - [spectral:oas, off]
+#extends:
+#  - [spectral:oas, off]
 rules:
   basepath-defined-oas2:
     formats: ["oas2"]
     recommended: true
-    description: Base path must be defined
+    description: Base path must be defined in basePath
     message: "{{description}} (#/basePath) {{path}}"
     severity: error
     tags:
@@ -17,7 +17,7 @@ rules:
   basepath-defined-oas3:
     formats: ["oas3"]
     recommended: true
-    description: Base path must be defined by a single item in servers
+    description: Base path must be defined in at least a server in servers
     message: "{{description}} (#/servers)  {{path}}"
     severity: error
     tags:
@@ -29,7 +29,7 @@ rules:
       - field: servers
         function: length
         functionOptions:
-          value: 1
+          min: 1
 
   basepath-valid-structure:
     recommended: true
@@ -44,7 +44,7 @@ rules:
     then:
       function: pattern
       functionOptions:
-        match: "/^\/[a-z0-9_-]+\/(v)[0-9]+$/i"
+        match: "/^(https?:\/\/[a-zA-Z0-9_.:]+)?\/[a-z0-9_-]+\/(v)[0-9]+$/i"
   
   basepath-lowerCamelCased:
     recommended: true
@@ -60,7 +60,7 @@ rules:
       function: pattern
       functionOptions:
         # added / use case to avoid having it trigger this rule
-        match: "(^\/$)|(^(\/[a-z0-9]+([A-Z0-9][a-z0-9]+)*)+$)"
+        match: "(^\/$)|(^(https?:\/\/[a-zA-Z0-9_.:]+)?(\/[a-z0-9]+([A-Z0-9][a-z0-9]+)*)+$)"
 
   basepath-no-trailing-slash:
     recommended: true
