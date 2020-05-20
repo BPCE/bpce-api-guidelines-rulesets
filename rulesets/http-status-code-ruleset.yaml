@@ -98,6 +98,7 @@ rules:
             - '403'
             - '404'
             - '500'
+            - '503'
 
   http-status-code-put:
     recommended: true
@@ -118,6 +119,7 @@ rules:
             - '403'
             - '404'
             - '500'
+            - '503'
 
   http-status-code-patch:
     recommended: true
@@ -139,6 +141,7 @@ rules:
             - '403'
             - '404'
             - '500'
+            - '503'
 
   http-status-code-delete:
     recommended: true
@@ -160,6 +163,7 @@ rules:
             - '403'
             - '404'
             - '500'
+            - '503'
 
   http-status-code-post:
     recommended: true
@@ -182,6 +186,7 @@ rules:
             - '403'
             - '404'
             - '500'
+            - '503'
 
   http-status-code-post-search:
     recommended: true
@@ -202,6 +207,7 @@ rules:
             - '403'
             - '404'
             - '500'
+            - '503'
 
   http-status-code-post-unusual-200:
     recommended: true
