@@ -346,32 +346,40 @@ rules:
                     properties:
                       pageSize:
                         type: object
+                        additionalProperties: true
                         properties:
                           type:
                             type: string
                             enum: 
                               - number
+                              - integer
                       pageNumber:
                         type: object
+                        additionalProperties: true
                         properties:
                           type:
                             type: string
                             enum: 
                               - number
+                              - integer
                       totalElements:
                         type: object
+                        additionalProperties: true
                         properties:
                           type:
                             type: string
                             enum: 
                               - number
+                              - integer
                       totalPages:
                         type: object
+                        additionalProperties: true
                         properties:
                           type:
                             type: string
                             enum: 
                               - number
+                              - integer
               - type: object
                 properties:
                   properties:

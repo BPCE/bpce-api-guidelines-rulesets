@@ -136,8 +136,9 @@ describe('model', function () {
     it('should return an error if schema name contains a number', async function () {
       const document = {
         definitions: {
-          Some1Schema: {},
-          SomeSchema1: {}
+          SomeSchema: {}, // no error
+          Some1Schema: {}, // error
+          SomeSchema1: {} // error
         }
       }
       const errorPaths = [
@@ -297,6 +298,27 @@ describe('model', function () {
       const errorPaths = [
         ['definitions', 'SomeSchema', 'properties', 'someProperty1'],
         ['definitions', 'AnotherSchema', 'properties', 'someProperty', 'properties', 'another1Property']
+      ]
+      const errorSeverity = linterTestSuite.SEVERITY.warn
+      await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
+    })
+
+    it('should return test', async function () {
+      const document = {
+        definitions: {
+          SomeDefinition: {
+            properties: {
+              aProperty: {
+                properties: {
+                  notional2: {}
+                }
+              }
+            }
+          }
+        }
+      }
+      const errorPaths = [
+        ['definitions', 'SomeDefinition', 'properties', 'aProperty', 'properties', 'notional2']
       ]
       const errorSeverity = linterTestSuite.SEVERITY.warn
       await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)

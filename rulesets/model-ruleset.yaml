@@ -75,6 +75,7 @@ rules:
     message: '{{description}} ({{path}})'
     given: $..properties
     severity: warn
+    resolved: false
     then:
       - field: "@key"
         function: pattern
