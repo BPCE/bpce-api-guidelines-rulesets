@@ -25,8 +25,9 @@ See [Spectral documentation](https://stoplight.io/p/docs/gh/stoplightio/spectral
 
 Checking compliance to Natixis API Design guidelines is done using the `rulesets/main-ruleset.yaml` ruleset file.
 
+> spectral lint -r __`<path to ruleset>`__ __`<path to Swagger or OpenAPI file in JSON or YAML format>`__
+
 ```sh
-spectral lint -r <path to ruleset> <path to Swagger or OpenAPI file in JSON or YAML format>
 spectral lint -r rulesets/main-ruleset.yaml samples/example-swagger.yaml
 ```
 
@@ -85,7 +86,7 @@ npm run test
 
 You can also run a specific test file using:
 
+> mocha test/__`<filename>`__
 ```sh
-mocha test/<filename>
 mocha test/test-info-ruleset.js
 ```
