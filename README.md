@@ -4,11 +4,11 @@
 
 Using Stoplight's Spectral and the Natixis API Design ruleset, you can ensure that an API design (provided as a Swagger 2.0 or OpenAPI 3 JSON or YAML file) is compliant with [Natixis API Design Guidelines](https://confluence.mycloud.intranatixis.com/display/EAPI89C3R/API+REST+-+Design+Guidelines). The ruleset is a work in progress and does not check yet all of our API Design Guidelines rules.
 
-:red_circle:  **Linting an API description only ensures that the form of the API is compliant with our guidelines but does ensure that it is accurate, fully consistent and user friendly.**  
+> :red_circle: **Linting an API description only ensures that the form of the API is compliant with our guidelines but does ensure that it is accurate, fully consistent and user friendly.**  
 **That's why, even linted, an API design must always be reviewed by the Natixis 89C3R API Team.**  
 
-## Usage :on:
 ----------
+## Usage :on:
 
 
 ### Spectral installation
@@ -37,8 +37,8 @@ Output can be turned into JSON using the -f flag:
 spectral lint -f json -r rulesets/main-ruleset.yaml samples/example-swagger.yaml
 ```
 
-## Development :construction_worker:
 ----------
+## Development :construction_worker:
 
 ### Setting up development environment
 
