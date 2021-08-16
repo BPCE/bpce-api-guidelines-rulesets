@@ -7,4 +7,5 @@
     },
     "jshint.enable": false,
     "files.trimTrailingWhitespace": true,
+    "mochaExplorer.ignore": "test/documentation/**"
 }
