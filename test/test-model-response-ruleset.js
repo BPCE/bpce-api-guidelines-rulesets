@@ -16,7 +16,7 @@ describe('model-response', function () {
         }
       }
     }
-    this.linterTester.checkGivenNotFound(document)
+    this.linterTester.checkGivenNotFound(document, 0)
   }
 
   function responseSchemaIsDefinedCheck2xx4xx5xx () {
@@ -38,7 +38,7 @@ describe('model-response', function () {
       ['paths', '/some/path', 'anymethod', 'responses', '401'],
       ['paths', '/some/path', 'anymethod', 'responses', '500']
     ]
-    this.linterTester.checkGivenFound(document, expectedPaths)
+    this.linterTester.checkGivenFound(document, expectedPaths, 0)
   }
 
   describe('response-schema-is-defined-oas2', function () {
@@ -186,7 +186,7 @@ describe('model-response', function () {
           }
         }
       }
-      this.linterTester.checkGivenNotFound(document, this.rule)
+      this.linterTester.checkGivenNotFound(document, 0)
     })
 
     it('should check 204 and 3xx response', function () {
@@ -208,7 +208,7 @@ describe('model-response', function () {
         ['paths', '/some/path', 'anymethod', 'responses', '301'],
         ['paths', '/some/path', 'anymethod', 'responses', '302']
       ]
-      this.linterTester.checkGivenFound(document, expectedPaths)
+      this.linterTester.checkGivenFound(document, expectedPaths, 0)
     })
 
     it('should return no error if 204 or 3xx response schema is not defined', async function () {

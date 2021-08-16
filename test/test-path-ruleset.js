@@ -11,7 +11,7 @@ describe('path', function () {
       const expectedPaths = [
         ['paths']
       ]
-      const givenIndex = undefined
+      const givenIndex = 0
       this.linterTester.checkGivenFound(document, expectedPaths, givenIndex)
     })
   }
