@@ -14,8 +14,8 @@ describe('{ruleset name}', function () {
     linterTestSuite.commonTests(linterTestSuite.FORMATS.xxx) // TODO Set on which format rule should run oas2/oas3/all
 
     // TODO 2 - Verify ALL given JSON paths
-    // There must be at least a "should check ..." and there should be at least on "should ignore" for each rule's given JSON path 
-  
+    // There must be at least a "should check ..." and there should be at least on "should ignore" for each rule's given JSON path
+
     // TODO 2.1 - Depending on JSON path complexity, you should check that some elements are actually ignored by the rule's given(s)
     it('should ignore {something}', function () {
       const document = {
@@ -26,7 +26,7 @@ describe('{ruleset name}', function () {
       const givenIndex = 0
       this.linterTester.checkGivenNotFound(document, givenIndex) // if rule's given is not array, givenIndex is not needed
     })
-  
+
     // TODO 2.2 - Depending on JSON path complexity, you should check 1 to multiple use case
     it('should check {something}', function () {
       const document = {
@@ -43,7 +43,7 @@ describe('{ruleset name}', function () {
 
     // TODO 3 - Check rule's "then"
 
-    // TODO 3.1 Check OK use cases (as many "it" as needed) 
+    // TODO 3.1 Check OK use cases (as many "it" as needed)
     it('should return no error if {use case}', async function () {
       // Valid document (partial one with minimal data to test rule)
       const document = {
