@@ -156,7 +156,7 @@ describe('main', function () {
         paths: {}
       }
       const errorPaths = [
-        ['info']
+        ['info', 'descriptionn']
       ]
       const errorSeverity = linterTestSuite.SEVERITY.error
       await this.linterTester.runAndCheckExpectedError(document, errorPaths, errorSeverity)
