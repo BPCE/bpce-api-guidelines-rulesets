@@ -101,6 +101,8 @@ SpectralTestWrapper.prototype.getCurrentRule = function () {
 SpectralTestWrapper.prototype.listUntestedRules = function () {
   const untestedRules = []
   for (const ruleName in this.originalRuleset) {
+    // avoid list run disabled
+    if (!this.originalRuleset[ruleName].enabled) { continue }
     // disabled rules have -1 severity
     if (this.originalRuleset[ruleName].severity >= 0 && !this.testedRules.includes(ruleName)) {
       untestedRules.push(ruleName)
@@ -112,6 +114,8 @@ SpectralTestWrapper.prototype.listUntestedRules = function () {
 SpectralTestWrapper.prototype.listRuleNames = function () {
   const names = []
   for (const ruleName in this.originalRuleset) {
+    // avoid list run disabled
+    if (!this.originalRuleset[ruleName].enabled) { continue }
     // disabled rules have -1 severity
     if (this.originalRuleset[ruleName].severity >= 0) {
       names.push(ruleName)
