@@ -32,6 +32,12 @@ pipeline  {
             }
         }
 
+        stage('Lint') {
+            steps {
+                sh 'npx standard "test/*.js" --env mocha'
+            }
+        }
+
     }
     post {
         success {
