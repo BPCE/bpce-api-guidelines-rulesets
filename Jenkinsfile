@@ -47,7 +47,7 @@ pipeline  {
                 cleanWs()
                 checkout([$class: 'GitSCM', branches: [[name: '${BRANCH_REF}']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CloneOption', noTags: false, reference: '', shallow: false]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'git_credential', url: 'https://bitbucket-mut.d.bbg/scm/eapi89c3r/api-linter.git']]])
                 notifyBitbucket buildName: "${BUILD_NUMBER}", buildStatus: 'INPROGRESS', commitSha1: '', considerUnstableAsSuccess: false, credentialsId: 'git_credential', disableInprogressNotification: false, ignoreUnverifiedSSLPeer: true, includeBuildNumberInKey: false, prependParentProjectKey: false, projectKey: '', stashServerBaseUrl: 'https://bitbucket.mycloud.intranatixis.com'
-                buildName("${PR_AUTHOR}-${BRANCH_NAME}")
+                buildName("${BUILD_NUMBER}-${PR_AUTHOR}-${BRANCH_NAME}-${PR_VERSION}")
             }
         }
 
