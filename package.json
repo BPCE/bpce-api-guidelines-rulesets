@@ -12,6 +12,7 @@
     "@stoplight/spectral": "^5.9.2",
     "jsonpath-plus": "^3.0.0",
     "mocha": "^6.2.2",
+    "mocha-junit-reporter": "^2.0.0",
     "standard": "^16.0.1",
     "tslib": "^2.3.1"
   },

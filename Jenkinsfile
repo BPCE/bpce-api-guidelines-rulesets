@@ -38,8 +38,16 @@ pipeline  {
             }
         }
 
+        stage('Test') {
+            steps {
+                sh 'npx mocha --reporter mocha-junit-reporter'
+            }
+        }
     }
     post {
+        always {
+            junit 'test-results.xml'
+        }
         success {
             notifyBitbucket buildName: "${BUILD_NUMBER}", buildStatus: 'SUCCESSFUL', commitSha1: '', considerUnstableAsSuccess: false, credentialsId: 'git_credential', disableInprogressNotification: false, ignoreUnverifiedSSLPeer: true, includeBuildNumberInKey: false, prependParentProjectKey: false, projectKey: '', stashServerBaseUrl: 'https://bitbucket.mycloud.intranatixis.com'
         }
