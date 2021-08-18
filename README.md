@@ -78,6 +78,7 @@ What follows only explains how this repo works.
 
 ### Testing :passport_control:
 
+[![JavaScript Mocha Test](https://raw.githubusercontent.com/mochajs/mocha/master/assets/mocha-logo-64.png)](https://github.com/mochajs/mocha)
 Run the following command to check that everything is ok
 
 ```sh
