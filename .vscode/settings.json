@@ -1,0 +1,11 @@
+{
+    "javascript.validate.enable": false,
+    "standard.options": {
+        "ignore": [
+        "node_modules/**"
+        ]
+    },
+    "jshint.enable": false,
+    "files.trimTrailingWhitespace": true,
+    "mochaExplorer.ignore": "test/documentation/**"
+}
