@@ -4,7 +4,6 @@ describe('{ruleset name}', function () {
   linterTestSuite.initialize()
 
   describe('{rule name}', function () {
-
     linterTestSuite.commonTests(linterTestSuite.FORMATS.xxx)
 
     it('should ignore {something}', function () {

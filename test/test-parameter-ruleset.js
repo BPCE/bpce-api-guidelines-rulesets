@@ -21,7 +21,7 @@ describe('parameter', function () {
           }
         }
       }
-      const givenIndex = undefined
+      const givenIndex = 0
       this.linterTester.checkGivenNotFound(document, givenIndex)
     })
 
@@ -117,7 +117,7 @@ describe('parameter', function () {
           }
         }
       }
-      const givenIndex = undefined
+      const givenIndex = 0
       this.linterTester.checkGivenNotFound(document, givenIndex)
     })
 
@@ -199,7 +199,7 @@ describe('parameter', function () {
           }
         }
       }
-      const givenIndex = undefined
+      const givenIndex = 0
       this.linterTester.checkGivenNotFound(document, givenIndex)
     })
 

@@ -280,7 +280,7 @@ describe('security', function () {
           }
         }
       }
-      const givenIndex = undefined
+      const givenIndex = 0
       this.linterTester.checkGivenNotFound(document, givenIndex)
     })
 
@@ -303,7 +303,7 @@ describe('security', function () {
         ['paths', 'path', 'patch'],
         ['paths', 'path', 'delete']
       ]
-      const givenIndex = undefined
+      const givenIndex = 0
       this.linterTester.checkGivenFound(document, expectedPaths, givenIndex)
     })
 
