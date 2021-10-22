@@ -13,7 +13,7 @@ rules:
     given: "$.paths.*[?( @property === 'get' || @property === 'put' || @property === 'post' || @property === 'delete' || @property === 'options' || @property === 'head' || @property === 'patch' || @property === 'trace' )]"
     then:
       - field: responses
-        function: oasOp2xxResponse
+        function: oasOpSuccessResponse
 
   http-status-code-mandatory-401:
     recommended: true
