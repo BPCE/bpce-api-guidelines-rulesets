@@ -223,8 +223,8 @@ rules:
     tags:
       - model response
     given:
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema # oas2
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.content.'application/json'.schema # oas3
+      - $.paths[?(/({[a-zA-Z0-9_]+})$/i.test(@property))].get.responses.200.schema # oas2
+      - $.paths[?(/({[a-zA-Z0-9_]+})$/i.test(@property))].get.responses.200.content.'application/json'.schema # oas3
       - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema # oas2
       - $.paths[?(/\/search$/.test(@property))].post.responses.200.content.'application/json'.schema # oas3
     then:
@@ -272,8 +272,8 @@ rules:
       - model response
     given:
       # Same regex as response-collection-schema-is-valid, no need to test again that part
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema.properties.items.items # oas2
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.content.'application/json'.schema.properties.items.items # oas3
+      - $.paths[?(/({[a-zA-Z0-9_]+})$/i.test(@property))].get.responses.200.schema.properties.items.items # oas2
+      - $.paths[?(/({[a-zA-Z0-9_]+})$/i.test(@property))].get.responses.200.content.'application/json'.schema.properties.items.items # oas3
       - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema.properties.items.items # oas2
       - $.paths[?(/\/search$/.test(@property))].post.responses.200.content.'application/json'.schema.properties.items.items # oas3
     then:
@@ -298,8 +298,8 @@ rules:
       - model response
     given:
       # Same regex as response-collection-schema-is-valid, no need to test again that part
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema.properties.additionalInformation
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.content.'application/json'.schema.properties.additionalInformation
+      - $.paths[?(/({[a-zA-Z0-9_]+})$/i.test(@property))].get.responses.200.schema.properties.additionalInformation
+      - $.paths[?(/({[a-zA-Z0-9_]+})$/i.test(@property))].get.responses.200.content.'application/json'.schema.properties.additionalInformation
       - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema.properties.additionalInformation
       - $.paths[?(/\/search$/.test(@property))].post.responses.200.content.'application/json'.schema.properties.additionalInformation
     then:
@@ -324,8 +324,8 @@ rules:
       - model response
     given:
       # Same regex as response-collection-schema-is-valid, no need to test again that part
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema.properties.page
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.content.'application/json'.schema.properties.page
+      - $.paths[?(/({[a-zA-Z0-9_]+})$/i.test(@property))].get.responses.200.schema.properties.page
+      - $.paths[?(/({[a-zA-Z0-9_]+})$/i.test(@property))].get.responses.200.content.'application/json'.schema.properties.page
       - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema.properties.page
       - $.paths[?(/\/search$/.test(@property))].post.responses.200.content.'application/json'.schema.properties.page
     then:
