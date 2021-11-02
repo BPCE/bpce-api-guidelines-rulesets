@@ -1,0 +1,12 @@
+extends:
+  - [spectral:oas, off]
+  - https://bitbucket-mut.d.bbg/projects/EAPI89C3R/repos/api-linter/raw/rulesets/oas-ruleset.yaml
+  - https://bitbucket-mut.d.bbg/projects/EAPI89C3R/repos/api-linter/raw/rulesets/info-ruleset.yaml
+  - https://bitbucket-mut.d.bbg/projects/EAPI89C3R/repos/api-linter/raw/rulesets/basepath-ruleset.yaml
+  - https://bitbucket-mut.d.bbg/projects/EAPI89C3R/repos/api-linter/raw/rulesets/path-ruleset.yaml
+  - https://bitbucket-mut.d.bbg/projects/EAPI89C3R/repos/api-linter/raw/rulesets/http-method-ruleset.yaml
+  - https://bitbucket-mut.d.bbg/projects/EAPI89C3R/repos/api-linter/raw/rulesets/http-status-code-ruleset.yaml
+  - https://bitbucket-mut.d.bbg/projects/EAPI89C3R/repos/api-linter/raw/rulesets/parameter-ruleset.yaml
+  - https://bitbucket-mut.d.bbg/projects/EAPI89C3R/repos/api-linter/raw/rulesets/model-ruleset.yaml
+  - https://bitbucket-mut.d.bbg/projects/EAPI89C3R/repos/api-linter/raw/rulesets/model-response-ruleset.yaml
+  - https://bitbucket-mut.d.bbg/projects/EAPI89C3R/repos/api-linter/raw/rulesets/security-ruleset.yaml
