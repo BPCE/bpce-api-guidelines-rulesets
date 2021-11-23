@@ -1,6 +1,6 @@
 const assert = require('assert')
 const { JSONPath } = require('jsonpath-plus')
-const { Spectral, isOpenApiv2, isOpenApiv3 } = require('@stoplight/spectral')
+const { Spectral } = require('@stoplight/spectral-core')
 
 const SEVERITY = {
   off: -1,
@@ -32,8 +32,6 @@ function SpectralTestWrapper (oasFormat) {
   // TODO Check when testing main if this is style necessary
   switch (oasFormat) {
     case 'auto':
-      this.spectral.registerFormat('oas2', isOpenApiv2)
-      this.spectral.registerFormat('oas3', isOpenApiv3)
       break
     case 'forceOas2':
       this.spectral.registerFormat('oas2', function (document) { return true })

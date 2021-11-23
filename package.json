@@ -9,10 +9,11 @@
   "author": "Arnaud Lauret",
   "license": "ISC",
   "devDependencies": {
-    "@stoplight/spectral": "^5.9.2",
-    "jsonpath-plus": "^3.0.0",
-    "mocha": "^6.2.2",
-    "mocha-junit-reporter": "^2.0.0",
+    "@stoplight/spectral-core": "^1.6.0",
+    "ajv": "^8.6.3",
+    "jsonpath-plus": "^6.0.1",
+    "mocha": "^9.1.3",
+    "mocha-junit-reporter": "^2.0.2",
     "standard": "^16.0.1",
     "tslib": "^2.3.1"
   },

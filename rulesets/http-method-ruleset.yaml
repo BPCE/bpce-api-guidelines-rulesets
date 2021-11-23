@@ -34,7 +34,7 @@ rules:
     severity: error
     tags:
       - http method
-    given: $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?(\/[a-z0-9\-_]+\/(?!search)[a-z0-9\-_{}]+)+$/i.test(@property))]
+    given: $.paths[?(/({[a-zA-Z0-9_]+})$/i.test(@property))]
     then:
       - field: "@key"
         function: pattern

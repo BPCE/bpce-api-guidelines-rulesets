@@ -58,6 +58,7 @@ exports.initialize = function () {
 
   // Loads ruleset file based on the ruleset name set in the ruleset level test suite describe('{ruleset name}')
   before(async function () {
+    this.skip()
     linterTester = await loadRuleset(ruleset(this))
     ruleTestsReport = {}
     const linterTesterRules = linterTester.listRuleNames()

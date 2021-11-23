@@ -5,11 +5,20 @@
 Using Stoplight's Spectral and the Natixis API Design ruleset, you can ensure that an API design (provided as a Swagger 2.0 or OpenAPI 3 JSON or YAML file) is compliant with [Natixis API Design Guidelines](https://confluence.mycloud.intranatixis.com/display/EAPI89C3R/API+REST+-+Design+Guidelines). The ruleset is a work in progress and does not check yet all of our API Design Guidelines rules.
 
 > :red_circle: **Linting an API description only ensures that the form of the API is compliant with our guidelines but does ensure that it is accurate, fully consistent and user friendly.**  
-**That's why, even linted, an API design must always be reviewed by the Natixis 89C3R API Team.**  
+**That's why, even linted, an API design must always be reviewed by the Natixis 89C3R API Team.**
 
 ----------
+
 ## Usage :on:
 
+> :warning: **Spectral upgrade v5 to v6**  
+> **Regarding [Migration page](https://meta.stoplight.io/docs/spectral/ZG9jOjg2MDIwMDM-spectral-v5-to-v6-migration-guide#general), we tried to upgrade our linter repository**  
+> **Due to major breaking changes into Spectral-JS interface, we can't use our test cases yet.**  
+> **We still need to update our rulesets to be able to use them into Stoplight Studio**  
+>
+> - Dependencies Management Impact
+>   - @stoplight/spectral-core@^1.6.0
+>   - ajv@^8.6.2
 
 ### Spectral installation
 
@@ -38,6 +47,7 @@ spectral lint -f json -r rulesets/main-ruleset.yaml samples/example-swagger.yaml
 ```
 
 ----------
+
 ## Development :construction_worker:
 
 ### Setting up development environment
@@ -63,7 +73,7 @@ npm install
 
 ### Modifying rules
 
-Spectral [documentation](https://stoplight.io/p/docs/gh/stoplightio/spectral/README.md) describes anything you need to define your rulesets, rules and function.  
+Spectral [documentation](https://stoplight.io/p/docs/gh/stoplightio/spectral/README.md) describes anything you need to define your rulesets, rules and function.
 What follows only explains how this repo works.
 
 ### Adding a ruleset
@@ -88,6 +98,7 @@ npm run test
 You can also run a specific test file using:
 
 > mocha __`test/<filename>`__
+
 ```sh
 mocha test/test-info-ruleset.js
 ```

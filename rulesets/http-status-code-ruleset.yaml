@@ -3,17 +3,22 @@ extends:
 rules:
   # Adapted from existing Spectral OAS rule to change rule name and description (only severity can be overiddden using the following line)
   #operation-2xx-response: error
-  http-status-code-mandatory-2xx:
-    recommended: true
-    description: Operation must have at least one 2xx response.
-    message: "{{description}} ({{path}})"
-    severity: error
-    tags:
-      - http status code
-    given: "$.paths.*[?( @property === 'get' || @property === 'put' || @property === 'post' || @property === 'delete' || @property === 'options' || @property === 'head' || @property === 'patch' || @property === 'trace' )]"
-    then:
-      - field: responses
-        function: oasOp2xxResponse
+  # RuleSet functions are no more accessible
+  # so can't use oasOpSuccessResponse
+  # http-status-code-mandatory-2xx:
+    # recommended: true
+    # description: Operation must have at least one 2xx response.
+    # message: "{{description}} ({{path}})"
+    # severity: error
+    # tags:
+      # - http status code
+    # given: "$.paths.*[?( @property === 'get' || @property === 'put' || @property === 'post' || @property === 'delete' || @property === 'options' || @property === 'head' || @property === 'patch' || @property === 'trace' )]"
+    # then:
+      # - field: responses
+        # function: oasOpSuccessResponse
+
+  # Instead of custom http-status-code-mandatory-2xx, we use default operation-success-response ruleset
+  operation-success-response: error
 
   http-status-code-mandatory-401:
     recommended: true
@@ -38,7 +43,7 @@ rules:
     then:
       - field: "500"
         function: truthy
-  
+
   http-status-code-404-when-path-parameters:
     recommended: true
     description: On operation on a path with a path parameter must return a 404 HTTP status code
@@ -71,7 +76,7 @@ rules:
     severity: error
     tags:
       - http status code
-    given: 
+    given:
       - $.paths.*.[?(@.requestBody)].responses
       - $.paths.*.*.parameters[?(/(query|body|header)/.test(@.in))]^^^.responses
     then:
@@ -190,7 +195,7 @@ rules:
 
   http-status-code-post-search:
     recommended: true
-    description: Post /search operation can only return 200, 400, 401, 403 and 500 HTTP status codes 
+    description: Post /search operation can only return 200, 400, 401, 403 and 500 HTTP status codes
     message: "{{description}} ({{path}})"
     severity: error
     tags:
@@ -211,7 +216,7 @@ rules:
 
   http-status-code-post-unusual-200:
     recommended: true
-    description: Post operation which are not /search returning 200 are unusual, did you mean 201 or 202? 
+    description: Post operation which are not /search returning 200 are unusual, did you mean 201 or 202?
     message: "{{description}} ({{path}})"
     severity: info
     tags:

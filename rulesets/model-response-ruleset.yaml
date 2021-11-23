@@ -95,7 +95,7 @@ rules:
     severity: error
     tags:
       - model response
-    given: 
+    given:
       - $.paths.*.*.responses[?(/4..|5../.test(@property))].schema # oas2
       - $.paths.*.*.responses[?(/4..|5../.test(@property))].content.'application/json'.schema # oas3
     then:
@@ -223,10 +223,11 @@ rules:
     tags:
       - model response
     given:
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema # oas2
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.content.'application/json'.schema # oas3
-      - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema # oas2
-      - $.paths[?(/\/search$/.test(@property))].post.responses.200.content.'application/json'.schema # oas3
+      - $.paths[?(/(s|i?es|ves)$/i.test(@property))].get.responses.200.schema # oas2
+      - $.paths[?(/(s|i?es|ves)$/i.test(@property))].get.responses.200.content.'application/json'.schema # oas3
+      # https://github.com/stoplightio/spectral/issues/1920
+      - $.paths[?(/search$/.test(@property))].post.responses.200.schema # oas2
+      - $.paths[?(/search$/.test(@property))].post.responses.200.content.'application/json'.schema # oas3
     then:
       function: schema
       functionOptions:
@@ -251,14 +252,14 @@ rules:
                   properties:
                     type:
                       type: string
-                      enum: 
+                      enum:
                         - array
                     items:
                       type: object
-                      # Testing that items are objects and not atomics or array in another rule                          
+                      # Testing that items are objects and not atomics or array in another rule
                 additionalInformation:
                   type: object
-                  # Testing additionalInformation is an object and not atomic or array in another rule                    
+                  # Testing additionalInformation is an object and not atomic or array in another rule
                 page:
                   type: object
                   # Testing page object format in another rule
@@ -270,12 +271,13 @@ rules:
     severity: error
     tags:
       - model response
-    given: 
+    given:
       # Same regex as response-collection-schema-is-valid, no need to test again that part
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema.properties.items.items # oas2
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.content.'application/json'.schema.properties.items.items # oas3
-      - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema.properties.items.items # oas2
-      - $.paths[?(/\/search$/.test(@property))].post.responses.200.content.'application/json'.schema.properties.items.items # oas3
+      - $.paths[?(/(s|i?es|ves)$/i.test(@property))].get.responses.200.schema.properties.items.items # oas2
+      - $.paths[?(/(s|i?es|ves)$/i.test(@property))].get.responses.200.content.'application/json'.schema.properties.items.items # oas3
+      # https://github.com/stoplightio/spectral/issues/1920
+      - $.paths[?(/search$/.test(@property))].post.responses.200.schema.properties.items.items # oas2
+      - $.paths[?(/search$/.test(@property))].post.responses.200.content.'application/json'.schema.properties.items.items # oas3
     then:
       - function: schema
         functionOptions:
@@ -288,7 +290,7 @@ rules:
                 type: string
                 enum:
                   - object
-  
+
   response-collection-additional-information-schema-is-valid:
     recommended: true
     description: The additionalInformation property of a list response (get /resources or post /resources/search) must be an object (no atomic like string or number nor array)
@@ -296,12 +298,13 @@ rules:
     severity: error
     tags:
       - model response
-    given: 
+    given:
       # Same regex as response-collection-schema-is-valid, no need to test again that part
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema.properties.additionalInformation
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.content.'application/json'.schema.properties.additionalInformation
-      - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema.properties.additionalInformation
-      - $.paths[?(/\/search$/.test(@property))].post.responses.200.content.'application/json'.schema.properties.additionalInformation
+      - $.paths[?(/(s|i?es|ves)$/i.test(@property))].get.responses.200.schema.properties.additionalInformation
+      - $.paths[?(/(s|i?es|ves)$/i.test(@property))].get.responses.200.content.'application/json'.schema.properties.additionalInformation
+      # https://github.com/stoplightio/spectral/issues/1920
+      - $.paths[?(/search$/.test(@property))].post.responses.200.schema.properties.additionalInformation
+      - $.paths[?(/search$/.test(@property))].post.responses.200.content.'application/json'.schema.properties.additionalInformation
     then:
       - function: schema
         functionOptions:
@@ -322,12 +325,13 @@ rules:
     severity: error
     tags:
       - model response
-    given: 
+    given:
       # Same regex as response-collection-schema-is-valid, no need to test again that part
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.schema.properties.page
-      - $.paths[?(/^((\/[a-z0-9\-_]+)?\/v[0-9]+)?\/[a-z0-9\-_]+(\/[a-z0-9\-_{}]+\/[a-z0-9\-_]+)*$/i.test(@property))].get.responses.200.content.'application/json'.schema.properties.page
-      - $.paths[?(/\/search$/.test(@property))].post.responses.200.schema.properties.page
-      - $.paths[?(/\/search$/.test(@property))].post.responses.200.content.'application/json'.schema.properties.page
+      - $.paths[?(/(s|i?es|ves)$/i.test(@property))].get.responses.200.schema.properties.page
+      - $.paths[?(/(s|i?es|ves)$/i.test(@property))].get.responses.200.content.'application/json'.schema.properties.page
+      # https://github.com/stoplightio/spectral/issues/1920
+      - $.paths[?(/search$/.test(@property))].post.responses.200.schema.properties.page
+      - $.paths[?(/search$/.test(@property))].post.responses.200.content.'application/json'.schema.properties.page
     then:
       - function: schema
         functionOptions:
@@ -350,7 +354,7 @@ rules:
                         properties:
                           type:
                             type: string
-                            enum: 
+                            enum:
                               - number
                               - integer
                       pageNumber:
@@ -359,7 +363,7 @@ rules:
                         properties:
                           type:
                             type: string
-                            enum: 
+                            enum:
                               - number
                               - integer
                       totalElements:
@@ -368,7 +372,7 @@ rules:
                         properties:
                           type:
                             type: string
-                            enum: 
+                            enum:
                               - number
                               - integer
                       totalPages:
@@ -377,7 +381,7 @@ rules:
                         properties:
                           type:
                             type: string
-                            enum: 
+                            enum:
                               - number
                               - integer
               - type: object
@@ -393,33 +397,32 @@ rules:
                           properties:
                             type:
                               type: string
-                              enum: 
+                              enum:
                                 - string
                         after:
                           type: object
                           properties:
                             type:
                               type: string
-                              enum: 
+                              enum:
                                 - string
 
   response-no-empty-required:
-     recommended: true
-     description: A response without any high level required property is not recommended
-     message: '{{description}} ({{path}})'
-     severity: warn
-     tags:
-       - model response
-     given: 
-       - $.paths.*.*.responses.*.schema
-       - $.paths.*.*.responses.*.content.'application/json'.schema
-       - $.paths.*.*.responses.*.schema.properties.items.items
-       - $.paths.*.*.responses.*.content.'application/json'.schema.properties.items.items
-     then:
-       - field: required
-         function: truthy
-       - field: required
-         function: length
-         functionOptions:
-           min: 1
-          
+    recommended: true
+    description: A response without any high level required property is not recommended
+    message: '{{description}} ({{path}})'
+    severity: warn
+    tags:
+      - model response
+    given:
+      - $.paths.*.*.responses.*.schema
+      - $.paths.*.*.responses.*.content.'application/json'.schema
+      - $.paths.*.*.responses.*.schema.properties.items.items
+      - $.paths.*.*.responses.*.content.'application/json'.schema.properties.items.items
+    then:
+      - field: required
+        function: truthy
+      - field: required
+        function: length
+        functionOptions:
+          min: 1
