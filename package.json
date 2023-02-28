@@ -1,7 +1,7 @@
 {
-  "name": "api-linter",
+  "name": "bpce-api-guidelines-rulesets",
   "version": "1.0.0",
-  "description": "Check OpenAPI3/Swagger2 files compliance with Natixis API Design guidelines",
+  "description": "OAS3/Swagger2.0 Rulesets files compliant with BPCE/Natixis API Design guidelines",
   "main": "index.js",
   "scripts": {
     "test": "standard test/*.js && mocha"
