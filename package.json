@@ -6,8 +6,9 @@
   "scripts": {
     "test": "standard test/*.js && mocha"
   },
-  "author": "Arnaud Lauret",
+  "author": "Groupe BPCE",
   "license": "Apache-2.0",
+  "contributor": ["Arnaud Lauret", "Aurélien Ianni", "Eric Salvan"],
   "devDependencies": {
     "@stoplight/spectral-core": "^1.6.0",
     "ajv": "^8.6.3",
