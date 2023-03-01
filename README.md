@@ -1,11 +1,28 @@
-# README :white_check_mark: :vs: :warning:
+<!--
+ Copyright 2019-2022 Groupe BPCE
+
+ Licensed under the Apache License, Version 2.0 (the License);
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an AS IS BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+# BPCE API Design Guidelines Rulesets :white_check_mark: :vs: :warning:
 
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
-Using Stoplight's Spectral and the Natixis API Design ruleset, you can ensure that an API design (provided as a Swagger 2.0 or OpenAPI 3 JSON or YAML file) is compliant with [Natixis API Design Guidelines](https://confluence.mycloud.intranatixis.com/display/EAPI89C3R/API+REST+-+Design+Guidelines). The ruleset is a work in progress and does not check yet all of our API Design Guidelines rules.
+Using Stoplight's Spectral and the BPCE API Design Guidelines Rulesets, you can ensure that an API design (provided as a Swagger 2.0 or OpenAPI 3, JSON or YAML file) is compliant with BPCE/Natixis API Design Guidelines.
+These rulesets are a work in progress and do not check yet all of our API Design Guidelines rules.
 
 > :red_circle: **Linting an API description only ensures that the form of the API is compliant with our guidelines but does ensure that it is accurate, fully consistent and user friendly.**  
-**That's why, even linted, an API design must always be reviewed by the Natixis 89C3R API Team.**
+**That's why, even linted, an API design must always be reviewed by the BPCE/Natixis API Team.**
 
 ----------
 
@@ -20,19 +37,31 @@ Using Stoplight's Spectral and the Natixis API Design ruleset, you can ensure th
 >   - @stoplight/spectral-core@^1.6.0
 >   - ajv@^8.6.2
 
-### Spectral installation
+### Spectral
+
+#### Description
+
+Spectral is a JSON/YAML linter with out of the box support for OpenAPI 3.0 & 2.0 and AsyncAPI
+
+#### Installation
 
 Open a terminal and launch the following command line to install the spectral cli:
 
 ```sh
-npm install -g @stoplight/spectral
+npm install -g @stoplight/spectral@5.9.2
+```
+
+or
+
+```sh
+yarn global add @stoplight/spectral@5.9.2
 ```
 
 See [Spectral documentation](https://stoplight.io/p/docs/gh/stoplightio/spectral/docs/getting-started/installation.md) for more information and other installation options.
 
 ### Linting a file
 
-Checking compliance to Natixis API Design guidelines is done using the `rulesets/main-ruleset.yaml` ruleset file.
+Checking compliance to BPCE/Natixis API Design guidelines is done using the `rulesets/main-ruleset.yaml` ruleset file.
 
 > spectral lint -r __`<path to ruleset>`__ __`<path to Swagger or OpenAPI file in JSON or YAML format>`__
 
@@ -50,6 +79,8 @@ spectral lint -f json -r rulesets/main-ruleset.yaml samples/example-swagger.yaml
 
 ## Development :construction_worker:
 
+In order to add new rules or rulesets, we have test suite to ensure your Spectral rules are working as intending by providing a frame to your tests.
+
 ### Setting up development environment
 
 [![JavaScript Style Guide](https://cdn.rawgit.com/standard/standard/master/badge.svg)](https://github.com/standard/standard) [![JavaScript Style Guide](https://avatars.githubusercontent.com/u/1165674?s=55&v=4)](http://editorconfig.org/)
@@ -66,7 +97,6 @@ npm install
 
 ### Source organization
 
-- `functions`: custom function (js, not used yet)
 - `rulesets`: available rulesets, `main-ruleset.yaml` is the top level ruleset which includes the other ones
 - `samples`: sample Swagger 2.0 and OpenAPI 3 files to test with spectral cli
 - `test`: tests for rulesets (one js mocha test file for each ruleset)
@@ -102,3 +132,7 @@ You can also run a specific test file using:
 ```sh
 mocha test/test-info-ruleset.js
 ```
+
+## Questions & Comments
+
+Please contact <api-it-support@natixis.com> in case of questions.
