@@ -57,7 +57,7 @@ or
 yarn global add @stoplight/spectral@5.9.2
 ```
 
-See [Spectral documentation](https://stoplight.io/p/docs/gh/stoplightio/spectral/docs/getting-started/installation.md) for more information and other installation options.
+See [Spectral documentation](https://meta.stoplight.io/docs/spectral/docs/getting-started/2-installation.md) for more information and other installation options.
 
 ### Linting a file
 
@@ -103,7 +103,7 @@ npm install
 
 ### Modifying rules
 
-Spectral [documentation](https://stoplight.io/p/docs/gh/stoplightio/spectral/README.md) describes anything you need to define your rulesets, rules and function.
+[Spectral documentation](https://meta.stoplight.io/docs/spectral/docs/guides/4-custom-rulesets.md) describes anything you need to define your rulesets, rules and function.
 What follows only explains how this repo works.
 
 ### Adding a ruleset
