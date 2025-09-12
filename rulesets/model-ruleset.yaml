@@ -18,7 +18,7 @@ rules:
 
   schema-name-uppercamelcase:
     recommended: true
-    description: Definitionname must be in UpperCamelCase
+    description: Definition name must be in UpperCamelCase
     message: '{{description}} ({{path}})'
     given: 
       - $.definitions
@@ -37,7 +37,7 @@ rules:
 
   schema-name-no-number:
     recommended: true
-    description: Definitionname should not contain number
+    description: Definition name should not contain number
     message: '{{description}} ({{path}})'
     given: 
       - $.definitions
@@ -53,7 +53,7 @@ rules:
 
   schema-name-no-technical-prefix-suffix:
     recommended: true
-    description: Definitionname must not contain technical suffix or prefix
+    description: Definition name must not contain technical suffix or prefix
     message: '{{description}} ({{path}})'
     given: 
       - $.definitions
