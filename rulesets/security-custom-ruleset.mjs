@@ -127,7 +127,7 @@ const checkDuplicateSchemes = createRulesetFunction(
     if (auth.length > 1) {
       results ??= []
       results.push({
-        message: 'Multiple OAuth2 / Authorization Code  declarations found. This setup increases the risk of scope misconfiguration.',
+        message: 'Multiple OAuth2 / Authorization Code declarations found. This setup increases the risk of scope misconfiguration.',
         path: [...path]
       })
     }
